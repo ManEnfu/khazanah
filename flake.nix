@@ -35,20 +35,30 @@
         ];
       in pkgsFor.${system}.mkShell {
         name = "build-env";
-        buildInputs = with pkgs; [
+
+        nativeBuildInputs = with pkgs; [
+          wrapGAppsHook4
           meson
           ninja
+          pkg-config
           toolchain
           fenix.packages.${system}.rust-analyzer
-          pkg-config
+        ];
+
+        buildInputs = with pkgs; [
           cmake
           fontconfig
           gtk4
+          glib
           libxml2
           libadwaita
+          gdk-pixbuf
+          gsettings-desktop-schemas
         ];
         shellHook = ''
           export RUST_SRC_PATH="${toolchain}/lib/rustlib/src/rust/library"
+          export RUST_LOG=debug
+          export XDG_DATA_DIRS="$GSETTINGS_SCHEMAS_PATH:$XDG_DATA_DIRS"
         '';
       };
     });

@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="CcWordEdit" parent="GtkBox">
+    <property name="margin-bottom">12</property>
+    <property name="margin-end">12</property>
+    <property name="margin-start">12</property>
+    <property name="margin-top">12</property>
+    <property name="orientation">vertical</property>
+    <property name="spacing">6</property>
+    <!-- Row -->
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">horizontal</property>
+        <property name="homogeneous">True</property>
+        <property name="spacing">6</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Conword</property>
+                <property name="halign">start</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkEntry" id="conword_entry">
+                <property name="hexpand">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="conword_override">
+                <property name="label">Override</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Translation</property>
+                <property name="halign">start</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkEntry" id="translation_entry">
+                <property name="hexpand">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="translation_override">
+                <property name="label">Override</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <!-- Row -->
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">horizontal</property>
+        <property name="homogeneous">True</property>
+        <property name="spacing">6</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Romanization</property>
+                <property name="halign">start</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkEntry" id="romanization_entry">
+                <property name="hexpand">True</property>
+              </object>
+            </child>
+            <!-- <child> -->
+            <!--   <object class="GtkCheckButton" id="romanization_override"> -->
+            <!--     <property name="label">Override</property> -->
+            <!--   </object> -->
+            <!-- </child> -->
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Pronunciation</property>
+                <property name="halign">start</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkEntry" id="pronunciation_entry">
+                <property name="hexpand">True</property>
+              </object>
+            </child>
+            <!-- <child> -->
+            <!--   <object class="GtkCheckButton" id="translation_override"> -->
+            <!--     <property name="label">Override</property> -->
+            <!--   </object> -->
+            <!-- </child> -->
+          </object>
+        </child>
+      </object>
+    </child>
+    <!-- Row -->
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">horizontal</property>
+        <property name="homogeneous">True</property>
+        <property name="spacing">6</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Part of Speech</property>
+                <property name="halign">start</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkDropDown" id="part_of_speech_dropdown">
+                <property name="hexpand">True</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item>Noun</item>
+                      <item>Verb</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Class</property>
+                <property name="halign">start</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkDropDown" id="class_dropdown">
+                <property name="hexpand">True</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item>Noun</item>
+                      <item>Verb</item>
+                    </items>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <!-- Row -->
+    <child>
+      <object class="GtkLabel">
+        <property name="label" translatable="yes">Description</property>
+        <property name="halign">start</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkFrame">
+        <child>
+          <object class="GtkTextView" id="description_entry">
+            <property name="hexpand">True</property>
+            <property name="top-margin">12</property>
+            <property name="bottom-margin">12</property>
+            <property name="left-margin">8</property>
+            <property name="right-margin">8</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <!-- Row -->
+    <child>
+      <object class="GtkLabel">
+        <property name="label" translatable="yes">Sample</property>
+        <property name="halign">start</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkFrame">
+        <child>
+          <object class="GtkTextView" id="sample_entry">
+            <property name="hexpand">True</property>
+            <property name="top-margin">12</property>
+            <property name="bottom-margin">12</property>
+            <property name="left-margin">8</property>
+            <property name="right-margin">8</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <!-- Row -->
+    <child>
+      <object class="GtkLabel">
+        <property name="label" translatable="yes">Sample (romanization)</property>
+        <property name="halign">start</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkFrame">
+        <child>
+          <object class="GtkTextView" id="sample_romanization_entry">
+            <property name="hexpand">True</property>
+            <property name="top-margin">12</property>
+            <property name="bottom-margin">12</property>
+            <property name="left-margin">8</property>
+            <property name="right-margin">8</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <!-- Row -->
+    <child>
+      <object class="GtkLabel">
+        <property name="label" translatable="yes">Sample (translation)</property>
+        <property name="halign">start</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkFrame">
+        <child>
+          <object class="GtkTextView" id="sample_translation_entry">
+            <property name="hexpand">True</property>
+            <property name="top-margin">12</property>
+            <property name="bottom-margin">12</property>
+            <property name="left-margin">8</property>
+            <property name="right-margin">8</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

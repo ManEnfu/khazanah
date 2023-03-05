@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="menubar">
+    <submenu>
+      <attribute name="label" translatable="yes">File</attribute>
+      <item>
+        <attribute name="label" translatable="yes">Open</attribute>
+        <attribute name="target">Open</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Save</attribute>
+        <attribute name="target">Save</attribute>
+      </item>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">Edit</attribute>
+      <item>
+        <attribute name="label" translatable="yes">Preferences</attribute>
+        <attribute name="target">Preferences</attribute>
+      </item>
+    </submenu>
+  </menu>
+</interface>

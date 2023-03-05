@@ -1,0 +1,16 @@
+[package]
+name = "khazanah"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+conlang = { path = "../conlang" }
+gtk = { package = "gtk4", version = "0.6.1", features = [ "v4_4" ] }
+adw = { package = "libadwaita", version = "0.3.1", features = [ "gtk_v4_4", "v1_2" ] }
+log = "0.4.0"
+env_logger = "0.9.0"
+
+[build-dependencies]
+glib-build-tools = "0.17.0"

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/github/manenfu/Khazanah/">
+    <file compressed="true" preprocess="xml-stripblanks">ui/window.ui</file>
+    <!-- <file compressed="true" preprocess="xml-stripblanks">ui/lexicon_page.ui</file> -->
+    <!-- <file compressed="true" preprocess="xml-stripblanks">ui/word_edit.ui</file> -->
+    <!-- <file compressed="true" preprocess="xml-stripblanks">ui/word_list.ui</file> -->
+    <!-- <file compressed="true" preprocess="xml-stripblanks">ui/word_list_row.ui</file> -->
+    <!-- <file compressed="true" preprocess="xml-stripblanks">ui/menu.ui</file> -->
+  </gresource>
+</gresources>

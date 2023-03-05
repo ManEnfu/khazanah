@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="CcLexiconPage" parent="GtkBox">
+    <child>
+      <object class="GtkPaned">
+        <property name="position">300</property>
+        <child type="start">
+          <object class="CcWordList" id="word_list">
+            <signal name="word-selected" handler="word_selected" swapped="true" />
+          </object>
+        </child>
+        <child type="end">
+          <object class="GtkScrolledWindow">
+            <property name="hscrollbar-policy">never</property>
+            <child>
+              <object class="CcWordEdit" id="word_edit" />
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>
