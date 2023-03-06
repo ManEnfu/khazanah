@@ -24,10 +24,12 @@ mod imp {
     pub struct ApplicationWindow {
         #[template_child]
         pub toast_overlay: TemplateChild<adw::ToastOverlay>,
+        // #[template_child]
+        // pub start_controls: TemplateChild<ui::ToolbarStartControls>,
+        // #[template_child]
+        // pub end_controls: TemplateChild<ui::ToolbarEndControls>,
         #[template_child]
-        pub start_controls: TemplateChild<ui::ToolbarStartControls>,
-        #[template_child]
-        pub end_controls: TemplateChild<ui::ToolbarEndControls>,
+        pub start_view: TemplateChild<ui::StartView>,
 
         pub file_dialog: RefCell<Option<gtk::FileChooserNative>>,
     }

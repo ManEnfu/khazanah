@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.6"/>
+  <requires lib="Adw" version="1.2"/>
+
+  <!-- The first view when the application is started. -->
+  <template class="KhzStartView" parent="AdwBin">
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="AdwHeaderBar" id="header_bar">
+            <child type="start">
+              <object class="KhzToolbarStartControls" id="start_controls"/>
+            </child>
+            <child type="end">
+              <object class="KhzToolbarEndControls" id="end_controls"/>
+            </child>
+          </object> <!-- GtkHeaderBar -->
+        </child>
+
+        <child>
+          <object class="AdwStatusPage" id="home_page">
+            <property name="icon-name">accessories-dictionary-symbolic</property>
+            <property name="title">Welcome!</property>
+            <property name="description">Create a new project, or open existing one.</property>
+            <property name="vexpand">true</property>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">12</property>
+                <property name="halign">center</property>
+                <property name="homogeneous">true</property>
+                <child>
+                  <object class="GtkButton">
+                    <property name="label">Create Project</property>
+                    <property name="action-name">win.new</property>
+                    <style>
+                      <class name="pill"/>
+                      <class name="suggested-action"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton">
+                    <property name="label">Open Project</property>
+                    <property name="action-name">win.open</property>
+                    <style>
+                      <class name="pill"/>
+                      <class name="suggested-action"/>
+                    </style>
+                  </object>
+                </child> 
+              </object>
+            </child>
+          </object> <!-- AdwStatusPage -->
+        </child>
+      </object> <!-- GtkBox -->
+    </child>
+  </template>
+
+</interface>
