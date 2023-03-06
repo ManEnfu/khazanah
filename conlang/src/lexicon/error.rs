@@ -3,27 +3,15 @@ use std::string::FromUtf8Error;
 use super::xml::XmlError;
 
 /// Error type for `Lexicon`.
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum Error {
-    Fs(std::io::Error),
-    Xml(XmlError),
-    FromUtf8(FromUtf8Error),
-}
-
-impl From<std::io::Error> for Error {
-    fn from(value: std::io::Error) -> Self {
-        Self::Fs(value)
-    }
-}
-
-impl From<XmlError> for Error {
-    fn from(value: XmlError) -> Self {
-        Self::Xml(value)
-    }
-}
-
-impl From<FromUtf8Error> for Error {
-    fn from(value: FromUtf8Error) -> Self {
-        Self::FromUtf8(value)
-    }
+    /// Filesystem error
+    #[error("Filesystem error: {0}")]
+    Fs(#[from] std::io::Error),
+    /// XML error
+    #[error("XML: {0}")]
+    Xml(#[from] XmlError),
+    /// Converting from Utf8 
+    #[error("Error in converting to string from UTF-8: {0}")]
+    FromUtf8(#[from] FromUtf8Error),
 }

@@ -49,15 +49,19 @@ impl<'a> From<XmlTag> for Cow<'a, str> {
 }
 
 /// Error type for `Lexicon` XML parsing.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, thiserror::Error)]
 pub enum XmlError {
     /// Error produced by `Reader`
+    #[error("XMLReader encountered an error: {0}")]
     Reader(quick_xml::Error),
     /// Error produced by `Writer`
+    #[error("XMLWriter encountered an error: {0}")]
     Writer(quick_xml::Error),
     /// Trying to set value of a nonexistent word. This should not happen.
+    #[error("Reader tried to set value of a nonexistent `Word`")]
     WriteInvalidWord,
     /// A valid tag in a wrong context.
+    #[error("tag <{}> should not be inside <{}>", Into::<Cow<str>>::into(*.tag), Into::<Cow<str>>::into(*.ptag))]
     WrongContext { ptag: XmlTag, tag: XmlTag },
 }
 
