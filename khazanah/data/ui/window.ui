@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk" version="4.4"/>
-  <requires lib="Adw" version="1.0"/>
+  <requires lib="gtk" version="4.6"/>
+  <requires lib="Adw" version="1.2"/>
 
   <!-- The root window. -->
   <template class="KhzApplicationWindow" parent="AdwApplicationWindow">
@@ -14,58 +14,12 @@
           <object class="GtkBox">
             <property name="orientation">vertical</property>
             <child>
-              <object class="GtkHeaderBar" id="header_bar">
+              <object class="AdwHeaderBar" id="header_bar">
                 <child type="start">
-                  <object class="GtkDropDown" id="part_of_speech_dropdown">
-                    <property name="hexpand">True</property>
-                    <property name="tooltip-text">Current view.</property>
-                    <property name="sensitive">False</property>
-                    <property name="model">
-                      <object class="GtkStringList">
-                        <items>
-                          <item>General</item>
-                          <item>Lexicon</item>
-                          <item>Phonology</item>
-                          <item>Grammar</item>
-                        </items>
-                      </object>
-                    </property>
-                  </object>
-                </child>
-                <child type="start">
-                  <object class="GtkButton">
-                    <property name="icon-name">document-open-symbolic</property>
-                    <property name="tooltip-text">Open a project</property>
-                    <property name="action-name">win.open</property>
-                  </object>
-                </child>
-                <child type="start">
-                  <object class="GtkButton">
-                    <property name="icon-name">document-new-symbolic</property>
-                    <property name="tooltip-text">Create a new project</property>
-                    <property name="action-name">win.new</property>
-                  </object>
+                  <object class="KhzToolbarStartControls" id="start_controls"/>
                 </child>
                 <child type="end">
-                  <object class="GtkMenuButton">
-                    <property name="icon-name">open-menu-symbolic</property>
-                    <property name="tooltip-text">Open menu</property>
-                    <property name="menu-model">primary_menu</property>
-                  </object>
-                </child>
-                <child type="end">
-                  <object class="GtkButton">
-                    <property name="icon-name">document-save-as-symbolic</property>
-                    <property name="tooltip-text">Save project with a different name</property>
-                    <property name="sensitive">False</property>
-                  </object>
-                </child>
-                <child type="end">
-                  <object class="GtkButton">
-                    <property name="icon-name">document-save-symbolic</property>
-                    <property name="tooltip-text">Save project</property>
-                    <property name="sensitive">False</property>
-                  </object>
+                  <object class="KhzToolbarEndControls" id="end_controls"/>
                 </child>
               </object> <!-- GtkHeaderBar -->
             </child>

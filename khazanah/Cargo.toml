@@ -7,8 +7,8 @@ edition = "2021"
 
 [dependencies]
 conlang = { path = "../conlang" }
-gtk = { package = "gtk4", version = "0.6.1", features = [ "v4_4" ] }
-adw = { package = "libadwaita", version = "0.3.1", features = [ "gtk_v4_4", "v1_2" ] }
+gtk = { package = "gtk4", version = "0.6.1", features = [ "v4_6" ] }
+adw = { package = "libadwaita", version = "0.3.1", features = [ "gtk_v4_6", "v1_2" ] }
 log = "0.4.0"
 env_logger = "0.9.0"
 

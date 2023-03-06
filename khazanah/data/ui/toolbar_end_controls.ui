@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.6"/>
+  <requires lib="Adw" version="1.2"/>
+
+  <menu id="main_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Preferences</attribute>
+        <attribute name="action">app.preferences</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
+        <attribute name="action">win.show-help-overlay</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_About Khazanah</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+  </menu>
+
+  <menu id="tool_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_IPA Charts</attribute>
+        <attribute name="action">win.show-ipa-chart</attribute>
+      </item>
+    </section>
+  </menu>
+
+  <!-- Control widgets at the end of the toolbar. -->
+  <template class="KhzToolbarEndControls" parent="AdwBin">
+    <child>
+      <object class="GtkBox">
+        <property name="spacing">6</property>
+        <child>
+          <object class="GtkButton" id="save_button">
+            <property name="icon-name">document-save-symbolic</property>
+            <property name="tooltip-text">Save project</property>
+            <property name="sensitive">False</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="save_as_button">
+            <property name="icon-name">document-save-as-symbolic</property>
+            <property name="tooltip-text">Save project with a different name</property>
+            <property name="sensitive">False</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="tool_menu_button">
+            <property name="icon-name">view-grid-symbolic</property>
+            <property name="tooltip-text">Tools</property>
+            <property name="menu-model">tool_menu</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="main_menu_button">
+            <property name="icon-name">open-menu-symbolic</property>
+            <property name="tooltip-text">Open menu</property>
+            <property name="menu-model">main_menu</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+
+</interface>

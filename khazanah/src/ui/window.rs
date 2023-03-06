@@ -6,6 +6,8 @@ use gtk::subclass::prelude::*;
 use gtk::{gio, glib};
 
 use adw::subclass::prelude::*;
+    
+use crate::ui;
 
 mod imp {
     use std::cell::RefCell;
@@ -22,6 +24,10 @@ mod imp {
     pub struct ApplicationWindow {
         #[template_child]
         pub toast_overlay: TemplateChild<adw::ToastOverlay>,
+        #[template_child]
+        pub start_controls: TemplateChild<ui::ToolbarStartControls>,
+        #[template_child]
+        pub end_controls: TemplateChild<ui::ToolbarEndControls>,
 
         pub file_dialog: RefCell<Option<gtk::FileChooserNative>>,
     }
@@ -161,7 +167,7 @@ impl ApplicationWindow {
                         window.imp().toast_overlay.add_toast(adw::Toast::new(&msg));
                     }
                     Err(e) => {
-                        log::error!("Error opening file: {:?}", e);
+                        log::error!("Error opening file: {}", e);
                         let msg = format!(
                             "Unable to open \"{}\"", 
                             path.file_name()

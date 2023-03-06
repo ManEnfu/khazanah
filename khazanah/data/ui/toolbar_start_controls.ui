@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.6"/>
+  <requires lib="Adw" version="1.2"/>
+
+  <!-- Control widgets at the start of the toolbar. -->
+  <template class="KhzToolbarStartControls" parent="AdwBin">
+    <child>
+      <object class="GtkBox">
+        <property name="spacing">6</property>
+        <child>
+          <object class="GtkDropDown" id="view_dropdown">
+            <property name="hexpand">True</property>
+            <property name="tooltip-text">Current view.</property>
+            <property name="sensitive">False</property>
+            <property name="model">
+              <object class="GtkStringList">
+                <items>
+                  <item>General</item>
+                  <item>Lexicon</item>
+                  <item>Phonology</item>
+                  <item>Grammar</item>
+                </items>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="open_button">
+            <property name="icon-name">document-open-symbolic</property>
+            <property name="tooltip-text">Open a project</property>
+            <property name="action-name">win.open</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="new_button">
+            <property name="icon-name">document-new-symbolic</property>
+            <property name="tooltip-text">Create a new project</property>
+            <property name="action-name">win.new</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+
+</interface>

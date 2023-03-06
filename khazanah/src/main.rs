@@ -8,6 +8,7 @@ mod ui;
 
 /// Entry point.
 fn main() {
+    // Initialize logger.
     env_logger::init();
 
     log::info!(
