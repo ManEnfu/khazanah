@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.4"/>
+  <requires lib="Adw" version="1.0"/>
+
+  <template class="KhzProjectGeneralView" parent="AdwBin">
+    <child>
+      <object class="GtkBox">
+      </object>
+    </child>
+  </template>
+
+</interface>

@@ -1,7 +1,7 @@
 fn main() {
     glib_build_tools::compile_resources(
-        &["res"],
-        "./res/resources.gresource.xml",
+        &["data"],
+        "./data/com.github.manenfu.Khazanah.gresource.xml",
         "resources.gresource",
     )
 }

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.4"/>
+  <requires lib="Adw" version="1.0"/>
+
+  <!-- The root window. -->
+  <template class="KhzApplicationWindow" parent="AdwApplicationWindow">
+    <property name="title">Khazanah</property>
+    <property name="default-height">600</property>
+    <property name="default-width">800</property>
+    <property name="content">
+      <object class="AdwToastOverlay" id="toast_overlay">
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkHeaderBar" id="header_bar">
+                <child type="start">
+                  <object class="GtkDropDown" id="part_of_speech_dropdown">
+                    <property name="hexpand">True</property>
+                    <property name="tooltip-text">Current view.</property>
+                    <property name="sensitive">False</property>
+                    <property name="model">
+                      <object class="GtkStringList">
+                        <items>
+                          <item>General</item>
+                          <item>Lexicon</item>
+                          <item>Phonology</item>
+                          <item>Grammar</item>
+                        </items>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child type="start">
+                  <object class="GtkButton">
+                    <property name="icon-name">document-open-symbolic</property>
+                    <property name="tooltip-text">Open a project</property>
+                    <property name="action-name">win.open</property>
+                  </object>
+                </child>
+                <child type="start">
+                  <object class="GtkButton">
+                    <property name="icon-name">document-new-symbolic</property>
+                    <property name="tooltip-text">Create a new project</property>
+                    <property name="action-name">win.new</property>
+                  </object>
+                </child>
+                <child type="end">
+                  <object class="GtkMenuButton">
+                    <property name="icon-name">open-menu-symbolic</property>
+                    <property name="tooltip-text">Open menu</property>
+                    <property name="menu-model">primary_menu</property>
+                  </object>
+                </child>
+                <child type="end">
+                  <object class="GtkButton">
+                    <property name="icon-name">document-save-as-symbolic</property>
+                    <property name="tooltip-text">Save project with a different name</property>
+                    <property name="sensitive">False</property>
+                  </object>
+                </child>
+                <child type="end">
+                  <object class="GtkButton">
+                    <property name="icon-name">document-save-symbolic</property>
+                    <property name="tooltip-text">Save project</property>
+                    <property name="sensitive">False</property>
+                  </object>
+                </child>
+              </object> <!-- GtkHeaderBar -->
+            </child>
+
+            <child>
+              <object class="AdwStatusPage" id="home_page">
+                <property name="icon-name">accessories-dictionary-symbolic</property>
+                <property name="title">Welcome!</property>
+                <property name="description">Create a new project, or open existing one.</property>
+                <property name="vexpand">true</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">horizontal</property>
+                    <property name="spacing">12</property>
+                    <property name="halign">center</property>
+                    <property name="homogeneous">true</property>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">Create Project</property>
+                        <property name="action-name">win.new</property>
+                        <style>
+                          <class name="pill"/>
+                          <class name="suggested-action"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">Open Project</property>
+                        <property name="action-name">win.open</property>
+                        <style>
+                          <class name="pill"/>
+                          <class name="suggested-action"/>
+                        </style>
+                      </object>
+                    </child> 
+                  </object>
+                </child>
+              </object> <!-- AdwStatusPage -->
+            </child>
+          </object> <!-- GtkBox -->
+        </child>
+      </object> <!-- AdwToastOverlay -->
+    </property>
+  </template> <!-- KhzApplicationWindow -->
+
+  <menu id="primary_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Preferences</attribute>
+        <attribute name="action">app.preferences</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
+        <attribute name="action">win.show-help-overlay</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_About Khazanah</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>
