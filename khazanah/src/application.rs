@@ -100,8 +100,8 @@ impl Application {
         let window = ui::ApplicationWindow::new(self);
 
         window.connect_closure(
-            "open-project", 
-            false, 
+            "open-project",
+            false,
             glib::closure_local!(@strong self as app => move |window: &ui::ApplicationWindow, path: &str| {
                 app.handle_open_project(window, path);
             })

@@ -4,32 +4,30 @@ use gtk::subclass::prelude::*;
 
 use adw::subclass::prelude::*;
 
+use crate::ui;
+
 mod imp {
     use std::cell::Cell;
 
     use super::*;
 
     #[derive(Debug, Default, gtk::CompositeTemplate, glib::Properties)]
-    #[properties(wrapper_type = super::ToolbarEndControls)]
-    #[template(resource = "/com/github/manenfu/Khazanah/ui/toolbar_end_controls.ui")]
-    pub struct ToolbarEndControls {
+    #[properties(wrapper_type = super::ProjectOverviewView)]
+    #[template(resource = "/com/github/manenfu/Khazanah/ui/project_overview_view.ui")]
+    pub struct ProjectOverviewView {
         #[template_child]
-        pub save_button: TemplateChild<gtk::Button>,
+        pub start_controls: TemplateChild<ui::ToolbarStartControls>,
         #[template_child]
-        pub save_as_button: TemplateChild<gtk::Button>,
-        #[template_child]
-        pub tool_menu_button: TemplateChild<gtk::MenuButton>,
-        #[template_child]
-        pub main_menu_button: TemplateChild<gtk::MenuButton>,
-
+        pub end_controls: TemplateChild<ui::ToolbarEndControls>,
+        
         #[property(get, set)]
-        pub buttons_sensitive: Cell<bool>,
+        pub project_opened: Cell<bool>,
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for ToolbarEndControls {
-        const NAME: &'static str = "KhzToolbarEndControls";
-        type Type = super::ToolbarEndControls;
+    impl ObjectSubclass for ProjectOverviewView {
+        const NAME: &'static str = "KhzProjectOverviewView";
+        type Type = super::ProjectOverviewView;
         type ParentType = adw::Bin;
 
         fn class_init(klass: &mut Self::Class) {
@@ -41,7 +39,7 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for ToolbarEndControls {
+    impl ObjectImpl for ProjectOverviewView {
         fn properties() -> &'static [glib::ParamSpec] {
             Self::derived_properties()
         }
@@ -55,13 +53,13 @@ mod imp {
         }
     }
 
-    impl WidgetImpl for ToolbarEndControls {}
-    impl BinImpl for ToolbarEndControls {}
+    impl WidgetImpl for ProjectOverviewView {}
+    impl BinImpl for ProjectOverviewView {}
 }
 
 glib::wrapper! {
-    /// Control widgets at the end of the toolbar.
-    pub struct ToolbarEndControls(ObjectSubclass<imp::ToolbarEndControls>)
+    /// The view to edit project general data, such as name and description.
+    pub struct ProjectOverviewView(ObjectSubclass<imp::ProjectOverviewView>)
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }

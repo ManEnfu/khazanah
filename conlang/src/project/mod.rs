@@ -10,15 +10,16 @@
 //! |-lexicon.xml
 //! ```
 
-
 pub use error::Error;
 
-use zip::{ZipArchive, ZipWriter, write::FileOptions};
 use std::{
     fs::File,
+    future::Future,
     io::{BufReader, Read, Seek, Write},
-    path::Path,
+    path::{Path, PathBuf},
+    pin::Pin,
 };
+use zip::{write::FileOptions, ZipArchive, ZipWriter};
 
 use crate::Lexicon;
 
@@ -30,14 +31,23 @@ pub const PROJECT_MIME_TYPE: &str = "application/cnpr";
 /// A project.
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct Project {
+    /// The file path of the project.
+    file_path: Option<PathBuf>,
     /// The lexicon of the project.
-    pub lexicon: Lexicon,
+    lexicon: Lexicon,
 }
 
 impl Project {
     /// Creates a new project.
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Getter for file path of the project.
+    pub fn file_path(&self) -> Option<&Path> {
+        self.file_path
+            .as_ref()
+            .map(<PathBuf as AsRef<Path>>::as_ref)
     }
 
     /// Loads project from ZIP archive.
@@ -59,13 +69,22 @@ impl Project {
         let lex_file = archive.by_name("lexicon.xml")?;
         let lexicon = Lexicon::read_xml(BufReader::new(lex_file))?;
 
-        Ok(Self { lexicon })
+        Ok(Self {
+            file_path: None,
+            lexicon,
+        })
     }
 
     /// Loads project from ZIP file in filesystem.
     pub fn load_file<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
-        let file = File::open(path)?;
-        Self::load(file)
+        let file = File::open(&path)?;
+        let mut proj = Self::load(file)?;
+        proj.file_path = Some(path.as_ref().into());
+        Ok(proj)
+    }
+
+    pub async fn load_file_async<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
+        todo!()
     }
 
     /// Saves project to ZIP archive.
@@ -79,14 +98,19 @@ impl Project {
 
         archive.start_file("lexicon.xml", options)?;
         archive = self.lexicon.write_xml(archive)?;
-        
+
         Ok(archive.finish()?)
     }
 
     /// Saves project to ZIP archive in filesystem.
-    pub fn save_file<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
-        let file = File::create(path)?;
+    pub fn save_file<P: AsRef<Path>>(&mut self, path: P) -> Result<(), Error> {
+        let file = File::create(&path)?;
         self.save(file)?;
+        self.file_path = Some(path.as_ref().into());
         Ok(())
+    }
+
+    pub async fn save_file_async<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
+        todo!()
     }
 }

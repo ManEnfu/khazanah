@@ -1,20 +1,27 @@
-use gtk::subclass::prelude::*;
 use gtk::glib;
+use gtk::prelude::*;
+use gtk::subclass::prelude::*;
 
 use adw::subclass::prelude::*;
 
 use crate::ui;
 
 mod imp {
+    use std::cell::Cell;
+
     use super::*;
 
-    #[derive(Debug, Default, gtk::CompositeTemplate)]
+    #[derive(Debug, Default, gtk::CompositeTemplate, glib::Properties)]
+    #[properties(wrapper_type = super::StartView)]
     #[template(resource = "/com/github/manenfu/Khazanah/ui/start_view.ui")]
     pub struct StartView {
         #[template_child]
         pub start_controls: TemplateChild<ui::ToolbarStartControls>,
         #[template_child]
         pub end_controls: TemplateChild<ui::ToolbarEndControls>,
+
+        #[property(get, set)]
+        pub project_opened: Cell<bool>,
     }
 
     #[glib::object_subclass]
@@ -32,7 +39,20 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for StartView {}
+    impl ObjectImpl for StartView {
+        fn properties() -> &'static [glib::ParamSpec] {
+            Self::derived_properties()
+        }
+
+        fn set_property(&self, id: usize, value: &glib::Value, pspec: &glib::ParamSpec) {
+            self.derived_set_property(id, value, pspec)
+        }
+
+        fn property(&self, id: usize, pspec: &glib::ParamSpec) -> glib::Value {
+            self.derived_property(id, pspec)
+        }
+    }
+
     impl WidgetImpl for StartView {}
     impl BinImpl for StartView {}
 }

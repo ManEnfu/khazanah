@@ -1,12 +1,16 @@
-use gtk::subclass::prelude::*;
 use gtk::glib;
+use gtk::prelude::*;
+use gtk::subclass::prelude::*;
 
 use adw::subclass::prelude::*;
 
 mod imp {
+    use std::cell::Cell;
+
     use super::*;
 
-    #[derive(Debug, Default, gtk::CompositeTemplate)]
+    #[derive(Debug, Default, gtk::CompositeTemplate, glib::Properties)]
+    #[properties(wrapper_type = super::ToolbarStartControls)]
     #[template(resource = "/com/github/manenfu/Khazanah/ui/toolbar_start_controls.ui")]
     pub struct ToolbarStartControls {
         #[template_child]
@@ -15,6 +19,9 @@ mod imp {
         pub open_button: TemplateChild<gtk::Button>,
         #[template_child]
         pub new_button: TemplateChild<gtk::Button>,
+        
+        #[property(get, set)]
+        pub buttons_sensitive: Cell<bool>,
     }
 
     #[glib::object_subclass]
@@ -32,7 +39,20 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for ToolbarStartControls {}
+    impl ObjectImpl for ToolbarStartControls {
+        fn properties() -> &'static [glib::ParamSpec] {
+            Self::derived_properties()
+        }
+
+        fn set_property(&self, id: usize, value: &glib::Value, pspec: &glib::ParamSpec) {
+            self.derived_set_property(id, value, pspec)
+        }
+
+        fn property(&self, id: usize, pspec: &glib::ParamSpec) -> glib::Value {
+            self.derived_property(id, pspec)
+        }
+    }
+    
     impl WidgetImpl for ToolbarStartControls {}
     impl BinImpl for ToolbarStartControls {}
 }

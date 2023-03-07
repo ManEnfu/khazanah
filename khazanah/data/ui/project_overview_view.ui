@@ -6,8 +6,73 @@
   <template class="KhzProjectOverviewView" parent="AdwBin">
     <child>
       <object class="GtkBox">
-      </object>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="AdwHeaderBar" id="header_bar">
+            <child type="start">
+              <object class="KhzToolbarStartControls" id="start_controls">
+                <property name="buttons-sensitive"
+                          bind-source="KhzProjectOverviewView"
+                          bind-property="project-opened"
+                          bind-flags="sync-create"/>
+              </object>
+            </child>
+            <child type="end">
+              <object class="KhzToolbarEndControls" id="end_controls">
+                <property name="buttons-sensitive"
+                          bind-source="KhzProjectOverviewView"
+                          bind-property="project-opened"
+                          bind-flags="sync-create"/>
+              </object>
+            </child>
+          </object> <!-- AdwHeaderBar -->
+        </child>
+
+        <child>
+          <object class="AdwClamp">
+            <property name="child">
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="margin-top">24</property>
+                <property name="margin-bottom">24</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="spacing">12</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Language Family</property>
+                    <property name="halign">start</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkListBox">
+                    <property name="selection-mode">none</property>
+                    <style>
+                      <class name="boxed-list"/>
+                    </style>
+                    <child>
+                      <object class="AdwEntryRow">
+                        <property name="title">Language Family Name</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwEntryRow">
+                        <property name="title">Author</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwEntryRow">
+                        <property name="title">Description</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object> <!-- GtkBox -->
+            </property>
+          </object> <!-- AdwClamp -->
+        </child>
+      </object> <!-- GtkBox -->
     </child>
-  </template>
+  </template> <!-- KhzProjectOverviewView -->
 
 </interface>

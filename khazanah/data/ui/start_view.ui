@@ -11,12 +11,22 @@
         <child>
           <object class="AdwHeaderBar" id="header_bar">
             <child type="start">
-              <object class="KhzToolbarStartControls" id="start_controls"/>
+              <object class="KhzToolbarStartControls" id="start_controls">
+                <property name="buttons-sensitive"
+                          bind-source="KhzStartView"
+                          bind-property="project-opened"
+                          bind-flags="sync-create"/>
+              </object>
             </child>
             <child type="end">
-              <object class="KhzToolbarEndControls" id="end_controls"/>
+              <object class="KhzToolbarEndControls" id="end_controls">
+                <property name="buttons-sensitive"
+                          bind-source="KhzStartView"
+                          bind-property="project-opened"
+                          bind-flags="sync-create"/>
+              </object>
             </child>
-          </object> <!-- GtkHeaderBar -->
+          </object> <!-- AdwHeaderBar -->
         </child>
 
         <child>
@@ -57,6 +67,6 @@
         </child>
       </object> <!-- GtkBox -->
     </child>
-  </template>
+  </template> <!-- KhzStartView --> 
 
 </interface>

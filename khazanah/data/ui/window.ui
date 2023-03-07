@@ -11,7 +11,26 @@
     <property name="content">
       <object class="AdwToastOverlay" id="toast_overlay">
         <child>
-          <object class="KhzStartView" id="start_view"/>
+          <object class="GtkStack" id="main_stack">
+            <property name="visible-child">start_view</property>
+            <property name="transition-type">crossfade</property>
+            <child>
+              <object class="KhzStartView" id="start_view">
+                <property name="project-opened"
+                          bind-source="KhzApplicationWindow"
+                          bind-property="project-opened"
+                          bind-flags="sync-create"/>
+              </object>
+            </child>
+            <child>
+              <object class="KhzProjectOverviewView" id="project_overview_view">
+                <property name="project-opened"
+                          bind-source="KhzApplicationWindow"
+                          bind-property="project-opened"
+                          bind-flags="sync-create"/>
+              </object>
+            </child>
+          </object> <!-- GtkStack -->
         </child>
       </object> <!-- AdwToastOverlay -->
     </property>

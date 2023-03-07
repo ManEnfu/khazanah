@@ -12,11 +12,14 @@
           <object class="GtkDropDown" id="view_dropdown">
             <property name="hexpand">True</property>
             <property name="tooltip-text">Current view.</property>
-            <property name="sensitive">False</property>
+            <property name="sensitive" 
+                      bind-source="KhzToolbarStartControls"
+                      bind-property="buttons-sensitive" 
+                      bind-flags="sync-create"/>
             <property name="model">
               <object class="GtkStringList">
                 <items>
-                  <item>General</item>
+                  <item>Overview</item>
                   <item>Lexicon</item>
                   <item>Phonology</item>
                   <item>Grammar</item>
@@ -41,6 +44,6 @@
         </child>
       </object>
     </child>
-  </template>
+  </template> <!-- KhzToolbarStartControls -->
 
 </interface>
