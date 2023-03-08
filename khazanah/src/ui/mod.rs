@@ -8,8 +8,8 @@ mod toolbar_end_controls;
 mod toolbar_start_controls;
 
 // Views
-mod start_view;
 mod project_overview_view;
+mod start_view;
 
 pub use project_overview_view::ProjectOverviewView;
 pub use start_view::StartView;

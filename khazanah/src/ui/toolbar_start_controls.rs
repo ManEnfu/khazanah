@@ -19,7 +19,7 @@ mod imp {
         pub open_button: TemplateChild<gtk::Button>,
         #[template_child]
         pub new_button: TemplateChild<gtk::Button>,
-        
+
         #[property(get, set)]
         pub buttons_sensitive: Cell<bool>,
     }
@@ -52,7 +52,7 @@ mod imp {
             self.derived_property(id, pspec)
         }
     }
-    
+
     impl WidgetImpl for ToolbarStartControls {}
     impl BinImpl for ToolbarStartControls {}
 }

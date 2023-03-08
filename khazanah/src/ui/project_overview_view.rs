@@ -4,10 +4,11 @@ use gtk::subclass::prelude::*;
 
 use adw::subclass::prelude::*;
 
+use crate::models;
 use crate::ui;
 
 mod imp {
-    use std::cell::Cell;
+    use std::cell::{Cell, RefCell};
 
     use super::*;
 
@@ -19,9 +20,11 @@ mod imp {
         pub start_controls: TemplateChild<ui::ToolbarStartControls>,
         #[template_child]
         pub end_controls: TemplateChild<ui::ToolbarEndControls>,
-        
+
         #[property(get, set)]
         pub project_opened: Cell<bool>,
+        #[property(get, set)]
+        pub project_model: RefCell<models::ProjectModel>,
     }
 
     #[glib::object_subclass]
@@ -32,6 +35,7 @@ mod imp {
 
         fn class_init(klass: &mut Self::Class) {
             klass.bind_template();
+            klass.bind_template_instance_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -62,4 +66,25 @@ glib::wrapper! {
     pub struct ProjectOverviewView(ObjectSubclass<imp::ProjectOverviewView>)
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
+}
+
+#[gtk::template_callbacks]
+impl ProjectOverviewView {
+    #[template_callback]
+    fn handle_lang_family_name_entry_apply(&self, entry: &adw::EntryRow) {
+        let s = entry.text();
+        log::debug!("lang_family_name_entry::apply({})", &s);
+    }
+
+    #[template_callback]
+    fn handle_author_entry_apply(&self, entry: &adw::EntryRow) {
+        let s = entry.text();
+        log::debug!("author_entry::apply({})", &s);
+    }
+
+    #[template_callback]
+    fn handle_description_entry_apply(&self, entry: &adw::EntryRow) {
+        let s = entry.text();
+        log::debug!("description_entry::apply({})", &s);
+    }
 }

@@ -4,10 +4,11 @@ use gtk::subclass::prelude::*;
 
 use adw::subclass::prelude::*;
 
+use crate::models;
 use crate::ui;
 
 mod imp {
-    use std::cell::Cell;
+    use std::cell::{Cell, RefCell};
 
     use super::*;
 
@@ -22,6 +23,8 @@ mod imp {
 
         #[property(get, set)]
         pub project_opened: Cell<bool>,
+        #[property(get, set)]
+        pub project_model: RefCell<models::ProjectModel>,
     }
 
     #[glib::object_subclass]

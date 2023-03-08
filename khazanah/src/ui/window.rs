@@ -1,4 +1,3 @@
-use std::cell::{Ref, RefMut};
 use std::path::Path;
 
 use conlang::Project;
@@ -12,12 +11,14 @@ use adw::subclass::prelude::*;
 use crate::ui;
 
 mod imp {
-    use std::{cell::{RefCell, Cell}, rc::Rc};
+    use std::cell::{Cell, RefCell};
 
     use gtk::glib::{
         once_cell::sync::Lazy,
         subclass::{Signal, SignalType},
     };
+
+    use crate::models;
 
     use super::*;
 
@@ -38,10 +39,10 @@ mod imp {
 
         #[property(get, set)]
         pub project_opened: Cell<bool>,
+        #[property(get, set)]
+        pub project_model: RefCell<models::ProjectModel>,
 
         pub file_dialog: RefCell<Option<gtk::FileChooserNative>>,
-
-        pub project: Rc<RefCell<Option<Project>>>,
     }
 
     #[glib::object_subclass]
@@ -127,26 +128,29 @@ impl ApplicationWindow {
         let new_action = gio::ActionEntry::builder("new")
             .activate(|window: &Self, _, _| {
                 window.emit_by_name::<()>("new-project", &[]);
-            }).build();
+            })
+            .build();
         // Save project
         let save_action = gio::ActionEntry::builder("save")
             .activate(|window: &Self, action, v| {
                 log::debug!("win.save");
-                if let Some(project) = window.project().as_ref() {
+                if let Some(project) = window.project_model().project().as_ref() {
                     match project.file_path() {
                         Some(path) => window.save_project_file(path),
-                        None => window.save_file_dialog(action, v)
+                        None => window.save_file_dialog(action, v),
                     }
                 }
-            }).build();
+            })
+            .build();
         // Save project as another file
         let save_as_action = gio::ActionEntry::builder("save-as")
             .activate(|window: &Self, action, v| {
                 log::debug!("win.save-as");
-                if window.project().is_some() {
+                if window.project_model().project().is_some() {
                     window.save_file_dialog(action, v);
                 }
-            }).build();
+            })
+            .build();
 
         self.add_action_entries([open_action, new_action, save_action, save_as_action]);
         self.action_set_enabled("win.save", false);
@@ -194,7 +198,7 @@ impl ApplicationWindow {
     /// Opens a project file for this window.
     pub fn open_project_file<P: AsRef<Path>>(&self, path: P) {
         log::info!("Opening file: {:?}", path.as_ref());
-        
+
         let ctx = glib::MainContext::default();
         let self_weak = glib::SendWeakRef::from(self.downgrade());
 
@@ -238,19 +242,6 @@ impl ApplicationWindow {
             .add_toast(adw::Toast::new("Created a New Project"));
     }
 
-    /// Gets a reference to the current project.
-    fn project(&self) -> Ref<Option<Project>> {
-        self.imp()
-            .project
-            .borrow()
-    }
-    
-    fn project_mut(&self) -> RefMut<Option<Project>> {
-        self.imp()
-            .project
-            .borrow_mut()
-    }
-
     /// Sets the current project of this window.
     fn set_project(&self, project: Project) {
         let imp = self.imp();
@@ -259,7 +250,7 @@ impl ApplicationWindow {
             None => "New Project - Khazanah".to_string(),
         };
 
-        imp.project.replace(Some(project));
+        self.project_model().set_project(Some(project));
         self.set_title(Some(&title));
         self.set_project_opened(true);
         self.action_set_enabled("win.save", true);
@@ -267,7 +258,7 @@ impl ApplicationWindow {
         imp.main_stack
             .set_visible_child(&*imp.project_overview_view);
     }
-    
+
     /// Shows `Save File` dialog.
     fn save_file_dialog(&self, _action: &gio::SimpleAction, _v: Option<&glib::Variant>) {
         let imp = self.imp();
@@ -302,7 +293,7 @@ impl ApplicationWindow {
         log::info!("Open file dialog.");
         dialog.show();
     }
-    
+
     /// Save the current project.
     pub fn save_project_file<P: AsRef<Path>>(&self, path: P) {
         log::info!("Saving file: {:?}", path.as_ref());
@@ -313,7 +304,7 @@ impl ApplicationWindow {
         let path = path.as_ref().to_path_buf();
         ctx.spawn_local(async move {
             if let Some(window) = self_weak.upgrade() {
-                if let Some(project) = window.project_mut().as_mut() {
+                if let Some(project) = window.project_model().project_mut().as_mut() {
                     match project.save_file(&path) {
                         Ok(_) => {
                             log::info!("Project Saved: {:?}", &path);
@@ -342,5 +333,4 @@ impl ApplicationWindow {
             }
         });
     }
-
 }
