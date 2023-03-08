@@ -25,6 +25,9 @@ mod imp {
         pub project_opened: Cell<bool>,
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
+
+        #[property(get, set)]
+        pub selected_view_index: Cell<u32>,
     }
 
     #[glib::object_subclass]

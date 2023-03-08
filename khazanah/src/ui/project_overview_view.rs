@@ -34,6 +34,9 @@ mod imp {
         pub project_opened: Cell<bool>,
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
+
+        #[property(get, set)]
+        pub selected_view_index: Cell<u32>,
     }
 
     #[glib::object_subclass]
@@ -79,7 +82,6 @@ glib::wrapper! {
 
 #[gtk::template_callbacks]
 impl ProjectOverviewView {
-
     #[template_callback]
     fn handle_lang_family_name_entry_apply(&self, _entry: &adw::EntryRow) {
         self.project_model().set_dirty(true);
@@ -94,7 +96,7 @@ impl ProjectOverviewView {
     fn handle_description_entry_apply(&self, _entry: &adw::EntryRow) {
         self.project_model().set_dirty(true);
     }
-    
+
     #[template_callback]
     fn handle_local_lang_entry_apply(&self, _entry: &adw::EntryRow) {
         self.project_model().set_dirty(true);
@@ -127,7 +129,7 @@ impl ui::View for ProjectOverviewView {
             meta.author = imp.author_entry.text().to_string();
             meta.description = imp.description_entry.text().to_string();
         }
-        
+
         self.project_model().set_dirty(true);
     }
 }

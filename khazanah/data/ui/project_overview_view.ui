@@ -15,6 +15,10 @@
                           bind-source="KhzProjectOverviewView"
                           bind-property="project-opened"
                           bind-flags="sync-create"/>
+                <property name="selected-view-index"
+                          bind-source="KhzProjectOverviewView"
+                          bind-property="selected-view-index"
+                          bind-flags="sync-create|bidirectional"/>
               </object>
             </child>
             <child type="end">

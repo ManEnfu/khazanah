@@ -82,11 +82,6 @@ impl ProjectModel {
         self.imp().project.borrow_mut()
     }
 
-    /// Returns true when a project is loaded.
-    pub fn is_loaded(&self) -> bool {
-        self.imp().project.borrow().is_some()
-    }
-
     /// Loads project from a file.
     pub fn load_file<P: AsRef<Path>>(&self, path: P) -> Result<(), project::Error> {
         let project = Project::load_file(&path)?;

@@ -16,16 +16,10 @@
                       bind-source="KhzToolbarStartControls"
                       bind-property="buttons-sensitive" 
                       bind-flags="sync-create"/>
-            <property name="model">
-              <object class="GtkStringList">
-                <items>
-                  <item>Overview</item>
-                  <item>Lexicon</item>
-                  <item>Phonology</item>
-                  <item>Grammar</item>
-                </items>
-              </object>
-            </property>
+            <property name="selected"
+                      bind-source="KhzToolbarStartControls"
+                      bind-property="selected-view-index"
+                      bind-flags="sync-create|bidirectional"/>
           </object>
         </child>
         <child>

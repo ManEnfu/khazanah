@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.6"/>
+  <requires lib="Adw" version="1.2"/>
+  <object class="GtkStringList" id="main_views">
+    <items>
+      <item>Overview</item>
+      <item>Phonology</item>
+      <item>Lexicon</item>
+      <item>Grammar</item>
+    </items>
+  </object>
+
+</interface>

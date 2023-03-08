@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use conlang::Project;
 
@@ -8,7 +8,7 @@ use gtk::{gio, glib};
 
 use adw::subclass::prelude::*;
 
-use crate::ui::{self, View};
+use crate::ui::{self, MainViews, View};
 
 mod imp {
     use std::cell::{Cell, RefCell};
@@ -42,7 +42,13 @@ mod imp {
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
 
+        #[property(get, set)]
+        pub selected_view_index: Cell<u32>,
+
         pub file_dialog: RefCell<Option<gtk::FileChooserNative>>,
+
+        #[property(get, set)]
+        pub current_view_index: Cell<u32>,
     }
 
     #[glib::object_subclass]
@@ -53,6 +59,7 @@ mod imp {
 
         fn class_init(klass: &mut Self::Class) {
             klass.bind_template();
+            klass.bind_template_instance_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -110,6 +117,7 @@ glib::wrapper! {
         @implements gio::ActionGroup, gio::ActionMap;
 }
 
+#[gtk::template_callbacks]
 impl ApplicationWindow {
     /// Creates a new window.
     pub fn new<P: glib::IsA<gtk::Application>>(application: &P) -> Self {
@@ -133,21 +141,18 @@ impl ApplicationWindow {
         // Save project
         let save_action = gio::ActionEntry::builder("save")
             .activate(|window: &Self, action, v| {
-                if !window.project_model().is_loaded() {
+                if window.project_model().project().is_none() {
                     return;
                 }
                 match window.project_model().path() {
                     Some(path) => window.save_project_file(path),
-                    None => window.save_file_dialog(action, v)
+                    None => window.save_file_dialog(action, v),
                 }
             })
             .build();
         // Save project as another file
         let save_as_action = gio::ActionEntry::builder("save-as")
             .activate(|window: &Self, action, v| {
-                if !window.project_model().is_loaded() {
-                    return;
-                }
                 if window.project_model().project().is_some() {
                     window.save_file_dialog(action, v);
                 }
@@ -210,7 +215,7 @@ impl ApplicationWindow {
                 match window.project_model().load_file(&path) {
                     Ok(_) => {
                         log::info!("Project opened: {:?}", &path);
-                        window.update_project_view();
+                        window.finish_open_project();
                         let msg = format!(
                             "Opened \"{}\"",
                             path.file_name()
@@ -239,27 +244,21 @@ impl ApplicationWindow {
     /// Creates a new project and sets it as the current project.
     pub fn new_project(&self) {
         self.project_model().set_project(Some(Project::new()));
-        self.update_project_view();
+        self.finish_open_project();
         self.imp()
             .toast_overlay
             .add_toast(adw::Toast::new("Created a New Project"));
     }
 
     /// Called after a project is opened or created for this window.
-    fn update_project_view(&self) {
+    fn finish_open_project(&self) {
         let imp = self.imp();
-        let path = self.project_model().path();
-        if let Some(project) = self.project_model().project().as_ref() {
-            let title = match path {
-                Some(p) => format!("{} - Khazanah", &p),
-                None => "New Project - Khazanah".to_string(),
-            };
-
-            self.set_title(Some(&title));
+        if self.project_model().project().is_some() {
             self.set_project_opened(true);
             self.action_set_enabled("win.save", true);
             self.action_set_enabled("win.save-as", true);
 
+            self.update_title();
             self.load_all_views();
 
             imp.main_stack
@@ -325,6 +324,7 @@ impl ApplicationWindow {
                                 .unwrap_or_default()
                         );
                         window.imp().toast_overlay.add_toast(adw::Toast::new(&msg));
+                        window.update_title();
                     }
                     Err(e) => {
                         log::error!("Error saving file: {}", e);
@@ -341,21 +341,66 @@ impl ApplicationWindow {
             }
         });
     }
-    
+
     // VIEWS
+
+    pub fn update_title(&self) {
+        if self.project_model().project().is_none() {
+            self.set_title(Some("Khazanah"));
+            return;
+        }
+
+        let title = if let Some(p) = self.project_model().path() {
+            let file = PathBuf::from(p)
+                .file_name()
+                .unwrap_or_default()
+                .to_str()
+                .unwrap_or_default()
+                .to_string();
+            let name = &self
+                .project_model()
+                .project()
+                .as_ref()
+                .unwrap()
+                .meta()
+                .name
+                .to_owned();
+            format!("{} [{}] - Khazanah", name, file)
+        } else {
+            "New Project - Khazanah".to_string()
+        };
+
+        self.set_title(Some(&title));
+    }
 
     /// Loads all view states from the project model.
     pub fn load_all_views(&self) {
         let imp = self.imp();
 
         imp.project_overview_view.load_state();
-    } 
+    }
 
     /// Commits all view states to the project model.
     pub fn commit_all_views(&self) {
         let imp = self.imp();
 
         imp.project_overview_view.commit_state();
-    } 
+    }
 
+    /// Commit view
+    pub fn commit_view_state(&self, view: MainViews) {
+        let imp = self.imp();
+
+        match view {
+            MainViews::Overview => imp.project_overview_view.commit_state(),
+            _ => log::warn!("Attempting to select unknown view."),
+        }
+    }
+
+    #[template_callback]
+    fn handle_selected_view_index_changed(&self, _pspec: glib::ParamSpec, _s: &Self) {
+        let idx = self.selected_view_index();
+        let view = MainViews::from(idx);
+        log::debug!("Selecting view: {:?} ({})", view, idx);
+    }
 }

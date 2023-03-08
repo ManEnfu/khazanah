@@ -24,6 +24,10 @@
                           bind-source="KhzApplicationWindow"
                           bind-property="project-model"
                           bind-flags="sync-create"/>
+                <property name="selected-view-index"
+                          bind-source="KhzApplicationWindow"
+                          bind-property="selected-view-index"
+                          bind-flags="sync-create|bidirectional"/>
               </object>
             </child>
             <child>
@@ -36,12 +40,19 @@
                           bind-source="KhzApplicationWindow"
                           bind-property="project-model"
                           bind-flags="sync-create"/>
+                <property name="selected-view-index"
+                          bind-source="KhzApplicationWindow"
+                          bind-property="selected-view-index"
+                          bind-flags="sync-create|bidirectional"/>
               </object>
             </child>
           </object> <!-- GtkStack -->
         </child>
       </object> <!-- AdwToastOverlay -->
     </property>
+    <signal name="notify::selected-view-index"
+            handler="handle_selected_view_index_changed"
+            swapped="true"/>
   </template> <!-- KhzApplicationWindow -->
 
   <menu id="primary_menu">
