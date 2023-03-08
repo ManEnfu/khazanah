@@ -6,16 +6,23 @@ use std::path::Path;
 use conlang::project;
 use conlang::Project;
 use gtk::glib;
+use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
 mod imp {
+    use std::cell::Cell;
+
     use super::*;
 
     use conlang::Project;
 
-    #[derive(Default)]
+    #[derive(Default, glib::Properties)]
+    #[properties(wrapper_type = super::ProjectModel)]
     pub struct ProjectModel {
         pub project: RefCell<Option<Project>>,
+
+        #[property(get, set)]
+        pub dirty: Cell<bool>
     }
 
     #[glib::object_subclass]
@@ -24,7 +31,19 @@ mod imp {
         type Type = super::ProjectModel;
     }
 
-    impl ObjectImpl for ProjectModel {}
+    impl ObjectImpl for ProjectModel {
+        fn properties() -> &'static [glib::ParamSpec] {
+            Self::derived_properties()
+        }
+
+        fn set_property(&self, id: usize, value: &glib::Value, pspec: &glib::ParamSpec) {
+            self.derived_set_property(id, value, pspec)
+        }
+
+        fn property(&self, id: usize, pspec: &glib::ParamSpec) -> glib::Value {
+            self.derived_property(id, pspec)
+        }
+    }
 }
 
 glib::wrapper! {
@@ -65,14 +84,14 @@ impl ProjectModel {
         self.imp().project.borrow().is_some()
     }
 
-    /// Load project from a file.
+    /// Loads project from a file.
     pub fn load_file<P: AsRef<Path>>(&self, path: P) -> Result<(), project::Error> {
         let project = Project::load_file(path)?;
         self.set_project(Some(project));
         Ok(())
     }
 
-    /// Save project to a file.
+    /// Saves the project to a file.
     pub fn save_file<P: AsRef<Path>>(&self, path: P) -> Result<(), project::Error> {
         match self.project_mut().as_mut() {
             Some(project) => {
@@ -83,7 +102,7 @@ impl ProjectModel {
         }
     }
 
-    /// Update the state of the project.
+    /// Updates the state of the project. Marks the project as dirty.
     pub fn update<F>(&self, f: F)
     where
         F: Fn(&mut Project),
@@ -99,9 +118,3 @@ impl Default for ProjectModel {
         Self::new()
     }
 }
-
-// impl glib::PropertySetNested for ProjectModel {
-//     fn set_nested<F: FnOnce(&mut Self::SetNestedValue)>(&self, f: F) {
-
-//     }
-// }
