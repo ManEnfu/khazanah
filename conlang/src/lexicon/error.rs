@@ -16,7 +16,7 @@ pub enum Error {
     FromUtf8(#[from] FromUtf8Error),
 }
 
-/// Error type that can be emitted by reading a `Lexicon` file. 
+/// Error type that can be emitted by reading a `Lexicon` file.
 #[derive(Debug, thiserror::Error)]
 pub enum ReadError {
     /// Trying to set value of a nonexistent word. This should not happen.

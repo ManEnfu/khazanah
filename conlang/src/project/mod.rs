@@ -11,30 +11,32 @@
 //! ```
 
 pub use error::Error;
+pub use meta::Meta;
 
 use std::{
     fs::File,
-    future::Future,
     io::{BufReader, Read, Seek, Write},
     path::{Path, PathBuf},
-    pin::Pin,
 };
-use zip::{write::FileOptions, ZipArchive, ZipWriter};
+use zip::{result::ZipError, write::FileOptions, ZipArchive, ZipWriter};
 
 use crate::Lexicon;
 
-pub mod error;
+mod error;
+pub mod meta;
 
 // The MIME type of a project file.
-pub const PROJECT_MIME_TYPE: &str = "application/cnpr";
+pub const PROJECT_MIME_TYPE: &str = "application/khz";
 
 /// A project.
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct Project {
     /// The file path of the project.
-    file_path: Option<PathBuf>,
+    pub(crate) file_path: Option<PathBuf>,
+    /// The metadata of the project.
+    pub(crate) meta: Meta,
     /// The lexicon of the project.
-    lexicon: Lexicon,
+    pub(crate) lexicon: Lexicon,
 }
 
 impl Project {
@@ -48,6 +50,16 @@ impl Project {
         self.file_path
             .as_ref()
             .map(<PathBuf as AsRef<Path>>::as_ref)
+    }
+
+    /// Get a reference to the metadata.
+    pub fn meta(&self) -> &Meta {
+        &self.meta
+    }
+
+    /// Get a mutable reference to the metadata.
+    pub fn meta_mut(&mut self) -> &mut Meta {
+        &mut self.meta
     }
 
     /// Loads project from ZIP archive.
@@ -65,12 +77,23 @@ impl Project {
             }
         }
 
+        // Load metadata
+        let meta = match archive.by_name("meta.xml") {
+            Ok(f) => Meta::read_xml(BufReader::new(f))?,
+            Err(ZipError::FileNotFound) => Meta::new(),
+            Err(e) => return Err(Error::Zip(e)),
+        };
+
         // Load lexicon
-        let lex_file = archive.by_name("lexicon.xml")?;
-        let lexicon = Lexicon::read_xml(BufReader::new(lex_file))?;
+        let lexicon = match archive.by_name("lexicon.xml") {
+            Ok(f) => Lexicon::read_xml(BufReader::new(f))?,
+            Err(ZipError::FileNotFound) => Lexicon::new(),
+            Err(e) => return Err(Error::Zip(e)),
+        };
 
         Ok(Self {
             file_path: None,
+            meta,
             lexicon,
         })
     }
@@ -83,19 +106,21 @@ impl Project {
         Ok(proj)
     }
 
-    pub async fn load_file_async<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
-        todo!()
-    }
-
     /// Saves project to ZIP archive.
     pub fn save<W: Write + Seek>(&self, writer: W) -> Result<W, Error> {
         let mut archive = ZipWriter::new(writer);
 
         let options = FileOptions::default();
 
+        // Save MIME type
         archive.start_file("mimetype", options)?;
-        archive.write_all(b"application/cnpr")?;
+        archive.write_all(PROJECT_MIME_TYPE.as_bytes())?;
 
+        // Save metadata
+        archive.start_file("meta.xml", options)?;
+        archive = self.meta.write_xml(archive)?;
+
+        // Save lexicon
         archive.start_file("lexicon.xml", options)?;
         archive = self.lexicon.write_xml(archive)?;
 
@@ -108,9 +133,5 @@ impl Project {
         self.save(file)?;
         self.file_path = Some(path.as_ref().into());
         Ok(())
-    }
-
-    pub async fn save_file_async<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
-        todo!()
     }
 }

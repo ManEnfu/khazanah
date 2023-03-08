@@ -3,10 +3,7 @@
 use std::{borrow::Cow, io::BufRead, str::Utf8Error};
 
 use quick_xml::{
-    events::{
-        attributes::AttrError,
-        BytesDecl, BytesEnd, BytesStart, BytesText, Event,
-    },
+    events::{attributes::AttrError, BytesDecl, BytesEnd, BytesStart, BytesText, Event},
     Reader, Writer,
 };
 
@@ -25,7 +22,6 @@ pub enum XmlError<E> {
     #[error(transparent)]
     Other(E),
 }
-
 
 /// Generic XML reader.
 #[allow(clippy::type_complexity)]
@@ -179,7 +175,7 @@ impl<W: std::io::Write> XmlWriter<W> {
             .map_err(XmlError::Qxml)
     }
 
-    /// Finishes writing and returns the underlying writer. 
+    /// Finishes writing and returns the underlying writer.
     pub fn finish(self) -> W {
         self.writer.into_inner()
     }
