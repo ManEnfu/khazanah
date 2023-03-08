@@ -205,10 +205,10 @@ impl ApplicationWindow {
         let path = path.as_ref().to_path_buf();
         ctx.spawn_local(async move {
             if let Some(window) = self_weak.upgrade() {
-                match Project::load_file(&path) {
-                    Ok(project) => {
+                match window.project_model().load_file(&path) {
+                    Ok(_) => {
                         log::info!("Project opened: {:?}", &path);
-                        window.set_project(project);
+                        window.update_project_view();
                         let msg = format!(
                             "Opened \"{}\"",
                             path.file_name()
@@ -236,27 +236,29 @@ impl ApplicationWindow {
 
     /// Creates a new project and sets it as the current project.
     pub fn new_project(&self) {
-        self.set_project(Project::new());
+        self.project_model().set_project(Some(Project::new()));
+        self.update_project_view();
         self.imp()
             .toast_overlay
             .add_toast(adw::Toast::new("Created a New Project"));
     }
 
-    /// Sets the current project of this window.
-    fn set_project(&self, project: Project) {
+    /// Called after a project is opened or created for this window.
+    fn update_project_view(&self) {
         let imp = self.imp();
-        let title = match project.file_path() {
-            Some(p) => format!("{} - Khazanah", p.to_str().unwrap_or("Unknown")),
-            None => "New Project - Khazanah".to_string(),
-        };
+        if let Some(project) = self.project_model().project().as_ref() {
+            let title = match project.file_path() {
+                Some(p) => format!("{} - Khazanah", p.to_str().unwrap_or("Unknown")),
+                None => "New Project - Khazanah".to_string(),
+            };
 
-        self.project_model().set_project(Some(project));
-        self.set_title(Some(&title));
-        self.set_project_opened(true);
-        self.action_set_enabled("win.save", true);
-        self.action_set_enabled("win.save-as", true);
-        imp.main_stack
-            .set_visible_child(&*imp.project_overview_view);
+            self.set_title(Some(&title));
+            self.set_project_opened(true);
+            self.action_set_enabled("win.save", true);
+            self.action_set_enabled("win.save-as", true);
+            imp.main_stack
+                .set_visible_child(&*imp.project_overview_view);
+        }
     }
 
     /// Shows `Save File` dialog.
@@ -304,30 +306,28 @@ impl ApplicationWindow {
         let path = path.as_ref().to_path_buf();
         ctx.spawn_local(async move {
             if let Some(window) = self_weak.upgrade() {
-                if let Some(project) = window.project_model().project_mut().as_mut() {
-                    match project.save_file(&path) {
-                        Ok(_) => {
-                            log::info!("Project Saved: {:?}", &path);
-                            let msg = format!(
-                                "Saved \"{}\"",
-                                path.file_name()
-                                    .unwrap_or_default()
-                                    .to_str()
-                                    .unwrap_or_default()
-                            );
-                            window.imp().toast_overlay.add_toast(adw::Toast::new(&msg));
-                        }
-                        Err(e) => {
-                            log::error!("Error saving file: {}", e);
-                            let msg = format!(
-                                "Unable to Save \"{}\"",
-                                path.file_name()
-                                    .unwrap_or_default()
-                                    .to_str()
-                                    .unwrap_or_default()
-                            );
-                            window.imp().toast_overlay.add_toast(adw::Toast::new(&msg));
-                        }
+                match window.project_model().save_file(&path) {
+                    Ok(_) => {
+                        log::info!("Project Saved: {:?}", &path);
+                        let msg = format!(
+                            "Saved \"{}\"",
+                            path.file_name()
+                                .unwrap_or_default()
+                                .to_str()
+                                .unwrap_or_default()
+                        );
+                        window.imp().toast_overlay.add_toast(adw::Toast::new(&msg));
+                    }
+                    Err(e) => {
+                        log::error!("Error saving file: {}", e);
+                        let msg = format!(
+                            "Unable to Save \"{}\"",
+                            path.file_name()
+                                .unwrap_or_default()
+                                .to_str()
+                                .unwrap_or_default()
+                        );
+                        window.imp().toast_overlay.add_toast(adw::Toast::new(&msg));
                     }
                 }
             }
