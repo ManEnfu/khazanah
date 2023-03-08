@@ -142,6 +142,8 @@ impl Application {
         self.set_accels_for_action("app.quit", &["<primary>q"]);
         self.set_accels_for_action("win.open", &["<primary>o"]);
         self.set_accels_for_action("win.new", &["<primary>n"]);
+        self.set_accels_for_action("win.save", &["<primary>s"]);
+        self.set_accels_for_action("win.save-as", &["<shift><primary>s"]);
     }
 
     /// Called on application shutdown.

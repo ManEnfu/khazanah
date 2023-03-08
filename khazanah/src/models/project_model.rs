@@ -22,7 +22,10 @@ mod imp {
         pub project: RefCell<Option<Project>>,
 
         #[property(get, set)]
-        pub dirty: Cell<bool>
+        pub dirty: Cell<bool>,
+
+        #[property(get, set)]
+        pub path: RefCell<Option<String>>,
     }
 
     #[glib::object_subclass]
@@ -86,8 +89,9 @@ impl ProjectModel {
 
     /// Loads project from a file.
     pub fn load_file<P: AsRef<Path>>(&self, path: P) -> Result<(), project::Error> {
-        let project = Project::load_file(path)?;
+        let project = Project::load_file(&path)?;
         self.set_project(Some(project));
+        self.set_path(path.as_ref().to_string_lossy().to_string());
         Ok(())
     }
 

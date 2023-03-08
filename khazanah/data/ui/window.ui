@@ -20,6 +20,10 @@
                           bind-source="KhzApplicationWindow"
                           bind-property="project-opened"
                           bind-flags="sync-create"/>
+                <property name="project-model"
+                          bind-source="KhzApplicationWindow"
+                          bind-property="project-model"
+                          bind-flags="sync-create"/>
               </object>
             </child>
             <child>
@@ -27,6 +31,10 @@
                 <property name="project-opened"
                           bind-source="KhzApplicationWindow"
                           bind-property="project-opened"
+                          bind-flags="sync-create"/>
+                <property name="project-model"
+                          bind-source="KhzApplicationWindow"
+                          bind-property="project-model"
                           bind-flags="sync-create"/>
               </object>
             </child>

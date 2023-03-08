@@ -31,8 +31,6 @@ pub const PROJECT_MIME_TYPE: &str = "application/khz";
 /// A project.
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct Project {
-    /// The file path of the project.
-    pub(crate) file_path: Option<PathBuf>,
     /// The metadata of the project.
     pub(crate) meta: Meta,
     /// The lexicon of the project.
@@ -43,13 +41,6 @@ impl Project {
     /// Creates a new project.
     pub fn new() -> Self {
         Self::default()
-    }
-
-    /// Getter for file path of the project.
-    pub fn file_path(&self) -> Option<&Path> {
-        self.file_path
-            .as_ref()
-            .map(<PathBuf as AsRef<Path>>::as_ref)
     }
 
     /// Get a reference to the metadata.
@@ -92,7 +83,6 @@ impl Project {
         };
 
         Ok(Self {
-            file_path: None,
             meta,
             lexicon,
         })
@@ -101,8 +91,7 @@ impl Project {
     /// Loads project from ZIP file in filesystem.
     pub fn load_file<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
         let file = File::open(&path)?;
-        let mut proj = Self::load(file)?;
-        proj.file_path = Some(path.as_ref().into());
+        let proj = Self::load(file)?;
         Ok(proj)
     }
 
@@ -131,7 +120,6 @@ impl Project {
     pub fn save_file<P: AsRef<Path>>(&mut self, path: P) -> Result<(), Error> {
         let file = File::create(&path)?;
         self.save(file)?;
-        self.file_path = Some(path.as_ref().into());
         Ok(())
     }
 }

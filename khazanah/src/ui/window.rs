@@ -8,7 +8,7 @@ use gtk::{gio, glib};
 
 use adw::subclass::prelude::*;
 
-use crate::ui;
+use crate::ui::{self, View};
 
 mod imp {
     use std::cell::{Cell, RefCell};
@@ -133,19 +133,21 @@ impl ApplicationWindow {
         // Save project
         let save_action = gio::ActionEntry::builder("save")
             .activate(|window: &Self, action, v| {
-                log::debug!("win.save");
-                if let Some(project) = window.project_model().project().as_ref() {
-                    match project.file_path() {
-                        Some(path) => window.save_project_file(path),
-                        None => window.save_file_dialog(action, v),
-                    }
+                if !window.project_model().is_loaded() {
+                    return;
+                }
+                match window.project_model().path() {
+                    Some(path) => window.save_project_file(path),
+                    None => window.save_file_dialog(action, v)
                 }
             })
             .build();
         // Save project as another file
         let save_as_action = gio::ActionEntry::builder("save-as")
             .activate(|window: &Self, action, v| {
-                log::debug!("win.save-as");
+                if !window.project_model().is_loaded() {
+                    return;
+                }
                 if window.project_model().project().is_some() {
                     window.save_file_dialog(action, v);
                 }
@@ -246,9 +248,10 @@ impl ApplicationWindow {
     /// Called after a project is opened or created for this window.
     fn update_project_view(&self) {
         let imp = self.imp();
+        let path = self.project_model().path();
         if let Some(project) = self.project_model().project().as_ref() {
-            let title = match project.file_path() {
-                Some(p) => format!("{} - Khazanah", p.to_str().unwrap_or("Unknown")),
+            let title = match path {
+                Some(p) => format!("{} - Khazanah", &p),
                 None => "New Project - Khazanah".to_string(),
             };
 
@@ -256,6 +259,9 @@ impl ApplicationWindow {
             self.set_project_opened(true);
             self.action_set_enabled("win.save", true);
             self.action_set_enabled("win.save-as", true);
+
+            self.load_all_views();
+
             imp.main_stack
                 .set_visible_child(&*imp.project_overview_view);
         }
@@ -300,6 +306,8 @@ impl ApplicationWindow {
     pub fn save_project_file<P: AsRef<Path>>(&self, path: P) {
         log::info!("Saving file: {:?}", path.as_ref());
 
+        self.commit_all_views();
+
         let ctx = glib::MainContext::default();
         let self_weak = glib::SendWeakRef::from(self.downgrade());
 
@@ -333,4 +341,21 @@ impl ApplicationWindow {
             }
         });
     }
+    
+    // VIEWS
+
+    /// Loads all view states from the project model.
+    pub fn load_all_views(&self) {
+        let imp = self.imp();
+
+        imp.project_overview_view.load_state();
+    } 
+
+    /// Commits all view states to the project model.
+    pub fn commit_all_views(&self) {
+        let imp = self.imp();
+
+        imp.project_overview_view.commit_state();
+    } 
+
 }

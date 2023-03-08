@@ -21,6 +21,15 @@ mod imp {
         #[template_child]
         pub end_controls: TemplateChild<ui::ToolbarEndControls>,
 
+        #[template_child]
+        pub lang_family_name_entry: TemplateChild<adw::EntryRow>,
+        #[template_child]
+        pub local_lang_entry: TemplateChild<adw::EntryRow>,
+        #[template_child]
+        pub author_entry: TemplateChild<adw::EntryRow>,
+        #[template_child]
+        pub description_entry: TemplateChild<adw::EntryRow>,
+
         #[property(get, set)]
         pub project_opened: Cell<bool>,
         #[property(get, set)]
@@ -70,21 +79,55 @@ glib::wrapper! {
 
 #[gtk::template_callbacks]
 impl ProjectOverviewView {
+
     #[template_callback]
-    fn handle_lang_family_name_entry_apply(&self, entry: &adw::EntryRow) {
-        let s = entry.text();
-        log::debug!("lang_family_name_entry::apply({})", &s);
+    fn handle_lang_family_name_entry_apply(&self, _entry: &adw::EntryRow) {
+        self.project_model().set_dirty(true);
     }
 
     #[template_callback]
-    fn handle_author_entry_apply(&self, entry: &adw::EntryRow) {
-        let s = entry.text();
-        log::debug!("author_entry::apply({})", &s);
+    fn handle_author_entry_apply(&self, _entry: &adw::EntryRow) {
+        self.project_model().set_dirty(true);
     }
 
     #[template_callback]
-    fn handle_description_entry_apply(&self, entry: &adw::EntryRow) {
-        let s = entry.text();
-        log::debug!("description_entry::apply({})", &s);
+    fn handle_description_entry_apply(&self, _entry: &adw::EntryRow) {
+        self.project_model().set_dirty(true);
+    }
+    
+    #[template_callback]
+    fn handle_local_lang_entry_apply(&self, _entry: &adw::EntryRow) {
+        self.project_model().set_dirty(true);
+    }
+}
+
+impl ui::View for ProjectOverviewView {
+    fn load_state(&self) {
+        let imp = self.imp();
+        let dirty = self.project_model().dirty();
+
+        if let Some(project) = self.project_model().project().as_ref() {
+            let meta = project.meta();
+            imp.lang_family_name_entry.set_text(&meta.name);
+            imp.local_lang_entry.set_text(&meta.local_lang);
+            imp.author_entry.set_text(&meta.author);
+            imp.description_entry.set_text(&meta.description);
+        }
+
+        self.project_model().set_dirty(dirty);
+    }
+
+    fn commit_state(&self) {
+        let imp = self.imp();
+
+        if let Some(project) = self.project_model().project_mut().as_mut() {
+            let meta = project.meta_mut();
+            meta.name = imp.lang_family_name_entry.text().to_string();
+            meta.local_lang = imp.local_lang_entry.text().to_string();
+            meta.author = imp.author_entry.text().to_string();
+            meta.description = imp.description_entry.text().to_string();
+        }
+        
+        self.project_model().set_dirty(true);
     }
 }
