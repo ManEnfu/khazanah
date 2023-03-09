@@ -1,7 +1,7 @@
 //! Module for lexicon and related data structures.
 
 pub use error::{Error, ReadError};
-pub use pos::PartOfSpeech;
+pub use pos::{PartOfSpeech, ALL_PARTS_OF_SPEECH};
 pub use word::Word;
 
 use std::{

@@ -1,5 +1,7 @@
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub enum PartOfSpeech {
+    #[default]
+    None,
     Abbreviation,
     Adjective,
     Adposition,
@@ -22,6 +24,7 @@ pub enum PartOfSpeech {
 impl PartOfSpeech {
     pub fn name(&self) -> &str {
         match self {
+            Self::None => "---",
             Self::Abbreviation => "Abbreviation",
             Self::Adjective => "Adjective",
             Self::Adposition => "Adposition",
@@ -34,7 +37,7 @@ impl PartOfSpeech {
             Self::Particle => "Particle",
             Self::Phrase => "Phrase",
             Self::Pronoun => "Pronoun",
-            Self::ProperNoun => "ProperNoun",
+            Self::ProperNoun => "Proper Noun",
             Self::Verb => "Verb",
             Self::Custom(s) => s,
             _ => "Unknown",
@@ -66,6 +69,7 @@ impl PartOfSpeech {
 impl From<&str> for PartOfSpeech {
     fn from(value: &str) -> Self {
         match value {
+            "---" => Self::None,
             "Abbreviation" => Self::Abbreviation,
             "Adjective" => Self::Adjective,
             "Adposition" => Self::Adposition,
@@ -78,7 +82,7 @@ impl From<&str> for PartOfSpeech {
             "Particle" => Self::Particle,
             "Phrase" => Self::Phrase,
             "Pronoun" => Self::Pronoun,
-            "ProperNoun" => Self::ProperNoun,
+            "Proper Noun" => Self::ProperNoun,
             "Verb" => Self::Verb,
             s => Self::Custom(s.to_owned()),
         }
@@ -90,3 +94,23 @@ impl From<PartOfSpeech> for String {
         value.name().to_owned()
     }
 }
+
+pub const ALL_PARTS_OF_SPEECH: &[PartOfSpeech] = &[
+    PartOfSpeech::None,
+    PartOfSpeech::Abbreviation,
+    PartOfSpeech::Adjective,
+    PartOfSpeech::Adposition,
+    PartOfSpeech::Adverb,
+    PartOfSpeech::Affix,
+    PartOfSpeech::Auxiliary,
+    PartOfSpeech::Conjunction,
+    PartOfSpeech::Determinative,
+    PartOfSpeech::Interjection,
+    PartOfSpeech::Noun,
+    PartOfSpeech::Numeral,
+    PartOfSpeech::Particle,
+    PartOfSpeech::Phrase,
+    PartOfSpeech::Pronoun,
+    PartOfSpeech::ProperNoun,
+    PartOfSpeech::Verb,
+];
