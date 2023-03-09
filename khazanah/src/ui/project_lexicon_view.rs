@@ -25,6 +25,8 @@ mod imp {
         pub start_controls: TemplateChild<ui::ToolbarStartControls>,
         #[template_child]
         pub end_controls: TemplateChild<ui::ToolbarEndControls>,
+        #[template_child]
+        pub main_menu_button: TemplateChild<ui::MainMenuButton>,
 
         #[template_child]
         pub pos_dropdown: TemplateChild<adw::ComboRow>,
@@ -81,7 +83,7 @@ mod imp {
 }
 
 glib::wrapper! {
-    /// The view to edit project general data, such as name and description.
+    /// The view to edit project lexicon.
     pub struct ProjectLexiconView(ObjectSubclass<imp::ProjectLexiconView>)
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
@@ -92,7 +94,6 @@ impl ProjectLexiconView {}
 
 impl ui::View for ProjectLexiconView {
     fn load_state(&self) {
-        let imp = self.imp();
         let dirty = self.project_model().dirty();
 
         self.project_model().set_dirty(dirty);

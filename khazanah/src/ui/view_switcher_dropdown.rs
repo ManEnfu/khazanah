@@ -36,16 +36,6 @@ mod imp {
     }
 
     impl ObjectImpl for ViewSwitcherDropDown {
-        // fn constructed(&self) {
-        //     self.parent_constructed();
-
-        //     // Load view dropdown model.
-        //     let main_views =
-        //         gtk::Builder::from_resource("/com/github/manenfu/Khazanah/ui/main_views.ui")
-        //             .object::<gtk::StringList>("main_views")
-        //             .expect("Loading nonexistent model `main_views` from resource.");
-        //     self.view_dropdown.set_model(Some(&main_views));
-        // }
 
         fn properties() -> &'static [glib::ParamSpec] {
             Self::derived_properties()
@@ -65,7 +55,7 @@ mod imp {
 }
 
 glib::wrapper! {
-    /// Control widgets at the start of the toolbar.
+    /// View switcher dropdown.
     pub struct ViewSwitcherDropDown(ObjectSubclass<imp::ViewSwitcherDropDown>)
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;

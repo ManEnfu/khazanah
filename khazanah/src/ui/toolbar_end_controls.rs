@@ -18,8 +18,6 @@ mod imp {
         pub save_as_button: TemplateChild<gtk::Button>,
         #[template_child]
         pub tool_menu_button: TemplateChild<gtk::MenuButton>,
-        #[template_child]
-        pub main_menu_button: TemplateChild<gtk::MenuButton>,
     }
 
     #[glib::object_subclass]

@@ -22,6 +22,8 @@ mod imp {
         pub start_controls: TemplateChild<ui::ToolbarStartControls>,
         #[template_child]
         pub end_controls: TemplateChild<ui::ToolbarEndControls>,
+        #[template_child]
+        pub main_menu_button: TemplateChild<ui::MainMenuButton>,
 
         #[template_child]
         pub lang_family_name_entry: TemplateChild<adw::EntryRow>,

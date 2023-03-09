@@ -7,7 +7,7 @@
     <file compressed="true" preprocess="xml-stripblanks">ui/start_view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/project_lexicon_view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/project_overview_view.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">ui/main_views.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/view_switcher_dropdown.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/main_menu_button.ui</file>
   </gresource>
 </gresources>

@@ -6,14 +6,16 @@ mod window;
 // Common Components
 mod toolbar_end_controls;
 mod toolbar_start_controls;
+mod main_menu_button; 
+mod view_switcher_dropdown;
 
 // Views
 mod project_lexicon_view;
 mod project_overview_view;
 mod start_view;
 mod view;
-mod view_switcher_dropdown;
 
+pub use main_menu_button::MainMenuButton;
 pub use project_lexicon_view::ProjectLexiconView;
 pub use project_overview_view::ProjectOverviewView;
 pub use start_view::StartView;

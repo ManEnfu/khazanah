@@ -23,12 +23,13 @@
               </object>
             </child>
             <child type="start">
-              <object class="KhzToolbarStartControls" id="start_controls">
-              </object>
+              <object class="KhzToolbarStartControls" id="start_controls"/>
             </child>
             <child type="end">
-              <object class="KhzToolbarEndControls" id="end_controls">
-              </object>
+              <object class="KhzMainMenuButton" id="main_menu_button"/>
+            </child>
+            <child type="end">
+              <object class="KhzToolbarEndControls" id="end_controls"/>
             </child>
           </object> <!-- AdwHeaderBar -->
         </child>

@@ -12,8 +12,6 @@ mod imp {
     #[derive(Debug, Default, gtk::CompositeTemplate)]
     #[template(resource = "/com/github/manenfu/Khazanah/ui/toolbar_start_controls.ui")]
     pub struct ToolbarStartControls {
-        // #[template_child]
-        // pub view_dropdown: TemplateChild<gtk::DropDown>,
         #[template_child]
         pub open_button: TemplateChild<gtk::Button>,
         #[template_child]
@@ -35,30 +33,7 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for ToolbarStartControls {
-        // fn constructed(&self) {
-        //     self.parent_constructed();
-
-        //     // Load view dropdown model.
-        //     let main_views =
-        //         gtk::Builder::from_resource("/com/github/manenfu/Khazanah/ui/main_views.ui")
-        //             .object::<gtk::StringList>("main_views")
-        //             .expect("Loading nonexistent model `main_views` from resource.");
-        //     self.view_dropdown.set_model(Some(&main_views));
-        // }
-
-        // fn properties() -> &'static [glib::ParamSpec] {
-        //     Self::derived_properties()
-        // }
-
-        // fn set_property(&self, id: usize, value: &glib::Value, pspec: &glib::ParamSpec) {
-        //     self.derived_set_property(id, value, pspec)
-        // }
-
-        // fn property(&self, id: usize, pspec: &glib::ParamSpec) -> glib::Value {
-        //     self.derived_property(id, pspec)
-        // }
-    }
+    impl ObjectImpl for ToolbarStartControls {}
 
     impl WidgetImpl for ToolbarStartControls {}
     impl BinImpl for ToolbarStartControls {}
