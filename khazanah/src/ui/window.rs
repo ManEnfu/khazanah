@@ -36,6 +36,8 @@ mod imp {
         pub start_view: TemplateChild<ui::StartView>,
         #[template_child]
         pub project_overview_view: TemplateChild<ui::ProjectOverviewView>,
+        #[template_child]
+        pub project_lexicon_view: TemplateChild<ui::ProjectLexiconView>,
 
         #[property(get, set)]
         pub project_opened: Cell<bool>,
@@ -45,10 +47,9 @@ mod imp {
         #[property(get, set)]
         pub selected_view_index: Cell<u32>,
 
-        pub file_dialog: RefCell<Option<gtk::FileChooserNative>>,
+        pub current_view_index: Cell<MainViews>,
 
-        #[property(get, set)]
-        pub current_view_index: Cell<u32>,
+        pub file_dialog: RefCell<Option<gtk::FileChooserNative>>,
     }
 
     #[glib::object_subclass]
@@ -252,7 +253,6 @@ impl ApplicationWindow {
 
     /// Called after a project is opened or created for this window.
     fn finish_open_project(&self) {
-        let imp = self.imp();
         if self.project_model().project().is_some() {
             self.set_project_opened(true);
             self.action_set_enabled("win.save", true);
@@ -261,8 +261,7 @@ impl ApplicationWindow {
             self.update_title();
             self.load_all_views();
 
-            imp.main_stack
-                .set_visible_child(&*imp.project_overview_view);
+            self.set_selected_view_index(0);
         }
     }
 
@@ -373,28 +372,71 @@ impl ApplicationWindow {
         self.set_title(Some(&title));
     }
 
+    /// Loads view state from the project model.
+    pub fn load_view_state(&self, view: MainViews) {
+        log::debug!("Loading view state: {:?}", view);
+        let imp = self.imp();
+
+        match view {
+            MainViews::Overview => imp.project_overview_view.load_state(),
+            MainViews::Lexicon => imp.project_overview_view.load_state(),
+            _ => log::warn!("Attempting to select unknown view."),
+        }
+    }
+
     /// Loads all view states from the project model.
     pub fn load_all_views(&self) {
-        let imp = self.imp();
+        // let imp = self.imp();
 
-        imp.project_overview_view.load_state();
+        for view in ui::ALL_MAIN_VIEWS.iter() {
+            self.load_view_state(*view);
+        }
+        // imp.project_overview_view.load_state();
     }
 
-    /// Commits all view states to the project model.
-    pub fn commit_all_views(&self) {
-        let imp = self.imp();
-
-        imp.project_overview_view.commit_state();
-    }
-
-    /// Commit view
+    /// Commits view state to the project model.
     pub fn commit_view_state(&self, view: MainViews) {
+        log::debug!("Committing view state: {:?}", view);
         let imp = self.imp();
 
         match view {
             MainViews::Overview => imp.project_overview_view.commit_state(),
+            MainViews::Lexicon => imp.project_overview_view.commit_state(),
+            MainViews::Unknown => {}
             _ => log::warn!("Attempting to select unknown view."),
         }
+    }
+
+    /// Commits all view states to the project model.
+    pub fn commit_all_views(&self) {
+        // let imp = self.imp();
+
+        for view in ui::ALL_MAIN_VIEWS.iter() {
+            self.commit_view_state(*view);
+        }
+        // imp.project_overview_view.commit_state();
+    }
+
+    /// Switch to a view
+    pub fn switch_view(&self, view: MainViews) {
+        log::debug!("Switching to view {:?}", view);
+        let imp = self.imp();
+        let current_view = imp.current_view_index.get();
+
+        if current_view != MainViews::Unknown {
+            self.commit_view_state(current_view);
+        }
+
+        self.load_view_state(view);
+        let main_stack = imp.main_stack.get();
+
+        match view {
+            MainViews::Overview => main_stack.set_visible_child(&*imp.project_overview_view),
+            MainViews::Lexicon => main_stack.set_visible_child(&*imp.project_lexicon_view),
+            _ => log::warn!("Attempting to select unknown view."),
+        }
+
+        imp.current_view_index.set(view);
     }
 
     #[template_callback]
@@ -402,5 +444,6 @@ impl ApplicationWindow {
         let idx = self.selected_view_index();
         let view = MainViews::from(idx);
         log::debug!("Selecting view: {:?} ({})", view, idx);
+        self.switch_view(view);
     }
 }

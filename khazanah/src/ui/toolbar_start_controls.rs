@@ -9,22 +9,15 @@ mod imp {
 
     use super::*;
 
-    #[derive(Debug, Default, gtk::CompositeTemplate, glib::Properties)]
-    #[properties(wrapper_type = super::ToolbarStartControls)]
+    #[derive(Debug, Default, gtk::CompositeTemplate)]
     #[template(resource = "/com/github/manenfu/Khazanah/ui/toolbar_start_controls.ui")]
     pub struct ToolbarStartControls {
-        #[template_child]
-        pub view_dropdown: TemplateChild<gtk::DropDown>,
+        // #[template_child]
+        // pub view_dropdown: TemplateChild<gtk::DropDown>,
         #[template_child]
         pub open_button: TemplateChild<gtk::Button>,
         #[template_child]
         pub new_button: TemplateChild<gtk::Button>,
-
-        #[property(get, set)]
-        pub buttons_sensitive: Cell<bool>,
-
-        #[property(get, set)]
-        pub selected_view_index: Cell<u32>,
     }
 
     #[glib::object_subclass]
@@ -35,7 +28,6 @@ mod imp {
 
         fn class_init(klass: &mut Self::Class) {
             klass.bind_template();
-            klass.bind_template_instance_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -44,28 +36,28 @@ mod imp {
     }
 
     impl ObjectImpl for ToolbarStartControls {
-        fn constructed(&self) {
-            self.parent_constructed();
+        // fn constructed(&self) {
+        //     self.parent_constructed();
 
-            // Load view dropdown model.
-            let main_views =
-                gtk::Builder::from_resource("/com/github/manenfu/Khazanah/ui/main_views.ui")
-                    .object::<gtk::StringList>("main_views")
-                    .expect("Loading nonexistent model `main_views` from resource.");
-            self.view_dropdown.set_model(Some(&main_views));
-        }
+        //     // Load view dropdown model.
+        //     let main_views =
+        //         gtk::Builder::from_resource("/com/github/manenfu/Khazanah/ui/main_views.ui")
+        //             .object::<gtk::StringList>("main_views")
+        //             .expect("Loading nonexistent model `main_views` from resource.");
+        //     self.view_dropdown.set_model(Some(&main_views));
+        // }
 
-        fn properties() -> &'static [glib::ParamSpec] {
-            Self::derived_properties()
-        }
+        // fn properties() -> &'static [glib::ParamSpec] {
+        //     Self::derived_properties()
+        // }
 
-        fn set_property(&self, id: usize, value: &glib::Value, pspec: &glib::ParamSpec) {
-            self.derived_set_property(id, value, pspec)
-        }
+        // fn set_property(&self, id: usize, value: &glib::Value, pspec: &glib::ParamSpec) {
+        //     self.derived_set_property(id, value, pspec)
+        // }
 
-        fn property(&self, id: usize, pspec: &glib::ParamSpec) -> glib::Value {
-            self.derived_property(id, pspec)
-        }
+        // fn property(&self, id: usize, pspec: &glib::ParamSpec) -> glib::Value {
+        //     self.derived_property(id, pspec)
+        // }
     }
 
     impl WidgetImpl for ToolbarStartControls {}
@@ -77,17 +69,4 @@ glib::wrapper! {
     pub struct ToolbarStartControls(ObjectSubclass<imp::ToolbarStartControls>)
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
-}
-
-#[gtk::template_callbacks]
-impl ToolbarStartControls {
-    #[template_callback]
-    fn handle_activate(&self, _: &glib::ParamSpec, dropdown: &gtk::DropDown) {
-        let v = dropdown.selected();
-        let x = dropdown
-            .selected_item()
-            .unwrap()
-            .property::<String>("string");
-        log::debug!("hhh. {}", x);
-    }
 }

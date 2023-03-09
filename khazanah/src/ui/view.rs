@@ -10,14 +10,17 @@ pub trait View {
 /// Possible views of the main window.
 /// Also check data/ui/toolbar_start_controls.ui
 #[repr(u32)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum MainViews {
     Overview = 0,
     Phonology = 1,
     Lexicon = 2,
 
+    #[default]
     Unknown = u32::MAX,
 }
+
+pub const ALL_MAIN_VIEWS: &[MainViews] = &[MainViews::Overview, MainViews::Lexicon];
 
 impl From<u32> for MainViews {
     fn from(value: u32) -> Self {

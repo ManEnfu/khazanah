@@ -9,8 +9,7 @@ mod imp {
 
     use super::*;
 
-    #[derive(Debug, Default, gtk::CompositeTemplate, glib::Properties)]
-    #[properties(wrapper_type = super::ToolbarEndControls)]
+    #[derive(Debug, Default, gtk::CompositeTemplate)]
     #[template(resource = "/com/github/manenfu/Khazanah/ui/toolbar_end_controls.ui")]
     pub struct ToolbarEndControls {
         #[template_child]
@@ -21,9 +20,6 @@ mod imp {
         pub tool_menu_button: TemplateChild<gtk::MenuButton>,
         #[template_child]
         pub main_menu_button: TemplateChild<gtk::MenuButton>,
-
-        #[property(get, set)]
-        pub buttons_sensitive: Cell<bool>,
     }
 
     #[glib::object_subclass]
@@ -41,19 +37,7 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for ToolbarEndControls {
-        fn properties() -> &'static [glib::ParamSpec] {
-            Self::derived_properties()
-        }
-
-        fn set_property(&self, id: usize, value: &glib::Value, pspec: &glib::ParamSpec) {
-            self.derived_set_property(id, value, pspec)
-        }
-
-        fn property(&self, id: usize, pspec: &glib::ParamSpec) -> glib::Value {
-            self.derived_property(id, pspec)
-        }
-    }
+    impl ObjectImpl for ToolbarEndControls {}
 
     impl WidgetImpl for ToolbarEndControls {}
     impl BinImpl for ToolbarEndControls {}

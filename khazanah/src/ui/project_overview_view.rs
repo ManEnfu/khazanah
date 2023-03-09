@@ -17,6 +17,8 @@ mod imp {
     #[template(resource = "/com/github/manenfu/Khazanah/ui/project_overview_view.ui")]
     pub struct ProjectOverviewView {
         #[template_child]
+        pub view_switcher: TemplateChild<ui::ViewSwitcherDropDown>,
+        #[template_child]
         pub start_controls: TemplateChild<ui::ToolbarStartControls>,
         #[template_child]
         pub end_controls: TemplateChild<ui::ToolbarEndControls>,

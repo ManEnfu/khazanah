@@ -9,20 +9,6 @@
       <object class="GtkBox">
         <property name="spacing">6</property>
         <child>
-          <object class="GtkDropDown" id="view_dropdown">
-            <property name="hexpand">True</property>
-            <property name="tooltip-text">Current view.</property>
-            <property name="sensitive" 
-                      bind-source="KhzToolbarStartControls"
-                      bind-property="buttons-sensitive" 
-                      bind-flags="sync-create"/>
-            <property name="selected"
-                      bind-source="KhzToolbarStartControls"
-                      bind-property="selected-view-index"
-                      bind-flags="sync-create|bidirectional"/>
-          </object>
-        </child>
-        <child>
           <object class="GtkButton" id="open_button">
             <property name="icon-name">document-open-symbolic</property>
             <property name="tooltip-text">Open a project</property>

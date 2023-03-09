@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.6"/>
+  <requires lib="Adw" version="1.2"/>
+
+  <template class="KhzProjectLexiconView" parent="AdwBin">
+    <child>
+      <object class="AdwLeaflet" id="leaflet">
+        <property name="fold-threshold-policy">minimum</property>
+        <property name="can-navigate-back">True</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="hexpand">False</property>
+            <!-- <property name="width-request">300</property> -->
+            <child>
+              <object class="AdwHeaderBar" id="start_header_bar">
+                <property name="title-widget">
+                  <object class="AdwWindowTitle">
+                    <property name="title">Words</property>
+                  </object>
+                </property>
+                <property name="show-end-title-buttons"
+                          bind-source="leaflet"
+                          bind-property="folded"
+                          bind-flags="sync-create"/>
+                <child type="start">
+                  <object class="KhzViewSwitcherDropDown" id="view_switcher">
+                    <property name="sensitive"
+                              bind-source="KhzProjectLexiconView"
+                              bind-property="project-opened"
+                              bind-flags="sync-create"/>
+                    <property name="selected-view-index"
+                              bind-source="KhzProjectLexiconView"
+                              bind-property="selected-view-index"
+                              bind-flags="sync-create|bidirectional"/>
+                  </object>
+                </child>
+                <child type="start">
+                  <object class="KhzToolbarStartControls" id="start_controls">
+                  </object>
+                </child>
+                <child type="end">
+                  <object class ="GtkButton">
+                    <property name="icon-name">system-search-symbolic</property>
+                    <property name="tooltip-text">Search word</property>
+                  </object>
+                </child>
+              </object> <!-- AdwHeaderBar -->
+            </child>
+          </object> <!-- GtkBox -->
+        </child>
+
+        <child>
+          <object class="AdwLeafletPage">
+            <property name="navigatable">False</property>
+            <property name="child">
+              <object class="GtkSeparator"/>
+            </property>
+          </object>
+        </child>
+        
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="hexpand">True</property>
+            <property name="width-request">400</property>
+            <child>
+              <object class="AdwHeaderBar" id="end_header_bar">
+                <child type="end">
+                  <object class="KhzToolbarEndControls" id="end_controls">
+                  </object>
+                </child>
+              </object> <!-- AdwHeaderBar -->
+            </child>
+
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="vexpand">True</property>
+                <property name="child">
+
+                  <object class="AdwClamp">
+                    <property name="child">
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="margin-top">24</property>
+                        <property name="margin-bottom">24</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                        <property name="spacing">12</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Word</property>
+                            <property name="halign">start</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkListBox">
+                            <property name="selection-mode">none</property>
+                            <style>
+                              <class name="boxed-list"/>
+                            </style>
+                            <child>
+                              <object class="AdwEntryRow" id="romanization_entry">
+                                <property name="title">Romanization</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow" id="translation_entry">
+                                <property name="title">Translation</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwEntryRow" id="pronunciation_entry">
+                                <property name="title">Pronunciation</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwComboRow" id="pos_dropdown">
+                                <property name="title">Part of Speech</property>
+                                <property name="model">
+                                  <object class="GtkStringList">
+                                    <items>
+                                      <item>Noun</item>
+                                      <item>Verb</item>
+                                    </items>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object> <!-- GtkBox -->
+                    </property>
+                  </object> <!-- AdwClamp -->
+
+                </property>
+              </object> <!-- GtkScrolledWindow -->
+            </child>
+
+          </object> <!-- GtkBox -->
+        </child>
+      </object> <!-- AdwLeaflet -->
+    </child>
+  </template> <!-- KhzProjectLexiconView -->
+
+</interface>

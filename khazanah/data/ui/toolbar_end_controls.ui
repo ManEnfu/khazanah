@@ -39,20 +39,12 @@
             <property name="icon-name">document-save-symbolic</property>
             <property name="tooltip-text">Save project</property>
             <property name="action-name">win.save</property>
-            <property name="sensitive" 
-                      bind-source="KhzToolbarEndControls"
-                      bind-property="buttons-sensitive" 
-                      bind-flags="sync-create"/>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="save_as_button">
             <property name="icon-name">document-save-as-symbolic</property>
             <property name="tooltip-text">Save project with a different name</property>
-            <property name="sensitive" 
-                      bind-source="KhzToolbarEndControls"
-                      bind-property="buttons-sensitive" 
-                      bind-flags="sync-create"/>
             <property name="action-name">win.save-as</property>
           </object>
         </child>

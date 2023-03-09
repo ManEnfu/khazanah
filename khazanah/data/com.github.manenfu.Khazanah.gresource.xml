@@ -5,8 +5,9 @@
     <file compressed="true" preprocess="xml-stripblanks">ui/toolbar_start_controls.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/toolbar_end_controls.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/start_view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/project_lexicon_view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/project_overview_view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/main_views.ui</file>
-
+    <file compressed="true" preprocess="xml-stripblanks">ui/view_switcher_dropdown.ui</file>
   </gresource>
 </gresources>

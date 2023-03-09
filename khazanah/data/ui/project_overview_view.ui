@@ -10,8 +10,8 @@
         <child>
           <object class="AdwHeaderBar" id="header_bar">
             <child type="start">
-              <object class="KhzToolbarStartControls" id="start_controls">
-                <property name="buttons-sensitive"
+              <object class="KhzViewSwitcherDropDown" id="view_switcher">
+                <property name="sensitive"
                           bind-source="KhzProjectOverviewView"
                           bind-property="project-opened"
                           bind-flags="sync-create"/>
@@ -21,12 +21,12 @@
                           bind-flags="sync-create|bidirectional"/>
               </object>
             </child>
+            <child type="start">
+              <object class="KhzToolbarStartControls" id="start_controls">
+              </object>
+            </child>
             <child type="end">
               <object class="KhzToolbarEndControls" id="end_controls">
-                <property name="buttons-sensitive"
-                          bind-source="KhzProjectOverviewView"
-                          bind-property="project-opened"
-                          bind-flags="sync-create"/>
               </object>
             </child>
           </object> <!-- AdwHeaderBar -->
