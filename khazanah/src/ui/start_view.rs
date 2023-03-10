@@ -8,7 +8,7 @@ use crate::models;
 use crate::ui;
 
 mod imp {
-    use std::cell::{Cell, RefCell};
+    use std::cell::RefCell;
 
     use super::*;
 
@@ -16,22 +16,8 @@ mod imp {
     #[properties(wrapper_type = super::StartView)]
     #[template(resource = "/com/github/manenfu/Khazanah/ui/start_view.ui")]
     pub struct StartView {
-        #[template_child]
-        pub view_switcher: TemplateChild<ui::ViewSwitcherDropDown>,
-        #[template_child]
-        pub start_controls: TemplateChild<ui::ToolbarStartControls>,
-        #[template_child]
-        pub end_controls: TemplateChild<ui::ToolbarEndControls>,
-        #[template_child]
-        pub main_menu_button: TemplateChild<ui::MainMenuButton>,
-
-        #[property(get, set)]
-        pub project_opened: Cell<bool>,
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
-
-        #[property(get, set)]
-        pub selected_view_index: Cell<u32>,
     }
 
     #[glib::object_subclass]
@@ -64,6 +50,7 @@ mod imp {
     }
 
     impl WidgetImpl for StartView {}
+
     impl BinImpl for StartView {}
 }
 
@@ -73,3 +60,5 @@ glib::wrapper! {
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
+
+impl ui::View for StartView {}

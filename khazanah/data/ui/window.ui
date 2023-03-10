@@ -11,60 +11,106 @@
     <property name="content">
       <object class="AdwToastOverlay" id="toast_overlay">
         <child>
-          <object class="GtkStack" id="main_stack">
-            <property name="visible-child">start_view</property>
-            <property name="transition-type">crossfade</property>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
             <child>
-              <object class="KhzStartView" id="start_view">
-                <property name="project-opened"
-                          bind-source="KhzApplicationWindow"
-                          bind-property="project-opened"
-                          bind-flags="sync-create"/>
-                <property name="project-model"
-                          bind-source="KhzApplicationWindow"
-                          bind-property="project-model"
-                          bind-flags="sync-create"/>
-                <property name="selected-view-index"
-                          bind-source="KhzApplicationWindow"
-                          bind-property="selected-view-index"
-                          bind-flags="sync-create|bidirectional"/>
-              </object>
+              <object class="AdwHeaderBar" id="header_bar">
+                <style>
+                  <class name="flat"/>
+                </style>
+                <child type="start">
+                  <object class="KhzViewSwitcherDropDown" id="view_switcher">
+                    <property name="sensitive"
+                              bind-source="KhzApplicationWindow"
+                              bind-property="project-opened"
+                              bind-flags="sync-create"/>
+                    <property name="selected-view-index"
+                              bind-source="KhzApplicationWindow"
+                              bind-property="selected-view-index"
+                              bind-flags="sync-create|bidirectional"/>
+                  </object>
+                </child>
+                <child type="start">
+                  <object class="GtkRevealer">
+                    <property name="reveal-child"
+                              bind-source="KhzApplicationWindow"
+                              bind-property="narrow"
+                              bind-flags="sync-create|invert-boolean"/>
+                    <property name="transition-type">slide-right</property>
+                    <property name="child">
+                      <object class="KhzToolbarStartControls" id="start_controls"/>
+                    </property>
+                  </object>
+                </child>
+                <child type="end">
+                  <object class="KhzMainMenuButton" id="main_menu_button"/>
+                </child>
+                <child type="end">
+                  <object class="GtkRevealer">
+                    <property name="reveal-child"
+                              bind-source="KhzApplicationWindow"
+                              bind-property="narrow"
+                              bind-flags="sync-create|invert-boolean"/>
+                    <property name="transition-type">slide-left</property>
+                    <property name="child">
+                      <object class="KhzToolbarEndControls" id="end_controls"/>
+                    </property>
+                  </object>
+                </child>
+              </object> <!-- AdwHeaderBar -->
             </child>
 
             <child>
-              <object class="KhzProjectOverviewView" id="project_overview_view">
-                <property name="project-opened"
-                          bind-source="KhzApplicationWindow"
-                          bind-property="project-opened"
-                          bind-flags="sync-create"/>
-                <property name="project-model"
-                          bind-source="KhzApplicationWindow"
-                          bind-property="project-model"
-                          bind-flags="sync-create"/>
-                <property name="selected-view-index"
-                          bind-source="KhzApplicationWindow"
-                          bind-property="selected-view-index"
-                          bind-flags="sync-create|bidirectional"/>
-              </object>
+              <object class="GtkStack" id="main_stack">
+                <property name="visible-child">start_view</property>
+                <property name="transition-type">crossfade</property>
+                <child>
+                  <object class="KhzStartView" id="start_view">
+                    <property name="project-model"
+                              bind-source="KhzApplicationWindow"
+                              bind-property="project-model"
+                              bind-flags="sync-create"/>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="KhzProjectOverviewView" id="project_overview_view">
+                    <property name="project-model"
+                              bind-source="KhzApplicationWindow"
+                              bind-property="project-model"
+                              bind-flags="sync-create"/>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="KhzProjectLexiconView" id="project_lexicon_view">
+                    <property name="project-model"
+                              bind-source="KhzApplicationWindow"
+                              bind-property="project-model"
+                              bind-flags="sync-create"/>
+                  </object>
+                </child>
+              </object> <!-- GtkStack -->
             </child>
 
             <child>
-              <object class="KhzProjectLexiconView" id="project_lexicon_view">
-                <property name="project-opened"
+              <object class="GtkActionBar" id="action_bar">
+                <style>
+                  <class name="flat"/>
+                </style>
+                <property name="revealed"
                           bind-source="KhzApplicationWindow"
-                          bind-property="project-opened"
+                          bind-property="narrow"
                           bind-flags="sync-create"/>
-                <property name="project-model"
-                          bind-source="KhzApplicationWindow"
-                          bind-property="project-model"
-                          bind-flags="sync-create"/>
-                <property name="selected-view-index"
-                          bind-source="KhzApplicationWindow"
-                          bind-property="selected-view-index"
-                          bind-flags="sync-create|bidirectional"/>
-              </object>
+                <child type="start">
+                  <object class="KhzToolbarStartControls" id="start_controls_2"/>
+                </child>
+                <child type="end">
+                  <object class="KhzToolbarEndControls" id="end_controls_2"/>
+                </child>
+              </object> <!-- GtkActionBar -->
             </child>
-          </object> <!-- GtkStack -->
+          </object> <!-- GtkBox -->
         </child>
       </object> <!-- AdwToastOverlay -->
     </property>

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/github/manenfu/Khazanah/">
+    <file compressed="true">style.css</file>
+    <file compressed="true">style-dark.css</file>
+
     <file compressed="true" preprocess="xml-stripblanks">ui/window.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/toolbar_start_controls.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/toolbar_end_controls.ui</file>

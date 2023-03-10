@@ -35,7 +35,7 @@ mod imp {
 }
 
 glib::wrapper! {
-    /// Control widgets at the end of the toolbar.
+    /// Main menu button.
     pub struct MainMenuButton(ObjectSubclass<imp::MainMenuButton>)
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;

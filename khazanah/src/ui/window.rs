@@ -38,6 +38,20 @@ mod imp {
         pub project_overview_view: TemplateChild<ui::ProjectOverviewView>,
         #[template_child]
         pub project_lexicon_view: TemplateChild<ui::ProjectLexiconView>,
+        
+        #[template_child]
+        pub view_switcher: TemplateChild<ui::ViewSwitcherDropDown>,
+        #[template_child]
+        pub start_controls: TemplateChild<ui::ToolbarStartControls>,
+        #[template_child]
+        pub end_controls: TemplateChild<ui::ToolbarEndControls>,
+        #[template_child]
+        pub main_menu_button: TemplateChild<ui::MainMenuButton>,
+
+        #[template_child]
+        pub header_bar: TemplateChild<adw::HeaderBar>,
+        #[template_child]
+        pub action_bar: TemplateChild<gtk::ActionBar>,
 
         #[property(get, set)]
         pub project_opened: Cell<bool>,
@@ -46,6 +60,9 @@ mod imp {
 
         #[property(get, set)]
         pub selected_view_index: Cell<u32>,
+        
+        #[property(get, set)]
+        pub narrow: Cell<bool>,
 
         pub current_view_index: Cell<MainViews>,
 
@@ -102,7 +119,14 @@ mod imp {
         }
     }
 
-    impl WidgetImpl for ApplicationWindow {}
+    impl WidgetImpl for ApplicationWindow {
+        fn size_allocate(&self, width: i32, height: i32, baseline: i32) {
+            // Send the current window width and height to all views.
+            self.obj().on_window_size(width, height);
+
+            self.parent_size_allocate(width, height, baseline);
+        }
+    }
 
     impl WindowImpl for ApplicationWindow {}
 
@@ -261,7 +285,7 @@ impl ApplicationWindow {
             self.update_title();
             self.load_all_views();
 
-            self.set_selected_view_index(0);
+            self.switch_view(MainViews::Overview);
         }
     }
 
@@ -343,6 +367,8 @@ impl ApplicationWindow {
 
     // VIEWS
 
+    // Updates window title. 
+    // If a project is opened, shows project name and file name as well.
     pub fn update_title(&self) {
         if self.project_model().project().is_none() {
             self.set_title(Some("Khazanah"));
@@ -372,54 +398,21 @@ impl ApplicationWindow {
         self.set_title(Some(&title));
     }
 
-    /// Loads view state from the project model.
-    pub fn load_view_state(&self, view: MainViews) {
-        log::debug!("Loading view state: {:?}", view);
-        let imp = self.imp();
-
-        match view {
-            MainViews::Overview => imp.project_overview_view.load_state(),
-            MainViews::Lexicon => imp.project_overview_view.load_state(),
-            _ => log::warn!("Attempting to select unknown view."),
-        }
-    }
-
-    /// Loads all view states from the project model.
-    pub fn load_all_views(&self) {
-        // let imp = self.imp();
-
-        for view in ui::ALL_MAIN_VIEWS.iter() {
-            self.load_view_state(*view);
-        }
-        // imp.project_overview_view.load_state();
-    }
-
-    /// Commits view state to the project model.
-    pub fn commit_view_state(&self, view: MainViews) {
-        log::debug!("Committing view state: {:?}", view);
-        let imp = self.imp();
-
-        match view {
-            MainViews::Overview => imp.project_overview_view.commit_state(),
-            MainViews::Lexicon => imp.project_overview_view.commit_state(),
-            MainViews::Unknown => {}
-            _ => log::warn!("Attempting to select unknown view."),
-        }
-    }
-
-    /// Commits all view states to the project model.
-    pub fn commit_all_views(&self) {
-        // let imp = self.imp();
-
-        for view in ui::ALL_MAIN_VIEWS.iter() {
-            self.commit_view_state(*view);
-        }
-        // imp.project_overview_view.commit_state();
-    }
-
-    /// Switch to a view
+    /// Switches to a view. This will set an internal property to sync with all view switchers in
+    /// the window.
     pub fn switch_view(&self, view: MainViews) {
-        log::debug!("Switching to view {:?}", view);
+        if view != MainViews::Unknown {
+            self.set_selected_view_index(u32::from(view));
+        }
+    }
+
+    /// Responds to change of view selection by switching to said view.
+    #[template_callback]
+    fn handle_selected_view_index_changed(&self, _pspec: glib::ParamSpec, _s: &Self) {
+        let idx = self.selected_view_index();
+        let view = MainViews::from(idx);
+        log::debug!("Switching to view: {:?} ({})", view, idx);
+        
         let imp = self.imp();
         let current_view = imp.current_view_index.get();
 
@@ -433,17 +426,56 @@ impl ApplicationWindow {
         match view {
             MainViews::Overview => main_stack.set_visible_child(&*imp.project_overview_view),
             MainViews::Lexicon => main_stack.set_visible_child(&*imp.project_lexicon_view),
-            _ => log::warn!("Attempting to select unknown view."),
+            _ => log::warn!("Attempting to switch to unknown view."),
         }
-
+    
+        imp.header_bar.remove_css_class("flat");
         imp.current_view_index.set(view);
     }
+    
+    /// Loads view state from the project model.
+    pub fn load_view_state(&self, view: MainViews) {
+        log::debug!("Loading view state: {:?}", view);
+        let imp = self.imp();
 
-    #[template_callback]
-    fn handle_selected_view_index_changed(&self, _pspec: glib::ParamSpec, _s: &Self) {
-        let idx = self.selected_view_index();
-        let view = MainViews::from(idx);
-        log::debug!("Selecting view: {:?} ({})", view, idx);
-        self.switch_view(view);
+        match view {
+            MainViews::Overview => imp.project_overview_view.load_state(),
+            MainViews::Lexicon => imp.project_overview_view.load_state(),
+            _ => log::warn!("Attempting to load unknown view."),
+        }
+    }
+
+    /// Loads all view states from the project model.
+    pub fn load_all_views(&self) {
+        for view in ui::ALL_MAIN_VIEWS.iter() {
+            self.load_view_state(*view);
+        }
+    }
+
+    /// Commits view state to the project model.
+    pub fn commit_view_state(&self, view: MainViews) {
+        log::debug!("Committing view state: {:?}", view);
+        let imp = self.imp();
+
+        match view {
+            MainViews::Overview => imp.project_overview_view.commit_state(),
+            MainViews::Lexicon => imp.project_overview_view.commit_state(),
+            MainViews::Unknown => {}
+            _ => log::warn!("Attempting to commit unknown view."),
+        }
+    }
+
+    /// Commits all view states to the project model.
+    pub fn commit_all_views(&self) {
+        for view in ui::ALL_MAIN_VIEWS.iter() {
+            self.commit_view_state(*view);
+        }
+    }
+    
+    pub fn on_window_size(&self, width: i32, _height: i32) {
+        if self.is_realized() {
+            let new_narrow = width <= 600;
+            self.set_narrow(new_narrow);
+        }
     }
 }

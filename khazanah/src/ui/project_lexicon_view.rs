@@ -20,24 +20,10 @@ mod imp {
     #[template(resource = "/com/github/manenfu/Khazanah/ui/project_lexicon_view.ui")]
     pub struct ProjectLexiconView {
         #[template_child]
-        pub view_switcher: TemplateChild<ui::ViewSwitcherDropDown>,
-        #[template_child]
-        pub start_controls: TemplateChild<ui::ToolbarStartControls>,
-        #[template_child]
-        pub end_controls: TemplateChild<ui::ToolbarEndControls>,
-        #[template_child]
-        pub main_menu_button: TemplateChild<ui::MainMenuButton>,
-
-        #[template_child]
         pub pos_dropdown: TemplateChild<adw::ComboRow>,
 
         #[property(get, set)]
-        pub project_opened: Cell<bool>,
-        #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
-
-        #[property(get, set)]
-        pub selected_view_index: Cell<u32>,
     }
 
     #[glib::object_subclass]
@@ -99,9 +85,9 @@ impl ui::View for ProjectLexiconView {
         self.project_model().set_dirty(dirty);
     }
 
-    fn commit_state(&self) {
-        // let imp = self.imp();
+    // fn commit_state(&self) {
+    //     // let imp = self.imp();
 
-        self.project_model().set_dirty(true);
-    }
+    //     self.project_model().set_dirty(true);
+    // }
 }

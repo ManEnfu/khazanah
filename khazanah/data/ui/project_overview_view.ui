@@ -6,34 +6,9 @@
   <!-- The view to edit project metadata. -->
   <template class="KhzProjectOverviewView" parent="AdwBin">
     <child>
-      <object class="GtkBox">
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="AdwHeaderBar" id="header_bar">
-            <child type="start">
-              <object class="KhzViewSwitcherDropDown" id="view_switcher">
-                <property name="sensitive"
-                          bind-source="KhzProjectOverviewView"
-                          bind-property="project-opened"
-                          bind-flags="sync-create"/>
-                <property name="selected-view-index"
-                          bind-source="KhzProjectOverviewView"
-                          bind-property="selected-view-index"
-                          bind-flags="sync-create|bidirectional"/>
-              </object>
-            </child>
-            <child type="start">
-              <object class="KhzToolbarStartControls" id="start_controls"/>
-            </child>
-            <child type="end">
-              <object class="KhzMainMenuButton" id="main_menu_button"/>
-            </child>
-            <child type="end">
-              <object class="KhzToolbarEndControls" id="end_controls"/>
-            </child>
-          </object> <!-- AdwHeaderBar -->
-        </child>
-
+      <object class="GtkScrolledWindow">
+        <property name="hscrollbar-policy">never</property>
+        <property name="vexpand">True</property>
         <child>
           <object class="AdwClamp">
             <property name="child">
@@ -94,7 +69,7 @@
             </property>
           </object> <!-- AdwClamp -->
         </child>
-      </object> <!-- GtkBox -->
+      </object>
     </child>
   </template> <!-- KhzProjectOverviewView -->
 

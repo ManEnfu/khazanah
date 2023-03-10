@@ -21,19 +21,19 @@ fn main() {
     log::info!("Report bugs and issues at {}", config::HOMEPAGE);
 
     // Initialize stuffs
-    gtk::init()
-        .map_err(|e| {
-            log::error!("GTK initialization failed.");
-            e
-        })
-        .expect("GTK initialization failed.");
+    // gtk::init()
+    //     .map_err(|e| {
+    //         log::error!("GTK initialization failed.");
+    //         e
+    //     })
+    //     .expect("GTK initialization failed.");
 
-    adw::init()
-        .map_err(|e| {
-            log::error!("libadwaita initialization failed.");
-            e
-        })
-        .expect("libadwaita initialization failed.");
+    // adw::init()
+    //     .map_err(|e| {
+    //         log::error!("libadwaita initialization failed.");
+    //         e
+    //     })
+    //     .expect("libadwaita initialization failed.");
 
     // Load resources first
     gio::resources_register_include!("resources.gresource")

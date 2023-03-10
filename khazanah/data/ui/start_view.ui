@@ -6,71 +6,40 @@
   <!-- The first view when the application is started. -->
   <template class="KhzStartView" parent="AdwBin">
     <child>
-      <object class="GtkBox">
-        <property name="orientation">vertical</property>
+      <object class="AdwStatusPage" id="home_page">
+        <property name="icon-name">accessories-dictionary-symbolic</property>
+        <property name="title">Welcome!</property>
+        <property name="description">Create a new project, or open existing one.</property>
+        <property name="vexpand">true</property>
         <child>
-          <object class="AdwHeaderBar" id="header_bar">
-            <child type="start">
-              <object class="KhzViewSwitcherDropDown" id="view_switcher">
-                <property name="sensitive"
-                          bind-source="KhzStartView"
-                          bind-property="project-opened"
-                          bind-flags="sync-create"/>
-                <property name="selected-view-index"
-                          bind-source="KhzStartView"
-                          bind-property="selected-view-index"
-                          bind-flags="sync-create|bidirectional"/>
-              </object>
-            </child>
-            <child type="start">
-              <object class="KhzToolbarStartControls" id="start_controls"/>
-            </child>
-            <child type="end">
-              <object class="KhzMainMenuButton" id="main_menu_button"/>
-            </child>
-            <child type="end">
-              <object class="KhzToolbarEndControls" id="end_controls"/>
-            </child>
-          </object> <!-- AdwHeaderBar -->
-        </child>
-
-        <child>
-          <object class="AdwStatusPage" id="home_page">
-            <property name="icon-name">accessories-dictionary-symbolic</property>
-            <property name="title">Welcome!</property>
-            <property name="description">Create a new project, or open existing one.</property>
-            <property name="vexpand">true</property>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">12</property>
+            <property name="halign">center</property>
+            <property name="homogeneous">true</property>
             <child>
-              <object class="GtkBox">
-                <property name="orientation">horizontal</property>
-                <property name="spacing">12</property>
-                <property name="halign">center</property>
-                <property name="homogeneous">true</property>
-                <child>
-                  <object class="GtkButton">
-                    <property name="label">Create Project</property>
-                    <property name="action-name">win.new</property>
-                    <style>
-                      <class name="pill"/>
-                      <class name="suggested-action"/>
-                    </style>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkButton">
-                    <property name="label">Open Project</property>
-                    <property name="action-name">win.open</property>
-                    <style>
-                      <class name="pill"/>
-                      <class name="suggested-action"/>
-                    </style>
-                  </object>
-                </child> 
+              <object class="GtkButton">
+                <property name="label">Create Project</property>
+                <property name="action-name">win.new</property>
+                <style>
+                  <class name="pill"/>
+                  <class name="suggested-action"/>
+                </style>
               </object>
             </child>
-          </object> <!-- AdwStatusPage -->
+            <child>
+              <object class="GtkButton">
+                <property name="label">Open Project</property>
+                <property name="action-name">win.open</property>
+                <style>
+                  <class name="pill"/>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+            </child> 
+          </object>
         </child>
-      </object> <!-- GtkBox -->
+      </object> <!-- AdwStatusPage -->
     </child>
   </template> <!-- KhzStartView --> 
 

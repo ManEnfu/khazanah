@@ -1,0 +1,12 @@
+/* 
+ * abin
+ */
+actionbar.flat > revealer > box {
+  background: none;
+  box-shadow: none;
+
+}
+actionbar > revealer > box {
+	background: none;
+	border-top: none;
+}
