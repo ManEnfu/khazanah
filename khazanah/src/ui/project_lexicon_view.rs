@@ -9,7 +9,7 @@ use crate::models;
 use crate::ui;
 
 mod imp {
-    use std::cell::{Cell, RefCell};
+    use std::cell::RefCell;
 
     use conlang::ALL_PARTS_OF_SPEECH;
 

@@ -39,17 +39,17 @@ mod imp {
         #[template_child]
         pub project_lexicon_view: TemplateChild<ui::ProjectLexiconView>,
         
-        #[template_child]
-        pub view_switcher: TemplateChild<ui::ViewSwitcherDropDown>,
-        #[template_child]
-        pub start_controls: TemplateChild<ui::ToolbarStartControls>,
-        #[template_child]
-        pub end_controls: TemplateChild<ui::ToolbarEndControls>,
-        #[template_child]
-        pub main_menu_button: TemplateChild<ui::MainMenuButton>,
+        // #[template_child]
+        // pub view_switcher: TemplateChild<ui::ViewSwitcherDropDown>,
+        // #[template_child]
+        // pub start_controls: TemplateChild<ui::ToolbarStartControls>,
+        // #[template_child]
+        // pub end_controls: TemplateChild<ui::ToolbarEndControls>,
+        // #[template_child]
+        // pub main_menu_button: TemplateChild<ui::MainMenuButton>,
 
         #[template_child]
-        pub header_bar: TemplateChild<adw::HeaderBar>,
+        pub header_bar: TemplateChild<ui::HeaderBar>,
         #[template_child]
         pub action_bar: TemplateChild<gtk::ActionBar>,
 
@@ -429,7 +429,7 @@ impl ApplicationWindow {
             _ => log::warn!("Attempting to switch to unknown view."),
         }
     
-        imp.header_bar.remove_css_class("flat");
+        imp.header_bar.set_flat(false);
         imp.current_view_index.set(view);
     }
     

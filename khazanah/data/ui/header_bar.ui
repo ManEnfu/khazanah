@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.6"/>
+  <requires lib="Adw" version="1.2"/>
+
+  <!-- Header of the window. -->
+  <template class="KhzHeaderBar" parent="AdwBin">
+    <child>
+      <object class="AdwHeaderBar" id="header_bar">
+        <style>
+          <class name="flat"/>
+        </style>
+        <child type="start">
+          <object class="GtkRevealer">
+            <property name="reveal-child"
+                      bind-source="KhzHeaderBar"
+                      bind-property="reveal-back-button"
+                      bind-flags="sync-create"/>
+            <property name="transition-type">slide-right</property>
+            <property name="child">
+              <object class="GtkButton" id="back_button">
+                <property name="icon-name">go-previous-symbolic</property>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child type="start">
+          <object class="KhzViewSwitcherDropDown" id="view_switcher">
+            <property name="sensitive"
+                      bind-source="KhzHeaderBar"
+                      bind-property="view-switcher-sensitive"
+                      bind-flags="sync-create"/>
+            <property name="selected-view-index"
+                      bind-source="KhzHeaderBar"
+                      bind-property="selected-view-index"
+                      bind-flags="sync-create|bidirectional"/>
+          </object>
+        </child>
+        <child type="start">
+          <object class="GtkRevealer">
+            <property name="reveal-child"
+                      bind-source="KhzHeaderBar"
+                      bind-property="reveal-toolbar-buttons"
+                      bind-flags="sync-create"/>
+            <property name="transition-type">slide-right</property>
+            <property name="child">
+              <object class="KhzToolbarStartControls" id="start_controls"/>
+            </property>
+          </object>
+        </child>
+        <child type="end">
+          <object class="KhzMainMenuButton" id="main_menu_button"/>
+        </child>
+        <child type="end">
+          <object class="GtkRevealer">
+            <property name="reveal-child"
+                      bind-source="KhzHeaderBar"
+                      bind-property="reveal-toolbar-buttons"
+                      bind-flags="sync-create"/>
+            <property name="transition-type">slide-left</property>
+            <property name="child">
+              <object class="KhzToolbarEndControls" id="end_controls"/>
+            </property>
+          </object>
+        </child>
+      </object> <!-- AdwHeaderBar -->
+    </child>
+  </template>
+</interface>

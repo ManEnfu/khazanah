@@ -14,50 +14,20 @@
           <object class="GtkBox">
             <property name="orientation">vertical</property>
             <child>
-              <object class="AdwHeaderBar" id="header_bar">
-                <style>
-                  <class name="flat"/>
-                </style>
-                <child type="start">
-                  <object class="KhzViewSwitcherDropDown" id="view_switcher">
-                    <property name="sensitive"
-                              bind-source="KhzApplicationWindow"
-                              bind-property="project-opened"
-                              bind-flags="sync-create"/>
-                    <property name="selected-view-index"
-                              bind-source="KhzApplicationWindow"
-                              bind-property="selected-view-index"
-                              bind-flags="sync-create|bidirectional"/>
-                  </object>
-                </child>
-                <child type="start">
-                  <object class="GtkRevealer">
-                    <property name="reveal-child"
-                              bind-source="KhzApplicationWindow"
-                              bind-property="narrow"
-                              bind-flags="sync-create|invert-boolean"/>
-                    <property name="transition-type">slide-right</property>
-                    <property name="child">
-                      <object class="KhzToolbarStartControls" id="start_controls"/>
-                    </property>
-                  </object>
-                </child>
-                <child type="end">
-                  <object class="KhzMainMenuButton" id="main_menu_button"/>
-                </child>
-                <child type="end">
-                  <object class="GtkRevealer">
-                    <property name="reveal-child"
-                              bind-source="KhzApplicationWindow"
-                              bind-property="narrow"
-                              bind-flags="sync-create|invert-boolean"/>
-                    <property name="transition-type">slide-left</property>
-                    <property name="child">
-                      <object class="KhzToolbarEndControls" id="end_controls"/>
-                    </property>
-                  </object>
-                </child>
-              </object> <!-- AdwHeaderBar -->
+              <object class="KhzHeaderBar" id="header_bar">
+                <property name="view-switcher-sensitive"
+                          bind-source="KhzApplicationWindow"
+                          bind-property="project-opened"
+                          bind-flags="sync-create"/>
+                <property name="selected-view-index"
+                          bind-source="KhzApplicationWindow"
+                          bind-property="selected-view-index"
+                          bind-flags="sync-create|bidirectional"/>
+                <property name="reveal-toolbar-buttons"
+                          bind-source="KhzApplicationWindow"
+                          bind-property="narrow"
+                          bind-flags="sync-create|invert-boolean"/>
+              </object>
             </child>
 
             <child>

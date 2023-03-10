@@ -1,12 +1,9 @@
 use gtk::glib;
-use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
 use adw::subclass::prelude::*;
 
 mod imp {
-    use std::cell::Cell;
-
     use super::*;
 
     #[derive(Debug, Default, gtk::CompositeTemplate)]
