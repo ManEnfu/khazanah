@@ -1,4 +1,5 @@
 use gtk::glib;
+use gtk::glib::BindingFlags;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
@@ -21,6 +22,10 @@ mod imp {
     pub struct ProjectLexiconView {
         #[template_child]
         pub pos_dropdown: TemplateChild<adw::ComboRow>,
+        #[template_child]
+        pub search_word_button: TemplateChild<gtk::ToggleButton>,
+        #[template_child]
+        pub add_word_button: TemplateChild<gtk::Button>,
 
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
@@ -85,9 +90,19 @@ impl ui::View for ProjectLexiconView {
         self.project_model().set_dirty(dirty);
     }
 
-    // fn commit_state(&self) {
-    //     // let imp = self.imp();
+    fn commit_state(&self) {
+        self.project_model().set_dirty(true);
+    }
 
-    //     self.project_model().set_dirty(true);
-    // }
+    fn connect_headerbar(&self, header_bar: &ui::HeaderBar) {
+        let imp = self.imp();
+
+        let _binding = header_bar.imp().search_word_button
+            .bind_property(
+                "active", 
+                &imp.search_word_button.get(),
+                "active")
+            .flags(BindingFlags::SYNC_CREATE | BindingFlags::BIDIRECTIONAL)
+            .build();
+    }
 }

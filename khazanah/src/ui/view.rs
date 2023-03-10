@@ -1,13 +1,16 @@
 /// View that loads and commits its state to a model.
 pub trait View {
-    /// Load widget states from the project model.
+    /// Loads widget states from the project model.
     fn load_state(&self) {}
 
-    /// Commit widget states to the project model.
+    /// Commits widget states to the project model.
     fn commit_state(&self) {}
 
     /// Called on window resize.
     fn on_window_size(&self, _width: i32, _height: i32) {}
+
+    /// Connects things on headerbar.
+    fn connect_headerbar(&self, _header_bar: &super::HeaderBar) {}
 }
 
 /// Possible views of the main window.

@@ -90,6 +90,10 @@ mod imp {
             self.parent_constructed();
             let obj = self.obj();
             obj.setup_gactions();
+
+            let header_bar = &self.header_bar.get();
+            self.project_overview_view.connect_headerbar(header_bar);
+            self.project_lexicon_view.connect_headerbar(header_bar);
         }
 
         fn properties() -> &'static [glib::ParamSpec] {
@@ -474,8 +478,14 @@ impl ApplicationWindow {
     
     pub fn on_window_size(&self, width: i32, _height: i32) {
         if self.is_realized() {
-            let new_narrow = width <= 600;
-            self.set_narrow(new_narrow);
+            let imp = self.imp();
+            let view = imp.current_view_index.get();
+
+            let narrow = width <= 600;
+            self.set_narrow(narrow);
+            
+            imp.header_bar
+                .set_reveal_lexicon_view_buttons(narrow && view == MainViews::Lexicon); 
         }
     }
 }

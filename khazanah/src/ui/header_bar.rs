@@ -35,6 +35,11 @@ mod imp {
         pub end_controls: TemplateChild<ui::ToolbarEndControls>,
         #[template_child]
         pub main_menu_button: TemplateChild<ui::MainMenuButton>,
+        
+        #[template_child]
+        pub search_word_button: TemplateChild<gtk::ToggleButton>,
+        #[template_child]
+        pub add_word_button: TemplateChild<gtk::Button>,
 
         #[property(get, set)]
         pub selected_view_index: Cell<u32>,
