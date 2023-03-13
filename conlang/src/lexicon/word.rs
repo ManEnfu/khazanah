@@ -1,5 +1,4 @@
 use super::PartOfSpeech;
-use crate::IPAString;
 use std::fmt::Debug;
 
 /// Word entry in the lexicon.
