@@ -3,7 +3,10 @@
 use std::{borrow::Cow, io::BufRead, str::Utf8Error};
 
 use quick_xml::{
-    events::{attributes::{AttrError, Attribute}, BytesDecl, BytesEnd, BytesStart, BytesText, Event},
+    events::{
+        attributes::{AttrError, Attribute},
+        BytesDecl, BytesEnd, BytesStart, BytesText, Event,
+    },
     Reader, Writer,
 };
 
@@ -28,26 +31,26 @@ pub trait XmlReaderProcess {
     type Error;
 
     fn process_tag_start(
-        &mut self, 
+        &mut self,
         data: Self::Output,
         _context: &[String],
         _name: &str,
-        _attrs: Vec<(&str, String)>
+        _attrs: Vec<(&str, String)>,
     ) -> Result<Self::Output, Self::Error> {
         Ok(data)
     }
-    
+
     fn process_text(
-        &mut self, 
+        &mut self,
         data: Self::Output,
         _context: &[String],
         _text: Cow<str>,
     ) -> Result<Self::Output, Self::Error> {
         Ok(data)
     }
-    
+
     fn process_tag_end(
-        &mut self, 
+        &mut self,
         data: Self::Output,
         _context: &[String],
         _name: &str,
@@ -138,18 +141,27 @@ where
                         ));
                     }
                     self.context.push(name.to_owned());
-                    data = self.processor.process_tag_start(data, &self.context, name, attrs).map_err(XmlError::Other)?;
+                    data = self
+                        .processor
+                        .process_tag_start(data, &self.context, name, attrs)
+                        .map_err(XmlError::Other)?;
                 }
 
                 Ok(Event::Text(e)) => {
                     let text = e.unescape()?;
-                    data = self.processor.process_text(data, &self.context, text).map_err(XmlError::Other)?;
+                    data = self
+                        .processor
+                        .process_text(data, &self.context, text)
+                        .map_err(XmlError::Other)?;
                 }
 
                 Ok(Event::End(e)) => {
                     let name = std::str::from_utf8(e.name().into_inner())?;
                     self.context.pop();
-                    data = self.processor.process_tag_end(data, &self.context, name).map_err(XmlError::Other)?;
+                    data = self
+                        .processor
+                        .process_tag_end(data, &self.context, name)
+                        .map_err(XmlError::Other)?;
                 }
 
                 _ => {}
@@ -187,10 +199,14 @@ impl<W: std::io::Write> XmlWriter<W> {
             .map_err(XmlError::Qxml)
     }
 
-    pub fn write_tag_start_with_attributes<'a, E, I>(&mut self, name: &str, attrs: I) -> Result<(), XmlError<E>> 
+    pub fn write_tag_start_with_attributes<'a, E, I>(
+        &mut self,
+        name: &str,
+        attrs: I,
+    ) -> Result<(), XmlError<E>>
     where
         I: IntoIterator,
-        I::Item: Into<Attribute<'a>> 
+        I::Item: Into<Attribute<'a>>,
     {
         self.writer
             .write_event(Event::Start(BytesStart::new(name).with_attributes(attrs)))

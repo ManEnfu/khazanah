@@ -16,7 +16,7 @@ pub use meta::Meta;
 use std::{
     fs::File,
     io::{BufReader, Read, Seek, Write},
-    path::{Path, PathBuf},
+    path::Path,
 };
 use zip::{result::ZipError, write::FileOptions, ZipArchive, ZipWriter};
 

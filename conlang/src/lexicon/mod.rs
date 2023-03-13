@@ -6,12 +6,16 @@ use uuid::Uuid;
 pub use word::Word;
 
 use std::{
+    collections::{
+        hash_map::{Iter, Keys},
+        HashMap,
+    },
     fs::File,
     io::{BufRead, BufReader, Cursor, Write},
-    path::Path, collections::{HashMap, hash_map::{Keys, Iter}},
+    path::Path,
 };
 
-use crate::xml::{XmlReader, XmlWriter, XmlReaderProcess};
+use crate::xml::{XmlReader, XmlReaderProcess, XmlWriter};
 
 mod error;
 mod pos;
@@ -65,7 +69,7 @@ impl Lexicon {
     pub fn word_by_id(&self, id: &Uuid) -> Option<&Word> {
         self.words.get(id)
     }
-    
+
     /// Gets a mutable reference to word by id.
     pub fn word_by_id_mut(&mut self, id: &Uuid) -> Option<&mut Word> {
         self.words.get_mut(id)
@@ -166,12 +170,12 @@ impl XmlReaderProcess for XmlReaderProcessor {
     type Error = ReadError;
 
     fn process_tag_start(
-            &mut self, 
-            mut data: Self::Output,
-            context: &[String],
-            _name: &str,
-            attrs: Vec<(&str, String)>
-        ) -> Result<Self::Output, Self::Error> {
+        &mut self,
+        mut data: Self::Output,
+        context: &[String],
+        _name: &str,
+        attrs: Vec<(&str, String)>,
+    ) -> Result<Self::Output, Self::Error> {
         let l = context.len();
         let tag = context.last().map(|s| s.as_str());
         let ptag = match l {
@@ -179,7 +183,9 @@ impl XmlReaderProcess for XmlReaderProcessor {
             _ => None,
         };
 
-        let word = data.words.get_mut(&self.current_id)
+        let word = data
+            .words
+            .get_mut(&self.current_id)
             .ok_or(ReadError::WriteInvalidWord);
 
         match (ptag, tag) {
@@ -219,14 +225,16 @@ impl XmlReaderProcess for XmlReaderProcessor {
     }
 
     fn process_text(
-            &mut self, 
-            mut data: Self::Output,
-            context: &[String],
-            text: std::borrow::Cow<str>,
-        ) -> Result<Self::Output, Self::Error> {
+        &mut self,
+        mut data: Self::Output,
+        context: &[String],
+        text: std::borrow::Cow<str>,
+    ) -> Result<Self::Output, Self::Error> {
         let tag = context.last().map(|s| s.as_str());
 
-        let word = data.words.get_mut(&self.current_id)
+        let word = data
+            .words
+            .get_mut(&self.current_id)
             .ok_or(ReadError::WriteInvalidWord);
 
         match tag {

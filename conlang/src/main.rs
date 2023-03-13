@@ -1,6 +1,6 @@
 use std::{cell::Cell, rc::Rc};
 
-use conlang::{lexicon::Lexicon, project::Project, Word, PartOfSpeech};
+use conlang::{lexicon::Lexicon, project::Project, PartOfSpeech, Word};
 
 fn test_lex() -> Lexicon {
     let mut lex = Lexicon::new();

@@ -30,10 +30,11 @@ fn read_xml() {
         <?xml version="1.0" encoding="UTF-8"?>
         <lexicon>
         "#
-        .to_string();
+    .to_string();
 
     for (id, word) in lex.words_iter() {
-        xml += format!(r#"
+        xml += format!(
+            r#"
             <word id="{}">
                 <romanization>{}</romanization>
                 <pronunciation>{}</pronunciation>
@@ -45,8 +46,9 @@ fn read_xml() {
             &word.romanization,
             &word.pronunciation,
             &word.translation,
-            word.part_of_speech.as_ref().unwrap().name())
-            .as_str();
+            word.part_of_speech.as_ref().unwrap().name()
+        )
+        .as_str();
     }
 
     xml += r#"

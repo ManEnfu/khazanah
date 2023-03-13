@@ -34,10 +34,7 @@ fn test_proj() -> Project {
         part_of_speech: Some(PartOfSpeech::Verb),
     });
 
-    Project {
-        meta,
-        lexicon: lex,
-    }
+    Project { meta, lexicon: lex }
 }
 
 #[test]

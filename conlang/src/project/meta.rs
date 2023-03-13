@@ -6,7 +6,7 @@ use std::{
     string::FromUtf8Error,
 };
 
-use crate::xml::{XmlError, XmlReader, XmlWriter, XmlReaderProcess};
+use crate::xml::{XmlError, XmlReader, XmlReaderProcess, XmlWriter};
 
 /// Error type for `Meta`.
 #[derive(Debug, thiserror::Error)]
@@ -126,12 +126,12 @@ impl XmlReaderProcess for XmlReaderProcessor {
     type Error = ReadError;
 
     fn process_tag_start(
-            &mut self, 
-            mut meta: Self::Output,
-            context: &[String],
-            _name: &str,
-            _attrs: Vec<(&str, String)>
-        ) -> Result<Self::Output, Self::Error> {
+        &mut self,
+        mut meta: Self::Output,
+        context: &[String],
+        _name: &str,
+        _attrs: Vec<(&str, String)>,
+    ) -> Result<Self::Output, Self::Error> {
         let l = context.len();
         let tag = context.last().map(|s| s.as_str());
         let ptag = match l {
@@ -167,11 +167,11 @@ impl XmlReaderProcess for XmlReaderProcessor {
     }
 
     fn process_text(
-            &mut self, 
-            mut meta: Self::Output,
-            context: &[String],
-            text: Cow<str>,
-        ) -> Result<Self::Output, Self::Error> {
+        &mut self,
+        mut meta: Self::Output,
+        context: &[String],
+        text: Cow<str>,
+    ) -> Result<Self::Output, Self::Error> {
         let tag = context.last().map(|s| s.as_str());
 
         match tag {
