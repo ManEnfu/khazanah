@@ -53,6 +53,14 @@ impl Project {
         &mut self.meta
     }
 
+    pub fn lexicon(&self) -> &Lexicon {
+        &self.lexicon
+    }
+
+    pub fn lexicon_mut(&mut self) -> &mut Lexicon {
+        &mut self.lexicon
+    }
+
     /// Loads project from ZIP archive.
     pub fn load<R: Read + Seek>(reader: R) -> Result<Self, Error> {
         // Initialize ZIP Archive
@@ -82,10 +90,7 @@ impl Project {
             Err(e) => return Err(Error::Zip(e)),
         };
 
-        Ok(Self {
-            meta,
-            lexicon,
-        })
+        Ok(Self { meta, lexicon })
     }
 
     /// Loads project from ZIP file in filesystem.

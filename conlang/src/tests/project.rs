@@ -35,7 +35,6 @@ fn test_proj() -> Project {
     });
 
     Project {
-        file_path: None,
         meta,
         lexicon: lex,
     }

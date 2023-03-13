@@ -6,7 +6,7 @@ use std::{
     string::FromUtf8Error,
 };
 
-use crate::xml::{XmlError, XmlReader, XmlWriter};
+use crate::xml::{XmlError, XmlReader, XmlWriter, XmlReaderProcess};
 
 /// Error type for `Meta`.
 #[derive(Debug, thiserror::Error)]
@@ -28,6 +28,9 @@ pub enum ReadError {
     /// A valid tag in a wrong context.
     #[error("tag <{}> should not be inside <{}>", .tag, .ptag)]
     WrongContext { ptag: String, tag: String },
+
+    #[error("<word> tag doesn't have attribute `id`")]
+    NoId,
 }
 
 /// Metadata for a project.
@@ -51,51 +54,7 @@ impl Meta {
 
     /// Reads from XML.
     pub fn read_xml<R: BufRead>(reader: R) -> Result<Self, Error> {
-        XmlReader::<R, Meta, ReadError>::new(reader)
-            .process_tag_start(|mut meta, ctx, _name, _attrs| {
-                let l = ctx.len();
-                let tag = ctx.last().map(|s| s.as_str());
-                let ptag = match l {
-                    2.. => ctx.get(l - 2).map(|s| s.as_str()),
-                    _ => None,
-                };
-                match (ptag, tag) {
-                    // Root tag;
-                    (None, Some("project")) => {}
-                    // Clear meta properties
-                    (Some("project"), Some("name")) => {
-                        meta.name.clear();
-                    }
-                    (Some("project"), Some("local-lang")) => {
-                        meta.local_lang.clear();
-                    }
-                    (Some("project"), Some("author")) => {
-                        meta.author.clear();
-                    }
-                    (Some("project"), Some("description")) => {
-                        meta.description.clear();
-                    }
-                    // Invalid tag
-                    _ => {
-                        return Err(ReadError::WrongContext {
-                            ptag: ptag.unwrap_or_default().to_string(),
-                            tag: tag.unwrap_or_default().to_string(),
-                        })
-                    }
-                }
-                Ok(meta)
-            })
-            .process_text(|mut meta, ctx, text| {
-                let tag = ctx.last().map(|s| s.as_str());
-                match tag {
-                    Some("name") => meta.name += &text,
-                    Some("local-lang") => meta.local_lang += &text,
-                    Some("author") => meta.author += &text,
-                    Some("description") => meta.description += &text,
-                    _ => {}
-                }
-                Ok(meta)
-            })
+        XmlReader::new(reader, XmlReaderProcessor::new())
             .read()
             .map_err(Error::Xml)
     }
@@ -151,5 +110,77 @@ impl Meta {
         let w = self.write_xml(Cursor::new(Vec::<u8>::new())).unwrap();
         let ar = w.into_inner();
         String::from_utf8(ar).map_err(Error::from)
+    }
+}
+
+struct XmlReaderProcessor();
+
+impl XmlReaderProcessor {
+    pub fn new() -> Self {
+        Self()
+    }
+}
+
+impl XmlReaderProcess for XmlReaderProcessor {
+    type Output = Meta;
+    type Error = ReadError;
+
+    fn process_tag_start(
+            &mut self, 
+            mut meta: Self::Output,
+            context: &[String],
+            _name: &str,
+            _attrs: Vec<(&str, String)>
+        ) -> Result<Self::Output, Self::Error> {
+        let l = context.len();
+        let tag = context.last().map(|s| s.as_str());
+        let ptag = match l {
+            2.. => context.get(l - 2).map(|s| s.as_str()),
+            _ => None,
+        };
+
+        match (ptag, tag) {
+            // Root tag;
+            (None, Some("project")) => {}
+            // Clear meta properties
+            (Some("project"), Some("name")) => {
+                meta.name.clear();
+            }
+            (Some("project"), Some("local-lang")) => {
+                meta.local_lang.clear();
+            }
+            (Some("project"), Some("author")) => {
+                meta.author.clear();
+            }
+            (Some("project"), Some("description")) => {
+                meta.description.clear();
+            }
+            // Invalid tag
+            _ => {
+                return Err(ReadError::WrongContext {
+                    ptag: ptag.unwrap_or_default().to_string(),
+                    tag: tag.unwrap_or_default().to_string(),
+                })
+            }
+        }
+        Ok(meta)
+    }
+
+    fn process_text(
+            &mut self, 
+            mut meta: Self::Output,
+            context: &[String],
+            text: Cow<str>,
+        ) -> Result<Self::Output, Self::Error> {
+        let tag = context.last().map(|s| s.as_str());
+
+        match tag {
+            Some("name") => meta.name += &text,
+            Some("local-lang") => meta.local_lang += &text,
+            Some("author") => meta.author += &text,
+            Some("description") => meta.description += &text,
+            _ => {}
+        }
+        Ok(meta)
     }
 }

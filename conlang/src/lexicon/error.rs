@@ -25,4 +25,9 @@ pub enum ReadError {
     /// A valid tag in a wrong context.
     #[error("tag <{}> should not be inside <{}>", .tag, .ptag)]
     WrongContext { ptag: String, tag: String },
+    /// <word> tag doesn't have attribute `id`.
+    #[error("<word> tag doesn't have attribute `id`")]
+    NoId,
+    #[error("Id error: {0}")]
+    Id(#[from] uuid::Error),
 }

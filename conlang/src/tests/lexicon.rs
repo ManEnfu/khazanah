@@ -25,31 +25,35 @@ fn test_lex() -> Lexicon {
 
 #[test]
 fn read_xml() {
-    let xml = r#"
+    let lex = test_lex();
+    let mut xml = r#"
         <?xml version="1.0" encoding="UTF-8"?>
         <lexicon>
-            <word>
-                <romanization>nifutu</romanization>
-                <pronunciation>ˈni.ɸu.tu</pronunciation>
-                <translation>sun</translation>
-                <part-of-speech>Noun</part-of-speech>
-            </word>
-            <word>
-                <romanization>xahlauraqi</romanization>
-                <pronunciation>ˈxa.ɬa.u.ɹa.qi</pronunciation>
-                <translation>story</translation>
-                <part-of-speech>Noun</part-of-speech>
-            </word>
-            <word>
-                <romanization>pfunutsaaxi</romanization>
-                <pronunciation>ˈpɸu.nu.tsaː.xi</pronunciation>
-                <translation>flow</translation>
-                <part-of-speech>Verb</part-of-speech>
-            </word>
-        </lexicon>
-        "#;
+        "#
+        .to_string();
 
-    assert_eq!(test_lex(), Lexicon::load_xml_str(xml).unwrap());
+    for (id, word) in lex.words_iter() {
+        xml += format!(r#"
+            <word id="{}">
+                <romanization>{}</romanization>
+                <pronunciation>{}</pronunciation>
+                <translation>{}</translation>
+                <part-of-speech>{}</part-of-speech>
+            </word>
+            "#,
+            id.to_string(),
+            &word.romanization,
+            &word.pronunciation,
+            &word.translation,
+            word.part_of_speech.as_ref().unwrap().name())
+            .as_str();
+    }
+
+    xml += r#"
+        </lexicon>
+    "#;
+
+    assert_eq!(lex, Lexicon::load_xml_str(&xml).unwrap());
 }
 
 #[test]
