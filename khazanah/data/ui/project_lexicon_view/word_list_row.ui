@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<interface>
+  <requires lib="gtk" version="4.6"/>
+  <requires lib="Adw" version="1.2"/>
+
+  <!-- Word list row. -->
+  <template class="KhzProjectLexiconWordListRow" parent="AdwBin">
+    <child>
+      <object class="GtkBox">
+        <property name="margin-bottom">6</property>
+        <property name="margin-end">6</property>
+        <property name="margin-start">6</property>
+        <property name="margin-top">6</property>
+        <property name="spacing">6</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="word_label">
+            <property name="halign">start</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkSeparator">
+                <style>
+                  <class name="spacer"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="pos_label">
+                <style>
+                  <class name="caption"/>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="translation_label">
+                <style>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

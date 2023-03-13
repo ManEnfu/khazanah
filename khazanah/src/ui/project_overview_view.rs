@@ -7,6 +7,7 @@ use adw::subclass::prelude::*;
 use crate::models;
 use crate::ui;
 
+#[doc(hidden)]
 mod imp {
     use std::cell::RefCell;
 
@@ -95,6 +96,8 @@ impl ProjectOverviewView {
 
 impl ui::View for ProjectOverviewView {
     fn load_state(&self) {
+        log::debug!("Loading view state.");
+
         let imp = self.imp();
         let dirty = self.project_model().dirty();
 
@@ -110,6 +113,8 @@ impl ui::View for ProjectOverviewView {
     }
 
     fn commit_state(&self) {
+        log::debug!("Committing view state.");
+
         let imp = self.imp();
 
         if let Some(project) = self.project_model().project_mut().as_mut() {

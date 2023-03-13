@@ -36,7 +36,6 @@ mod imp {
     }
 
     impl ObjectImpl for ViewSwitcherDropDown {
-
         fn properties() -> &'static [glib::ParamSpec] {
             Self::derived_properties()
         }

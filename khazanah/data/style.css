@@ -1,3 +1,9 @@
 .word-header {
   padding:  4px;
 }
+
+actionbar.flat > revealer > box {
+  background: none;
+  box-shadow: none;
+  border-top: none;
+}

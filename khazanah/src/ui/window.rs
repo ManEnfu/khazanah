@@ -38,7 +38,7 @@ mod imp {
         pub project_overview_view: TemplateChild<ui::ProjectOverviewView>,
         #[template_child]
         pub project_lexicon_view: TemplateChild<ui::ProjectLexiconView>,
-        
+
         // #[template_child]
         // pub view_switcher: TemplateChild<ui::ViewSwitcherDropDown>,
         // #[template_child]
@@ -47,7 +47,6 @@ mod imp {
         // pub end_controls: TemplateChild<ui::ToolbarEndControls>,
         // #[template_child]
         // pub main_menu_button: TemplateChild<ui::MainMenuButton>,
-
         #[template_child]
         pub header_bar: TemplateChild<ui::HeaderBar>,
         #[template_child]
@@ -60,7 +59,7 @@ mod imp {
 
         #[property(get, set)]
         pub selected_view_index: Cell<u32>,
-        
+
         #[property(get, set)]
         pub narrow: Cell<bool>,
 
@@ -371,7 +370,7 @@ impl ApplicationWindow {
 
     // VIEWS
 
-    // Updates window title. 
+    // Updates window title.
     // If a project is opened, shows project name and file name as well.
     pub fn update_title(&self) {
         if self.project_model().project().is_none() {
@@ -416,7 +415,7 @@ impl ApplicationWindow {
         let idx = self.selected_view_index();
         let view = MainViews::from(idx);
         log::debug!("Switching to view: {:?} ({})", view, idx);
-        
+
         let imp = self.imp();
         let current_view = imp.current_view_index.get();
 
@@ -432,19 +431,19 @@ impl ApplicationWindow {
             MainViews::Lexicon => main_stack.set_visible_child(&*imp.project_lexicon_view),
             _ => log::warn!("Attempting to switch to unknown view."),
         }
-    
+
         imp.header_bar.set_flat(false);
+        imp.action_bar.remove_css_class("flat");
         imp.current_view_index.set(view);
     }
-    
+
     /// Loads view state from the project model.
     pub fn load_view_state(&self, view: MainViews) {
-        log::debug!("Loading view state: {:?}", view);
         let imp = self.imp();
 
         match view {
             MainViews::Overview => imp.project_overview_view.load_state(),
-            MainViews::Lexicon => imp.project_overview_view.load_state(),
+            MainViews::Lexicon => imp.project_lexicon_view.load_state(),
             _ => log::warn!("Attempting to load unknown view."),
         }
     }
@@ -458,12 +457,11 @@ impl ApplicationWindow {
 
     /// Commits view state to the project model.
     pub fn commit_view_state(&self, view: MainViews) {
-        log::debug!("Committing view state: {:?}", view);
         let imp = self.imp();
 
         match view {
             MainViews::Overview => imp.project_overview_view.commit_state(),
-            MainViews::Lexicon => imp.project_overview_view.commit_state(),
+            MainViews::Lexicon => imp.project_lexicon_view.commit_state(),
             MainViews::Unknown => {}
             _ => log::warn!("Attempting to commit unknown view."),
         }
@@ -475,7 +473,7 @@ impl ApplicationWindow {
             self.commit_view_state(*view);
         }
     }
-    
+
     pub fn on_window_size(&self, width: i32, _height: i32) {
         if self.is_realized() {
             let imp = self.imp();
@@ -483,9 +481,9 @@ impl ApplicationWindow {
 
             let narrow = width <= 600;
             self.set_narrow(narrow);
-            
+
             imp.header_bar
-                .set_reveal_lexicon_view_buttons(narrow && view == MainViews::Lexicon); 
+                .set_reveal_lexicon_view_buttons(narrow && view == MainViews::Lexicon);
         }
     }
 }

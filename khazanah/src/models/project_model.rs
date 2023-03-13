@@ -15,6 +15,8 @@ mod imp {
     use super::*;
 
     use conlang::Project;
+    use gtk::glib::subclass::{Signal, SignalType};
+    use once_cell::sync::Lazy;
 
     #[derive(Default, glib::Properties)]
     #[properties(wrapper_type = super::ProjectModel)]
@@ -46,6 +48,15 @@ mod imp {
         fn property(&self, id: usize, pspec: &glib::ParamSpec) -> glib::Value {
             self.derived_property(id, pspec)
         }
+
+        fn signals() -> &'static [Signal] {
+            static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
+                vec![Signal::builder("project-updated")
+                    .param_types(Vec::<SignalType>::new())
+                    .build()]
+            });
+            SIGNALS.as_ref()
+        }
     }
 }
 
@@ -70,6 +81,7 @@ impl ProjectModel {
     /// Sets the current project.
     pub fn set_project(&self, project: Option<Project>) {
         self.imp().project.replace(project);
+        self.emit_by_name::<()>("project-updated", &[]);
     }
 
     /// Gets a reference to the current project.
@@ -102,13 +114,11 @@ impl ProjectModel {
     }
 
     /// Updates the state of the project. Marks the project as dirty.
-    pub fn update<F>(&self, f: F)
+    pub fn update<F, O>(&self, f: F) -> Option<O>
     where
-        F: Fn(&mut Project),
+        F: Fn(&mut Project) -> O,
     {
-        if let Some(project) = self.project_mut().as_mut() {
-            f(project);
-        }
+        self.project_mut().as_mut().map(f)
     }
 }
 
