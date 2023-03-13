@@ -53,12 +53,15 @@ mod imp {
         #[property(get, set)]
         pub filter_model: RefCell<Option<gtk::FilterListModel>>,
         #[property(get, set)]
+        pub sort_model: RefCell<Option<gtk::SortListModel>>,
+        #[property(get, set)]
         pub selection_model: RefCell<Option<gtk::SingleSelection>>,
 
         #[property(get, set)]
         pub reveal_header: Cell<bool>,
 
         pub selected_id: Cell<Uuid>,
+        pub old_selected_word: RefCell<Option<WordObject>>,
     }
 
     #[glib::object_subclass]
@@ -136,7 +139,12 @@ impl ProjectLexiconWordListView {
             gtk::FilterListModel::new(Some(word_list_model), Option::<gtk::CustomFilter>::None);
         self.set_filter_model(filter_model.clone());
 
-        let selection_model = gtk::SingleSelection::new(Some(filter_model));
+        let sort_model = gtk::SortListModel::new(
+            Some(filter_model),
+            Some(models::WordSorter::new(models::WordSortBy::Romanization)));
+        self.set_sort_model(sort_model.clone());
+
+        let selection_model = gtk::SingleSelection::new(Some(sort_model));
         self.set_selection_model(selection_model.clone());
 
         // Setup list factory
@@ -195,6 +203,25 @@ impl ProjectLexiconWordListView {
     pub fn selected_word(&self) -> Option<WordObject> {
         self.selection_model()?.selected_item().and_downcast()
     }
+    
+    /// Adds a new word to the model.
+    pub fn add_word(&self) {
+        if let Some(id) = self
+            .project_model()
+            .update(|project| project.lexicon_mut().add_word(Word::new()))
+        {
+            log::debug!("Added word by id {}", id);
+            let word_object = WordObject::new(self.project_model(), id);
+
+            self.word_list_model()
+                .expect("word list model is not initialized")
+                .append(&word_object);
+
+            self.select_word_by_id(id);
+        }
+        
+        self.switch_stack_page();
+    }
 
     /// Select a word by its id.
     pub fn select_word_by_id(&self, id: Uuid) -> bool {
@@ -216,28 +243,26 @@ impl ProjectLexiconWordListView {
         false
     }
 
-    /// Adds a new word to the model.
-    pub fn add_word(&self) {
-        if let Some(id) = self
-            .project_model()
-            .update(|project| project.lexicon_mut().add_word(Word::new()))
-        {
-            log::debug!("Added word by id {}", id);
-            let word_object = WordObject::new(self.project_model(), id);
-
-            self.word_list_model()
-                .expect("word list model is not initialized")
-                .append(&word_object);
-
-            self.select_word_by_id(id);
-        }
-        
-        self.switch_stack_page();
-    }
-
     /// Callback to `selection-changed` signal
     pub fn handle_selection_changed(&self) {
+        if let Some(word) = self.imp().old_selected_word.borrow().as_ref() {
+            self.notify_changes_to_model(word);
+        }
+
+        self.imp().old_selected_word.replace(self.selected_word());
+        
         self.emit_by_name::<()>("word-selected", &[])
+    }
+    
+    /// Notify the model that a word is updates.
+    pub fn notify_changes_to_model(&self, word: &WordObject) {
+        let word_list_model = self
+            .word_list_model()
+            .expect("Word list model is not initialized.");
+
+        if let Some(position) = word_list_model.find(word) {
+            word_list_model.items_changed(position, 1, 1);
+        }
     }
 
     /// Switches to a stack page according to this view's state.
