@@ -40,6 +40,11 @@ impl Lexicon {
         id
     }
 
+    /// Removes a word of id `id` from lexicon. Returns `true` if removal is successful.
+    pub fn delete_word_by_id(&mut self, id: Uuid) -> bool {
+        self.words.remove(&id).is_some()
+    }
+
     /// Gets the number of words.
     pub fn num_words(&self) -> usize {
         self.words.len()
