@@ -12,8 +12,6 @@ mod imp {
 
     use uuid::Uuid;
 
-    use crate::models;
-
     use super::*;
 
     #[derive(Debug, Default, glib::Properties)]
@@ -29,18 +27,10 @@ mod imp {
             get = Self::get_pos, set = Self::set_pos)]
         #[property(name = "part-of-speech-label", 
             get = Self::get_pos_label, type = String)]
-        pub data: RefCell<Word>,
-
         #[property(get, set, construct_only)]
         pub project_model: RefCell<models::ProjectModel>,
 
         pub id: Cell<Uuid>,
-    }
-
-    #[glib::object_subclass]
-    impl ObjectSubclass for WordObject {
-        const NAME: &'static str = "KhzWordObject";
-        type Type = super::WordObject;
     }
 
     impl WordObject {
@@ -49,23 +39,28 @@ mod imp {
             T: Default,
             F: Fn(&Word) -> T,
         {
-            if let Some(project) = self.project_model.borrow().project().as_ref() {
-                if let Some(word) = project.lexicon().word_by_id(&self.id.get()) {
-                    return f(word);
-                }
-            }
-            Default::default()
+            self.project_model
+                .borrow()
+                .query(|project| {
+                    if let Some(word) = project.lexicon().word_by_id(&self.id.get()) {
+                        f(word)
+                    } else {
+                        Default::default()
+                    }
+                })
+                .unwrap_or_default()
         }
 
         fn set_word_property<F, T>(&self, value: T, f: F)
         where
             F: Fn(&mut Word, T),
+            T: Clone,
         {
-            if let Some(project) = self.project_model.borrow().project_mut().as_mut() {
+            self.project_model.borrow().update(|project| {
                 if let Some(word) = project.lexicon_mut().word_by_id_mut(&self.id.get()) {
-                    f(word, value);
+                    f(word, value.clone());
                 }
-            }
+            });
         }
 
         fn get_romanization(&self) -> String {
@@ -118,6 +113,12 @@ mod imp {
                     .unwrap_or_default()
             })
         }
+    }
+
+    #[glib::object_subclass]
+    impl ObjectSubclass for WordObject {
+        const NAME: &'static str = "KhzWordObject";
+        type Type = super::WordObject;
     }
 
     impl ObjectImpl for WordObject {

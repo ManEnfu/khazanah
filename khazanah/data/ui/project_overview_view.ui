@@ -34,33 +34,21 @@
                     <child>
                       <object class="AdwEntryRow" id="lang_family_name_entry">
                         <property name="title">Language Family Name</property>
-                        <signal name="changed" 
-                                handler="handle_lang_family_name_entry_apply"
-                                swapped="true"/>
                       </object>
                     </child>
                     <child>
                       <object class="AdwEntryRow" id="local_lang_entry">
                         <property name="title">Local Language</property>
-                        <signal name="changed" 
-                                handler="handle_local_lang_entry_apply"
-                                swapped="true"/>
                       </object>
                     </child>
                     <child>
                       <object class="AdwEntryRow" id="author_entry">
                         <property name="title">Author</property>
-                        <signal name="changed" 
-                                handler="handle_author_entry_apply"
-                                swapped="true"/>
                       </object>
                     </child>
                     <child>
                       <object class="AdwEntryRow" id="description_entry">
                         <property name="title">Description</property>
-                        <signal name="changed" 
-                                handler="handle_description_entry_apply"
-                                swapped="true"/>
                       </object>
                     </child>
                   </object>

@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use conlang::Project;
 
@@ -81,6 +81,7 @@ mod imp {
             self.parent_constructed();
             let obj = self.obj();
             obj.setup_gactions();
+            obj.setup_bindings();
 
             let header_bar = &self.header_bar.get();
             self.project_overview_view.connect_headerbar(header_bar);
@@ -123,7 +124,11 @@ mod imp {
         }
     }
 
-    impl WindowImpl for ApplicationWindow {}
+    impl WindowImpl for ApplicationWindow {
+        // fn close_request(&self) -> glib::signal::Inhibit {
+        //     glib::signal::Inhibit(true)
+        // }
+    }
 
     impl ApplicationWindowImpl for ApplicationWindow {}
 
@@ -161,7 +166,7 @@ impl ApplicationWindow {
         // Save project
         let save_action = gio::ActionEntry::builder("save")
             .activate(|window: &Self, action, v| {
-                if window.project_model().project().is_none() {
+                if !window.project_model().opened() {
                     return;
                 }
                 match window.project_model().path() {
@@ -173,7 +178,7 @@ impl ApplicationWindow {
         // Save project as another file
         let save_as_action = gio::ActionEntry::builder("save-as")
             .activate(|window: &Self, action, v| {
-                if window.project_model().project().is_some() {
+                if window.project_model().opened() {
                     window.save_file_dialog(action, v);
                 }
             })
@@ -182,6 +187,16 @@ impl ApplicationWindow {
         self.add_action_entries([open_action, new_action, save_action, save_as_action]);
         self.action_set_enabled("win.save", false);
         self.action_set_enabled("win.save-as", false);
+    }
+
+    fn setup_bindings(&self) {
+        self.project_model()
+            .bind_property("title", self, "title")
+            .sync_create()
+            .transform_to(|_, s: Option<String>| {
+                Some(s.map_or("Khazanah".to_string(), |s| format!("{} - Khazanah", s)))
+            })
+            .build();
     }
 
     /// Shows `Open File` dialog.
@@ -272,12 +287,12 @@ impl ApplicationWindow {
 
     /// Called after a project is opened or created for this window.
     fn finish_open_project(&self) {
-        if self.project_model().project().is_some() {
+        if self.project_model().opened() {
             self.set_project_opened(true);
             self.action_set_enabled("win.save", true);
             self.action_set_enabled("win.save-as", true);
 
-            self.update_title();
+            // self.update_title();
             self.load_all_views();
 
             self.switch_view(MainViews::Overview);
@@ -342,7 +357,7 @@ impl ApplicationWindow {
                                 .unwrap_or_default()
                         );
                         window.imp().toast_overlay.add_toast(adw::Toast::new(&msg));
-                        window.update_title();
+                        // window.update_title();
                     }
                     Err(e) => {
                         log::error!("Error saving file: {}", e);
@@ -361,37 +376,6 @@ impl ApplicationWindow {
     }
 
     // VIEWS
-
-    // Updates window title.
-    // If a project is opened, shows project name and file name as well.
-    pub fn update_title(&self) {
-        if self.project_model().project().is_none() {
-            self.set_title(Some("Khazanah"));
-            return;
-        }
-
-        let title = if let Some(p) = self.project_model().path() {
-            let file = PathBuf::from(p)
-                .file_name()
-                .unwrap_or_default()
-                .to_str()
-                .unwrap_or_default()
-                .to_string();
-            let name = &self
-                .project_model()
-                .project()
-                .as_ref()
-                .unwrap()
-                .meta()
-                .name
-                .to_owned();
-            format!("{} [{}] - Khazanah", name, file)
-        } else {
-            "New Project - Khazanah".to_string()
-        };
-
-        self.set_title(Some(&title));
-    }
 
     /// Switches to a view. This will set an internal property to sync with all view switchers in
     /// the window.

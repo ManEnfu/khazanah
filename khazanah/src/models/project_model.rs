@@ -21,6 +21,8 @@ mod imp {
     #[derive(Default, glib::Properties)]
     #[properties(wrapper_type = super::ProjectModel)]
     pub struct ProjectModel {
+        #[property(name = "opened", type = bool, get = Self::get_opened)]
+        #[property(name = "title", type = Option<String>, get = Self::get_title)]
         pub project: RefCell<Option<Project>>,
 
         #[property(get, set)]
@@ -28,6 +30,35 @@ mod imp {
 
         #[property(get, set)]
         pub path: RefCell<Option<String>>,
+
+        pub title: RefCell<String>,
+    }
+
+    impl ProjectModel {
+        fn get_title(&self) -> Option<String> {
+            self.project
+                .borrow()
+                .as_ref()
+                .map(|project| {
+                    let s = &project.meta().name;
+                    if s.is_empty() {
+                        "New Project".to_string()
+                    } else {
+                        s.to_owned()
+                    }
+                })
+                .map(|s| {
+                    if self.dirty.get() {
+                        "*".to_string() + &s
+                    } else {
+                        s
+                    }
+                })
+        }
+
+        fn get_opened(&self) -> bool {
+            self.project.borrow().is_some()
+        }
     }
 
     #[glib::object_subclass]
@@ -81,6 +112,9 @@ impl ProjectModel {
     /// Sets the current project.
     pub fn set_project(&self, project: Option<Project>) {
         self.imp().project.replace(project);
+        self.set_dirty(false);
+        self.notify_title();
+        self.notify_opened();
         self.emit_by_name::<()>("project-updated", &[]);
     }
 
@@ -99,18 +133,26 @@ impl ProjectModel {
         let project = Project::load_file(&path)?;
         self.set_project(Some(project));
         self.set_path(path.as_ref().to_string_lossy().to_string());
+        self.set_dirty(false);
+        self.notify_title();
+        self.notify_opened();
         Ok(())
     }
 
     /// Saves the project to a file.
     pub fn save_file<P: AsRef<Path>>(&self, path: P) -> Result<(), project::Error> {
-        match self.project_mut().as_mut() {
+        let result = match self.project_mut().as_mut() {
             Some(project) => {
                 project.save_file(path)?;
                 Ok(())
             }
             None => Err(project::Error::WrongMimeType),
+        };
+        if result.is_ok() {
+            self.set_dirty(false);
+            self.notify_title();
         }
+        result
     }
 
     /// Updates the state of the project. Marks the project as dirty.
@@ -118,7 +160,18 @@ impl ProjectModel {
     where
         F: Fn(&mut Project) -> O,
     {
-        self.project_mut().as_mut().map(f)
+        let ret = self.project_mut().as_mut().map(f);
+        self.set_dirty(true);
+        self.notify_title();
+        ret
+    }
+
+    /// Queries the state of the project.
+    pub fn query<F, O>(&self, f: F) -> Option<O>
+    where
+        F: Fn(&Project) -> O,
+    {
+        self.project().as_ref().map(f)
     }
 }
 

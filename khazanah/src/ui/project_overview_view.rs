@@ -28,6 +28,11 @@ mod imp {
 
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
+
+        #[property(get, set)]
+        pub meta_object: RefCell<models::MetaObject>,
+
+        pub form_bindings: RefCell<Vec<glib::Binding>>,
     }
 
     #[glib::object_subclass]
@@ -47,6 +52,12 @@ mod imp {
     }
 
     impl ObjectImpl for ProjectOverviewView {
+        fn constructed(&self) {
+            self.parent_constructed();
+            let obj = self.obj();
+            obj.setup();
+        }
+
         fn properties() -> &'static [glib::ParamSpec] {
             Self::derived_properties()
         }
@@ -73,24 +84,10 @@ glib::wrapper! {
 
 #[gtk::template_callbacks]
 impl ProjectOverviewView {
-    #[template_callback]
-    fn handle_lang_family_name_entry_apply(&self, _entry: &adw::EntryRow) {
-        self.project_model().set_dirty(true);
-    }
-
-    #[template_callback]
-    fn handle_author_entry_apply(&self, _entry: &adw::EntryRow) {
-        self.project_model().set_dirty(true);
-    }
-
-    #[template_callback]
-    fn handle_description_entry_apply(&self, _entry: &adw::EntryRow) {
-        self.project_model().set_dirty(true);
-    }
-
-    #[template_callback]
-    fn handle_local_lang_entry_apply(&self, _entry: &adw::EntryRow) {
-        self.project_model().set_dirty(true);
+    fn setup(&self) {
+        self.bind_property("project-model", &self.meta_object(), "project-model")
+            .sync_create()
+            .build();
     }
 }
 
@@ -101,13 +98,44 @@ impl ui::View for ProjectOverviewView {
         let imp = self.imp();
         let dirty = self.project_model().dirty();
 
-        if let Some(project) = self.project_model().project().as_ref() {
-            let meta = project.meta();
-            imp.lang_family_name_entry.set_text(&meta.name);
-            imp.local_lang_entry.set_text(&meta.local_lang);
-            imp.author_entry.set_text(&meta.author);
-            imp.description_entry.set_text(&meta.description);
+        let mut bindings = imp.form_bindings.borrow_mut();
+        let meta_object = self.meta_object();
+
+        for binding in bindings.drain(..) {
+            binding.unbind()
         }
+
+        bindings.push(
+            meta_object
+                .bind_property("name", &imp.lang_family_name_entry.get(), "text")
+                .sync_create()
+                .bidirectional()
+                .build(),
+        );
+
+        bindings.push(
+            meta_object
+                .bind_property("local-language", &imp.local_lang_entry.get(), "text")
+                .sync_create()
+                .bidirectional()
+                .build(),
+        );
+
+        bindings.push(
+            meta_object
+                .bind_property("author", &imp.author_entry.get(), "text")
+                .sync_create()
+                .bidirectional()
+                .build(),
+        );
+
+        bindings.push(
+            meta_object
+                .bind_property("description", &imp.description_entry.get(), "text")
+                .sync_create()
+                .bidirectional()
+                .build(),
+        );
 
         self.project_model().set_dirty(dirty);
     }
@@ -117,12 +145,8 @@ impl ui::View for ProjectOverviewView {
 
         let imp = self.imp();
 
-        if let Some(project) = self.project_model().project_mut().as_mut() {
-            let meta = project.meta_mut();
-            meta.name = imp.lang_family_name_entry.text().to_string();
-            meta.local_lang = imp.local_lang_entry.text().to_string();
-            meta.author = imp.author_entry.text().to_string();
-            meta.description = imp.description_entry.text().to_string();
+        for binding in imp.form_bindings.borrow_mut().drain(..) {
+            binding.unbind()
         }
 
         self.project_model().set_dirty(true);
