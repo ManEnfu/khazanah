@@ -108,6 +108,9 @@ mod imp {
             static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
                 vec![Signal::builder("word-selected")
                     .param_types(Vec::<SignalType>::new())
+                    .build(),
+                    Signal::builder("word-activated")
+                    .param_types(Vec::<SignalType>::new())
                     .build()]
             });
             SIGNALS.as_ref()
@@ -218,6 +221,8 @@ impl ProjectLexiconWordListView {
                 .append(&word_object);
 
             self.select_word_by_id(id);
+
+            self.emit_by_name::<()>("word-activated", &[]);
         }
         
         self.switch_stack_page();
@@ -243,7 +248,7 @@ impl ProjectLexiconWordListView {
         false
     }
 
-    /// Callback to `selection-changed` signal
+    /// Callback to `selection-changed` signal.
     pub fn handle_selection_changed(&self) {
         if let Some(word) = self.imp().old_selected_word.borrow().as_ref() {
             self.notify_changes_to_model(word);
@@ -253,6 +258,12 @@ impl ProjectLexiconWordListView {
         
         self.emit_by_name::<()>("word-selected", &[])
     }
+
+    /// Callback to 'activate' signal.
+    #[template_callback]
+    pub fn handle_row_activated(&self, _position: u32, _list_view: &gtk::ListView) {
+        self.emit_by_name::<()>("word-activated", &[]);
+    } 
     
     /// Notify the model that a word is updates.
     pub fn notify_changes_to_model(&self, word: &WordObject) {

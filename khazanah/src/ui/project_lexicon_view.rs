@@ -1,4 +1,4 @@
-use gtk::glib;
+use gtk::{glib, gdk};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
@@ -35,14 +35,22 @@ mod imp {
         pub translation_entry: TemplateChild<adw::EntryRow>,
         #[template_child]
         pub pronunciation_entry: TemplateChild<adw::EntryRow>,
+        
+        #[template_child]
+        pub leaflet: TemplateChild<adw::Leaflet>,
 
         #[template_child]
         pub word_list_view: TemplateChild<ProjectLexiconWordListView>,
+        #[template_child]
+        pub word_edit_view: TemplateChild<gtk::ScrolledWindow>,
+
 
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
 
-       pub form_binding: RefCell<Vec<glib::Binding>>,
+        pub header_bar: RefCell<Option<ui::HeaderBar>>,
+
+        pub form_binding: RefCell<Vec<glib::Binding>>,
     }
 
     #[glib::object_subclass]
@@ -55,6 +63,20 @@ mod imp {
             klass.bind_template();
             klass.bind_template_instance_callbacks();
 
+            klass.install_action(
+                "lexicon.go-back", 
+                None, 
+                move |view, _, _| {
+                    view.navigate_back();
+                },
+            );
+
+            klass.add_binding_action(
+                gdk::Key::Escape, 
+                gdk::ModifierType::empty(), 
+                "lexicon.go-back", 
+                None,
+            );
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -122,6 +144,21 @@ impl ProjectLexiconView {
                 view.load_selected_word();
             }),
         );
+
+        imp.word_list_view.connect_closure(
+            "word-activated",
+            false,
+            glib::closure_local!(@strong self as view => move |_: &ProjectLexiconWordListView| {
+                view.handle_activate_word();
+            }),
+        );
+        
+        imp.leaflet.connect_notify_local(
+            Some("folded"),
+            glib::clone!(@weak self as view => move |_leaflet, _| {
+                view.update_buttons_visibility(); 
+            })
+        );
     }
 
     /// Initializes forms.
@@ -176,6 +213,47 @@ impl ProjectLexiconView {
                     .build(),
             );
         }
+
+        self.navigate_back();
+    }
+
+    /// Activates currently selected word. If the leaflet is folded, switch to form page.
+    fn handle_activate_word(&self) {
+        let imp = self.imp();
+
+        if imp.leaflet.is_folded() {
+            self.navigate_to_forward();
+        }
+    }
+
+    /// Navigates forward.
+    fn navigate_to_forward(&self) {
+        let imp = self.imp();
+        imp.leaflet.navigate(adw::NavigationDirection::Forward);
+        self.update_buttons_visibility();
+    }
+
+    /// Navigates back.
+    fn navigate_back(&self) {
+        let imp = self.imp();
+        imp.leaflet.navigate(adw::NavigationDirection::Back);
+        if imp.leaflet.is_folded() {
+            if let Some(word) = imp.word_list_view.selected_word() {
+                imp.word_list_view.notify_changes_to_model(&word);
+            }
+        }
+        self.update_buttons_visibility();
+    }
+
+    /// Updates visibility of some buttons.
+    fn update_buttons_visibility(&self) {
+        let imp = self.imp();
+        if let Some(header_bar) = imp.header_bar.borrow().as_ref() {
+            header_bar.set_reveal_back_button(
+                imp.leaflet.is_folded() && 
+                imp.leaflet.visible_child_name() != Some("word-list-view".into())
+            );
+        }
     }
 }
 
@@ -205,5 +283,11 @@ impl ui::View for ProjectLexiconView {
     fn connect_headerbar(&self, header_bar: &ui::HeaderBar) {
         let imp = self.imp();
         imp.word_list_view.connect_headerbar(header_bar);
+
+        header_bar.imp().back_button.connect_clicked(glib::clone!(@weak self as view => move |_| {
+            view.activate_action("lexicon.go-back", None).unwrap_or_default();
+        }));
+
+        imp.header_bar.replace(Some(header_bar.clone()));
     }
 }

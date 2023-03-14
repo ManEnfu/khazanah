@@ -111,6 +111,7 @@
                       <class name="navigation-sidebar"/>
                       <class name="background"/>
                     </style>
+                    <signal name="activate" handler="handle_row_activated" swapped="true"/>
                   </object>
                 </child>
               </object>
