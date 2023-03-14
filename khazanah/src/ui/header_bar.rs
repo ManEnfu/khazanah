@@ -24,10 +24,6 @@ mod imp {
         #[template_child]
         pub view_switcher: TemplateChild<ui::ViewSwitcherDropDown>,
 
-        // Center
-        // #[template_child]
-        // pub title_widget: TemplateChild<adw::WindowTitle>,
-
         // End
         #[template_child]
         pub start_controls: TemplateChild<ui::ToolbarStartControls>,
@@ -35,11 +31,6 @@ mod imp {
         pub end_controls: TemplateChild<ui::ToolbarEndControls>,
         #[template_child]
         pub main_menu_button: TemplateChild<ui::MainMenuButton>,
-
-        #[template_child]
-        pub search_word_button: TemplateChild<gtk::ToggleButton>,
-        #[template_child]
-        pub add_word_button: TemplateChild<gtk::Button>,
 
         #[property(get, set)]
         pub selected_view_index: Cell<u32>,
@@ -50,9 +41,6 @@ mod imp {
         pub reveal_back_button: Cell<bool>,
         #[property(get, set)]
         pub reveal_toolbar_buttons: Cell<bool>,
-
-        #[property(get, set)]
-        pub reveal_lexicon_view_buttons: Cell<bool>,
     }
 
     #[glib::object_subclass]

@@ -282,7 +282,6 @@ impl ui::View for ProjectLexiconView {
 
     fn connect_headerbar(&self, header_bar: &ui::HeaderBar) {
         let imp = self.imp();
-        imp.word_list_view.connect_headerbar(header_bar);
 
         header_bar.imp().back_button.connect_clicked(glib::clone!(@weak self as view => move |_| {
             view.activate_action("lexicon.go-back", None).unwrap_or_default();

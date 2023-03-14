@@ -1,5 +1,13 @@
-.word-header {
-  padding:  4px;
+.word-toolbar {
+  padding-top:  6px;
+  padding-bottom:  6px;
+  padding-left:  6px;
+}
+
+searchbar.flat > revealer > box {
+  background: none;
+  box-shadow: none;
+  border-top: none;
 }
 
 actionbar.flat > revealer > box {

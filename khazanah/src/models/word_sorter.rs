@@ -15,7 +15,7 @@ pub enum WordSortBy {
 
 #[doc(hidden)]
 mod imp {
-    use std::cell::Cell;
+    use std::{cell::Cell, cmp};
 
     use gtk::prelude::Cast;
 
@@ -61,12 +61,14 @@ mod imp {
         fn compare_by_romanization(&self, word1: &WordObject, word2: &WordObject) -> gtk::Ordering {
             let v1 = word1.romanization();
             let v2 = word2.romanization();
-            if v1 < v2 {
-                gtk::Ordering::Smaller
-            } else if v1 > v2 {
-                gtk::Ordering::Larger
-            } else {
-                gtk::Ordering::Equal
+            self.convert_ordering(v1.cmp(&v2))
+        }
+
+        fn convert_ordering(&self, ordering: cmp::Ordering) -> gtk::Ordering {
+            match ordering {
+                cmp::Ordering::Less => gtk::Ordering::Smaller,
+                cmp::Ordering::Greater => gtk::Ordering::Larger,
+                cmp::Ordering::Equal => gtk::Ordering::Equal,
             }
         }
     }

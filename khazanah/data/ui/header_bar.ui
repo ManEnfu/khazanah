@@ -63,21 +63,6 @@
                 </property>
               </object>
             </child>
-            <child>
-              <object class="GtkRevealer">
-                <property name="reveal-child"
-                          bind-source="KhzHeaderBar"
-                          bind-property="reveal-lexicon-view-buttons"
-                          bind-flags="sync-create"/>
-                <property name="transition-type">slide-right</property>
-                <property name="child">
-                  <object class="GtkToggleButton" id="search_word_button">
-                    <property name="icon-name">system-search-symbolic</property>
-                    <property name="tooltip-text">Search word</property>
-                  </object>
-                </property>
-              </object>
-            </child>
           </object>
         </child>
 
@@ -87,33 +72,6 @@
 
         <child type="end">
           <object class="GtkBox">
-            <child>
-              <object class="GtkRevealer">
-                <property name="reveal-child"
-                          bind-source="KhzHeaderBar"
-                          bind-property="reveal-lexicon-view-buttons"
-                          bind-flags="sync-create"/>
-                <property name="transition-type">slide-left</property>
-                <property name="child">
-                  <object class="GtkBox">
-                    <property name="spacing">6</property>
-                    <child>
-                      <object class="GtkButton" id="edit_button">
-                        <property name="icon-name">document-edit-symbolic</property>
-                        <property name="tooltip-text">Edit words</property>
-                        <!-- <property name="action-name">lexicon.add-word</property> -->
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="add_word_button">
-                        <property name="icon-name">list-add-symbolic</property>
-                        <property name="tooltip-text">Add new word</property>
-                      </object>
-                    </child>
-                  </object>
-                </property>
-              </object>
-            </child>
             <child>
               <object class="GtkRevealer">
                 <property name="reveal-child"

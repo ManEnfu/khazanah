@@ -41,7 +41,7 @@ mod imp {
         #[template_child]
         pub view_stack: TemplateChild<gtk::Stack>,
         #[template_child]
-        pub main_page: TemplateChild<gtk::ScrolledWindow>,
+        pub main_page: TemplateChild<gtk::Box>,
         #[template_child]
         pub list_empty_page: TemplateChild<adw::StatusPage>,
 
@@ -317,23 +317,5 @@ impl ui::View for ProjectLexiconWordListView {
         if let Some(word) = self.selected_word() {
             self.imp().selected_id.set(word.id());
         }
-    }
-
-    fn connect_headerbar(&self, header_bar: &ui::HeaderBar) {
-        let imp = self.imp();
-
-        let _binding = header_bar
-            .imp()
-            .search_word_button
-            .bind_property("active", &imp.search_word_button.get(), "active")
-            .sync_create()
-            .bidirectional()
-            .build();
-
-        header_bar.imp().add_word_button.connect_clicked(
-            glib::clone!(@strong self as view => move |_| {
-                view.add_word();
-            }),
-        );
     }
 }

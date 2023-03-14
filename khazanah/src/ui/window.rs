@@ -39,14 +39,6 @@ mod imp {
         #[template_child]
         pub project_lexicon_view: TemplateChild<ui::ProjectLexiconView>,
 
-        // #[template_child]
-        // pub view_switcher: TemplateChild<ui::ViewSwitcherDropDown>,
-        // #[template_child]
-        // pub start_controls: TemplateChild<ui::ToolbarStartControls>,
-        // #[template_child]
-        // pub end_controls: TemplateChild<ui::ToolbarEndControls>,
-        // #[template_child]
-        // pub main_menu_button: TemplateChild<ui::MainMenuButton>,
         #[template_child]
         pub header_bar: TemplateChild<ui::HeaderBar>,
         #[template_child]
@@ -476,14 +468,8 @@ impl ApplicationWindow {
 
     pub fn on_window_size(&self, width: i32, _height: i32) {
         if self.is_realized() {
-            let imp = self.imp();
-            let view = imp.current_view_index.get();
-
             let narrow = width <= 600;
             self.set_narrow(narrow);
-
-            imp.header_bar
-                .set_reveal_lexicon_view_buttons(narrow && view == MainViews::Lexicon);
         }
     }
 }
