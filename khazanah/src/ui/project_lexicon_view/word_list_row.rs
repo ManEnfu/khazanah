@@ -7,13 +7,16 @@ use adw::subclass::prelude::*;
 
 use crate::models::WordObject;
 
+use uuid::Uuid;
+
 #[doc(hidden)]
 mod imp {
-    use std::cell::RefCell;
+    use std::cell::{Cell, RefCell};
 
     use super::*;
 
-    #[derive(Debug, Default, gtk::CompositeTemplate)]
+    #[derive(Debug, Default, gtk::CompositeTemplate, glib::Properties)]
+    #[properties(wrapper_type = super::ProjectLexiconWordListRow)]
     #[template(resource = "/com/github/manenfu/Khazanah/ui/project_lexicon_view/word_list_row.ui")]
     pub struct ProjectLexiconWordListRow {
         #[template_child]
@@ -22,6 +25,11 @@ mod imp {
         pub pos_label: TemplateChild<gtk::Label>,
         #[template_child]
         pub translation_label: TemplateChild<gtk::Label>,
+
+        #[property(get, set)]
+        pub reveal_action_buttons: Cell<bool>,
+
+        pub id: Cell<Uuid>,
 
         pub bindings: RefCell<Vec<glib::Binding>>,
     }
@@ -34,7 +42,7 @@ mod imp {
 
         fn class_init(klass: &mut Self::Class) {
             klass.bind_template();
-            klass.bind_template_callbacks();
+            klass.bind_template_instance_callbacks();
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -42,10 +50,19 @@ mod imp {
         }
     }
 
-    #[gtk::template_callbacks]
-    impl ProjectLexiconWordListRow {}
+    impl ObjectImpl for ProjectLexiconWordListRow {
+        fn properties() -> &'static [glib::ParamSpec] {
+            Self::derived_properties()
+        }
 
-    impl ObjectImpl for ProjectLexiconWordListRow {}
+        fn set_property(&self, id: usize, value: &glib::Value, pspec: &glib::ParamSpec) {
+            self.derived_set_property(id, value, pspec)
+        }
+
+        fn property(&self, id: usize, pspec: &glib::ParamSpec) -> glib::Value {
+            self.derived_property(id, pspec)
+        }
+    }
 
     impl WidgetImpl for ProjectLexiconWordListRow {}
 
@@ -59,6 +76,7 @@ glib::wrapper! {
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
+#[gtk::template_callbacks]
 impl ProjectLexiconWordListRow {
     /// Creates a new list row.
     pub fn new() -> Self {
@@ -101,6 +119,8 @@ impl ProjectLexiconWordListRow {
                 .sync_create()
                 .build(),
         );
+
+        self.imp().id.set(word_object.id());
     }
 
     /// Unbinds widget.
@@ -108,6 +128,16 @@ impl ProjectLexiconWordListRow {
         for binding in self.imp().bindings.borrow_mut().drain(..) {
             binding.unbind();
         }
+    }
+
+    #[template_callback]
+    pub fn handle_delete_button(&self, _button: &gtk::Button) {
+        let id = self.imp().id.get();
+        self.activate_action(
+            "lexicon-list.delete-word",
+            Some(&glib::Variant::from(id.to_string())),
+        )
+        .unwrap_or_default();
     }
 }
 

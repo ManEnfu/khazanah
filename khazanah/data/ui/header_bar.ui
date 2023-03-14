@@ -18,7 +18,7 @@
                           bind-source="KhzHeaderBar"
                           bind-property="reveal-back-button"
                           bind-flags="sync-create"/>
-                <property name="transition-type">slide-left</property>
+                <property name="transition-type">slide-right</property>
                 <property name="child">
                   <object class="GtkButton" id="back_button">
                     <property name="icon-name">go-previous-symbolic</property>
@@ -32,7 +32,7 @@
                           bind-source="KhzHeaderBar"
                           bind-property="reveal-back-button"
                           bind-flags="sync-create|invert-boolean"/>
-                <property name="transition-type">slide-left</property>
+                <property name="transition-type">slide-right</property>
                 <property name="child">
                   <object class="KhzViewSwitcherDropDown" id="view_switcher">
                     <property name="sensitive"

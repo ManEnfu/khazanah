@@ -17,15 +17,21 @@
 
             <child>
               <object class="GtkBox" id="word_toolbar">
-                <property name="margin-top">6</property>
-                <property name="margin-bottom">6</property>
-                <property name="margin-start">6</property>
                 <property name="spacing">6</property>
                 <property name="orientation">vertical</property>
+                <style>
+                  <class name="word-toolbar"/>
+                </style>
                 <child>
                   <object class="GtkToggleButton" id="search_word_button">
                     <property name="icon-name">system-search-symbolic</property>
                     <property name="tooltip-text">Search word</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkMenuButton" id="sort_word_button">
+                    <property name="icon-name">view-sort-ascending-symbolic</property>
+                    <property name="tooltip-text">Sort word</property>
                   </object>
                 </child>
                 <child>
@@ -38,14 +44,13 @@
                       <object class="GtkButton" id="add_word_button">
                         <property name="icon-name">list-add-symbolic</property>
                         <property name="tooltip-text">Add new word</property>
-                        <property name="action-name">lexicon.add-word</property>
+                        <property name="action-name">lexicon-list.add-word</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="edit_button">
+                      <object class="GtkToggleButton" id="edit_word_button">
                         <property name="icon-name">document-edit-symbolic</property>
                         <property name="tooltip-text">Edit words</property>
-                        <!-- <property name="action-name">lexicon.add-word</property> -->
                       </object>
                     </child>
                   </object>
@@ -115,7 +120,7 @@
             <child>
               <object class="GtkButton">
                 <property name="label">Add Word</property>
-                <property name="action-name">lexicon.add-word</property>
+                <property name="action-name">lexicon-list.add-word</property>
                 <property name="halign">center</property>
                 <style>
                   <class name="pill"/>

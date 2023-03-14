@@ -3,7 +3,7 @@
 // pub use lexicon_word_list::LexiconWordList;
 pub use project_model::ProjectModel;
 pub use word_object::WordObject;
-pub use word_sorter::{WordSorter, WordSortBy};
+pub use word_sorter::{WordSortBy, WordSorter};
 
 // mod lexicon_word_list;
 mod project_model;

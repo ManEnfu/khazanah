@@ -1,6 +1,6 @@
+use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use gtk::glib;
 
 #[derive(Default, Debug, Clone, Copy, glib::Enum)]
 #[enum_type(name = "KhzWordSortBy")]

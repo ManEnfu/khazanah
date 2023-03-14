@@ -1,7 +1,5 @@
 .word-toolbar {
-  padding-top:  6px;
-  padding-bottom:  6px;
-  padding-left:  6px;
+  padding:  6px;
 }
 
 searchbar.flat > revealer > box {

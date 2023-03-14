@@ -19,7 +19,10 @@ use super::ProjectLexiconWordListRow;
 mod imp {
     use std::cell::{Cell, RefCell};
 
-    use gtk::glib::subclass::{Signal, SignalType};
+    use gtk::glib::{
+        subclass::{Signal, SignalType},
+        FromVariant,
+    };
     use once_cell::sync::Lazy;
 
     use crate::models;
@@ -37,6 +40,8 @@ mod imp {
         pub search_word_button: TemplateChild<gtk::ToggleButton>,
         #[template_child]
         pub add_word_button: TemplateChild<gtk::Button>,
+        #[template_child]
+        pub edit_word_button: TemplateChild<gtk::ToggleButton>,
 
         #[template_child]
         pub view_stack: TemplateChild<gtk::Stack>,
@@ -74,9 +79,23 @@ mod imp {
             klass.bind_template();
             klass.bind_template_instance_callbacks();
 
-            klass.install_action("lexicon.add-word", None, move |widget, _, _| {
+            klass.install_action("lexicon-list.add-word", None, move |widget, _, _| {
                 widget.add_word();
-            })
+            });
+
+            // Param type: string
+            klass.install_action(
+                "lexicon-list.delete-word",
+                Some("s"),
+                move |widget, _, v| {
+                    if let Some(id) = v
+                        .and_then(String::from_variant)
+                        .and_then(|s| Uuid::try_parse(&s).ok())
+                    {
+                        widget.delete_word_by_id(id);
+                    }
+                },
+            );
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -106,12 +125,14 @@ mod imp {
 
         fn signals() -> &'static [Signal] {
             static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
-                vec![Signal::builder("word-selected")
-                    .param_types(Vec::<SignalType>::new())
-                    .build(),
+                vec![
+                    Signal::builder("word-selected")
+                        .param_types(Vec::<SignalType>::new())
+                        .build(),
                     Signal::builder("word-activated")
-                    .param_types(Vec::<SignalType>::new())
-                    .build()]
+                        .param_types(Vec::<SignalType>::new())
+                        .build(),
+                ]
             });
             SIGNALS.as_ref()
         }
@@ -144,7 +165,8 @@ impl ProjectLexiconWordListView {
 
         let sort_model = gtk::SortListModel::new(
             Some(filter_model),
-            Some(models::WordSorter::new(models::WordSortBy::Romanization)));
+            Some(models::WordSorter::new(models::WordSortBy::Romanization)),
+        );
         self.set_sort_model(sort_model.clone());
 
         let selection_model = gtk::SingleSelection::new(Some(sort_model));
@@ -153,12 +175,18 @@ impl ProjectLexiconWordListView {
         // Setup list factory
         let factory = gtk::SignalListItemFactory::new();
 
-        factory.connect_setup(move |_, item| {
+        factory.connect_setup(glib::clone!(@weak self as view => move |_, item| {
             let row = ProjectLexiconWordListRow::new();
+
+            view.imp().edit_word_button
+                .bind_property("active", &row, "reveal-action-buttons")
+                .sync_create()
+                .build();
+
             item.downcast_ref::<gtk::ListItem>()
                 .expect(EXPECTED_LIST_ITEM)
                 .set_child(Some(&row));
-        });
+        }));
 
         factory.connect_bind(move |_, item| {
             let list_item = item
@@ -206,14 +234,14 @@ impl ProjectLexiconWordListView {
     pub fn selected_word(&self) -> Option<WordObject> {
         self.selection_model()?.selected_item().and_downcast()
     }
-    
+
     /// Adds a new word to the model.
     pub fn add_word(&self) {
         if let Some(id) = self
             .project_model()
             .update(|project| project.lexicon_mut().add_word(Word::new()))
         {
-            log::debug!("Added word by id {}", id);
+            log::debug!("Added word of id {}", id);
             let word_object = WordObject::new(self.project_model(), id);
 
             self.word_list_model()
@@ -222,10 +250,36 @@ impl ProjectLexiconWordListView {
 
             self.select_word_by_id(id);
 
+            self.imp().edit_word_button.set_active(false);
             self.emit_by_name::<()>("word-activated", &[]);
         }
-        
+
         self.switch_stack_page();
+    }
+
+    /// Deletes a word by its id.
+    pub fn delete_word_by_id(&self, id: Uuid) {
+        if let Some(true) = self
+            .project_model()
+            .update(|project| project.lexicon_mut().delete_word_by_id(id))
+        {
+            log::debug!("Deleted word of id {}", id);
+
+            let word_list_model = self
+                .word_list_model()
+                .expect("word list model is not initialized");
+
+            if let Some(position) = word_list_model
+                .iter::<glib::Object>()
+                .position(|w| w.unwrap().downcast_ref::<WordObject>().unwrap().id() == id)
+            {
+                word_list_model.remove(position as u32);
+            };
+
+            self.handle_selection_changed();
+
+            self.switch_stack_page();
+        }
     }
 
     /// Select a word by its id.
@@ -255,16 +309,18 @@ impl ProjectLexiconWordListView {
         }
 
         self.imp().old_selected_word.replace(self.selected_word());
-        
+
         self.emit_by_name::<()>("word-selected", &[])
     }
 
     /// Callback to 'activate' signal.
     #[template_callback]
     pub fn handle_row_activated(&self, _position: u32, _list_view: &gtk::ListView) {
-        self.emit_by_name::<()>("word-activated", &[]);
-    } 
-    
+        if !self.imp().edit_word_button.is_active() {
+            self.emit_by_name::<()>("word-activated", &[]);
+        }
+    }
+
     /// Notify the model that a word is updates.
     pub fn notify_changes_to_model(&self, word: &WordObject) {
         let word_list_model = self
@@ -281,8 +337,13 @@ impl ProjectLexiconWordListView {
         let imp = self.imp();
         let stack = imp.view_stack.get();
 
-        if self.word_list_model().map(|wl| wl.n_items()).unwrap_or_default() > 0 {
-            stack.set_visible_child(&*imp.main_page); 
+        if self
+            .word_list_model()
+            .map(|wl| wl.n_items())
+            .unwrap_or_default()
+            > 0
+        {
+            stack.set_visible_child(&*imp.main_page);
         } else {
             stack.set_visible_child(&*imp.list_empty_page);
         }
@@ -308,6 +369,8 @@ impl ui::View for ProjectLexiconWordListView {
             self.select_word_by_id(self.imp().selected_id.get());
         }
 
+        self.imp().edit_word_button.set_active(false);
+
         self.switch_stack_page();
     }
 
@@ -317,5 +380,7 @@ impl ui::View for ProjectLexiconWordListView {
         if let Some(word) = self.selected_word() {
             self.imp().selected_id.set(word.id());
         }
+
+        self.imp().edit_word_button.set_active(false);
     }
 }
