@@ -16,6 +16,7 @@ use crate::ui;
 use super::ProjectLexiconWordListRow;
 
 #[doc(hidden)]
+#[allow(clippy::enum_variant_names)]
 mod imp {
     use std::cell::{Cell, RefCell};
 
@@ -61,9 +62,6 @@ mod imp {
         pub sort_model: RefCell<Option<gtk::SortListModel>>,
         #[property(get, set)]
         pub selection_model: RefCell<Option<gtk::SingleSelection>>,
-
-        #[property(get, set)]
-        pub reveal_header: Cell<bool>,
 
         pub selected_id: Cell<Uuid>,
         pub old_selected_word: RefCell<Option<WordObject>>,

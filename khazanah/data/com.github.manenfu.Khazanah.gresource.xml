@@ -9,6 +9,7 @@
     <file compressed="true" preprocess="xml-stripblanks">ui/toolbar_end_controls.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/start_view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/project_lexicon_view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/project_lexicon_view/word_edit_view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/project_lexicon_view/word_list_view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/project_lexicon_view/word_list_row.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/project_overview_view.ui</file>

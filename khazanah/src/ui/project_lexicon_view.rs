@@ -2,17 +2,16 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gdk, glib};
 
-use adw::prelude::*;
 use adw::subclass::prelude::*;
 
 use crate::models;
 use crate::ui;
 
-use conlang::ALL_PARTS_OF_SPEECH;
-
-pub use self::word_list_row::ProjectLexiconWordListRow;
+pub use word_edit_view::ProjectLexiconWordEditView;
+pub use word_list_row::ProjectLexiconWordListRow;
 pub use word_list_view::ProjectLexiconWordListView;
 
+mod word_edit_view;
 mod word_list_row;
 mod word_list_view;
 
@@ -26,30 +25,27 @@ mod imp {
     #[properties(wrapper_type = super::ProjectLexiconView)]
     #[template(resource = "/com/github/manenfu/Khazanah/ui/project_lexicon_view.ui")]
     pub struct ProjectLexiconView {
-        #[template_child]
-        pub pos_dropdown: TemplateChild<adw::ComboRow>,
+        // #[template_child]
+        // pub pos_dropdown: TemplateChild<adw::ComboRow>,
 
-        #[template_child]
-        pub romanization_entry: TemplateChild<adw::EntryRow>,
-        #[template_child]
-        pub translation_entry: TemplateChild<adw::EntryRow>,
-        #[template_child]
-        pub pronunciation_entry: TemplateChild<adw::EntryRow>,
-
+        // #[template_child]
+        // pub romanization_entry: TemplateChild<adw::EntryRow>,
+        // #[template_child]
+        // pub translation_entry: TemplateChild<adw::EntryRow>,
+        // #[template_child]
+        // pub pronunciation_entry: TemplateChild<adw::EntryRow>,
         #[template_child]
         pub leaflet: TemplateChild<adw::Leaflet>,
 
         #[template_child]
         pub word_list_view: TemplateChild<ProjectLexiconWordListView>,
         #[template_child]
-        pub word_edit_view: TemplateChild<gtk::ScrolledWindow>,
+        pub word_edit_view: TemplateChild<ProjectLexiconWordEditView>,
 
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
 
         pub header_bar: RefCell<Option<ui::HeaderBar>>,
-
-        pub form_binding: RefCell<Vec<glib::Binding>>,
     }
 
     #[glib::object_subclass]
@@ -84,8 +80,6 @@ mod imp {
             self.parent_constructed();
 
             let obj = self.obj();
-            obj.setup_dropdown();
-            // obj.setup_list();
             obj.setup_callbacks();
         }
 
@@ -115,19 +109,6 @@ glib::wrapper! {
 
 #[gtk::template_callbacks]
 impl ProjectLexiconView {
-    /// Setups dropdown widget.
-    fn setup_dropdown(&self) {
-        let imp = self.imp();
-
-        // Populate dropdown.
-        let pos_list: Vec<&str> = ALL_PARTS_OF_SPEECH
-            .iter()
-            .map(|pos| pos.map(|v| v.name()).unwrap_or("---"))
-            .collect();
-        let pos_model = gtk::StringList::new(&pos_list);
-        imp.pos_dropdown.set_model(Some(&pos_model));
-    }
-
     /// Setups callbacks.
     fn setup_callbacks(&self) {
         let imp = self.imp();
@@ -156,57 +137,20 @@ impl ProjectLexiconView {
         );
     }
 
-    /// Initializes forms.
-    pub fn init_form(&self) {
-        let mut bindings = self.imp().form_binding.borrow_mut();
-
-        for binding in bindings.drain(..) {
-            binding.unbind();
-        }
-    }
-
     /// Loads form contents with word data.
     pub fn load_selected_word(&self) {
         let imp = self.imp();
 
-        let mut bindings = self.imp().form_binding.borrow_mut();
-
-        for binding in bindings.drain(..) {
-            binding.unbind();
-        }
-
+        imp.word_edit_view.unbind();
         let word = imp.word_list_view.selected_word();
 
         if let Some(word) = word {
             log::debug!("selected word: {}", word.id());
-
-            bindings.push(
-                word.bind_property("romanization", &imp.romanization_entry.get(), "text")
-                    .sync_create()
-                    .bidirectional()
-                    .build(),
-            );
-
-            bindings.push(
-                word.bind_property("translation", &imp.translation_entry.get(), "text")
-                    .sync_create()
-                    .bidirectional()
-                    .build(),
-            );
-
-            bindings.push(
-                word.bind_property("pronunciation", &imp.pronunciation_entry.get(), "text")
-                    .sync_create()
-                    .bidirectional()
-                    .build(),
-            );
-
-            bindings.push(
-                word.bind_property("part-of-speech", &imp.pos_dropdown.get(), "selected")
-                    .sync_create()
-                    .bidirectional()
-                    .build(),
-            );
+            imp.word_edit_view.bind(&word);
+            imp.word_edit_view.set_fields_sensitive(true);
+        } else {
+            imp.word_edit_view.clear_fields();
+            imp.word_edit_view.set_fields_sensitive(false);
         }
 
         self.navigate_back();
@@ -259,6 +203,7 @@ impl ui::View for ProjectLexiconView {
         let imp = self.imp();
 
         imp.word_list_view.load_state();
+        imp.word_edit_view.load_state();
 
         self.load_selected_word();
     }
@@ -268,6 +213,7 @@ impl ui::View for ProjectLexiconView {
 
         let imp = self.imp();
         imp.word_list_view.commit_state();
+        imp.word_edit_view.commit_state();
     }
 
     fn connect_headerbar(&self, header_bar: &ui::HeaderBar) {

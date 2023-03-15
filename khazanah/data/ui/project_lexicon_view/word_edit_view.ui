@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<interface>
+  <requires lib="gtk" version="4.6"/>
+  <requires lib="Adw" version="1.2"/>
+
+  <!-- The view to edit lexicon word. -->
+  <template class="KhzProjectLexiconWordEditView" parent="AdwBin">
+    <child>
+      <object class="GtkScrolledWindow" id="word_edit_view">
+        <property name="vexpand">True</property>
+        <property name="child">
+          <object class="AdwClamp">
+            <property name="child">
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="margin-top">24</property>
+                <property name="margin-bottom">24</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="spacing">12</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Word</property>
+                    <property name="halign">start</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkListBox">
+                    <property name="selection-mode">none</property>
+                    <style>
+                      <class name="boxed-list"/>
+                    </style>
+                    <child>
+                      <object class="AdwEntryRow" id="romanization_entry">
+                        <property name="title">Romanization</property>
+                        <property name="sensitive"
+                                  bind-source="KhzProjectLexiconWordEditView"
+                                  bind-property="fields-sensitive"
+                                  bind-flags="sync-create"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwEntryRow" id="translation_entry">
+                        <property name="title">Translation</property>
+                        <property name="sensitive"
+                                  bind-source="KhzProjectLexiconWordEditView"
+                                  bind-property="fields-sensitive"
+                                  bind-flags="sync-create"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwEntryRow" id="pronunciation_entry">
+                        <property name="title">Pronunciation</property>
+                        <property name="sensitive"
+                                  bind-source="KhzProjectLexiconWordEditView"
+                                  bind-property="fields-sensitive"
+                                  bind-flags="sync-create"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwComboRow" id="pos_dropdown">
+                        <property name="title">Part of Speech</property>
+                        <property name="sensitive"
+                                  bind-source="KhzProjectLexiconWordEditView"
+                                  bind-property="fields-sensitive"
+                                  bind-flags="sync-create"/>
+                        <property name="model">
+                          <object class="GtkStringList">
+                            <items>
+                              <item>Noun</item>
+                              <item>Verb</item>
+                            </items>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object> <!-- GtkBox -->
+            </property>
+          </object> <!-- AdwClamp -->
+        </property>
+      </object> <!-- GtkScrolledWindow -->
+    </child>
+  </template> <!-- KhzProjectLexiconWordEditView -->
+</interface>
