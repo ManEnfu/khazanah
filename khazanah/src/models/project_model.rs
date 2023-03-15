@@ -128,6 +128,12 @@ impl ProjectModel {
         self.imp().project.borrow_mut()
     }
 
+    pub fn new_project(&self) {
+        self.set_project(Some(Project::new()));
+        self.imp().path.replace(None);
+        self.notify_path();
+    }
+
     /// Loads project from a file.
     pub fn load_file<P: AsRef<Path>>(&self, path: P) -> Result<(), project::Error> {
         let project = Project::load_file(&path)?;

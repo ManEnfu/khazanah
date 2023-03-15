@@ -96,7 +96,6 @@ impl ui::View for ProjectOverviewView {
         log::debug!("Loading view state.");
 
         let imp = self.imp();
-        let dirty = self.project_model().dirty();
 
         let mut bindings = imp.form_bindings.borrow_mut();
         let meta_object = self.meta_object();
@@ -136,8 +135,6 @@ impl ui::View for ProjectOverviewView {
                 .bidirectional()
                 .build(),
         );
-
-        self.project_model().set_dirty(dirty);
     }
 
     fn commit_state(&self) {
@@ -148,7 +145,5 @@ impl ui::View for ProjectOverviewView {
         for binding in imp.form_bindings.borrow_mut().drain(..) {
             binding.unbind()
         }
-
-        self.project_model().set_dirty(true);
     }
 }

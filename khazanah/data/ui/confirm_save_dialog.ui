@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.6"/>
+  <requires lib="Adw" version="1.2"/>
+
+  <!-- This dialog will appear on closing a window with unsaved project. -->
+  <object class="AdwMessageDialog" id="dialog">
+    <property name="heading" translatable="yes">Save Project?</property>
+    <property name="body" translatable="yes">The current project contains unsaved changes. Changes which are not saved will be permanently lost.?.</property>
+    <property name="default-response">save</property>
+    <property name="close-response">cancel</property>
+    <responses>
+      <response id="cancel" translatable="yes">_Cancel</response>
+      <response id="discard" translatable="yes" appearance="destructive">_Discard</response>
+      <response id="save" translatable="yes" appearance="suggested">_Save</response>
+    </responses>
+  </object>
+</interface>

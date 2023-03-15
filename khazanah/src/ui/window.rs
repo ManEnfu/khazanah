@@ -1,7 +1,5 @@
 use std::path::Path;
 
-use conlang::Project;
-
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gio, glib};
@@ -117,7 +115,6 @@ mod imp {
 
     impl WidgetImpl for ApplicationWindow {
         fn size_allocate(&self, width: i32, height: i32, baseline: i32) {
-            // Send the current window width and height to all views.
             self.obj().on_window_size(width, height);
 
             self.parent_size_allocate(width, height, baseline);
@@ -125,9 +122,15 @@ mod imp {
     }
 
     impl WindowImpl for ApplicationWindow {
-        // fn close_request(&self) -> glib::signal::Inhibit {
-        //     glib::signal::Inhibit(true)
-        // }
+        fn close_request(&self) -> glib::signal::Inhibit {
+            if self.project_model.borrow().dirty() {
+                log::debug!("Project is dirty.");
+                self.obj().confirm_save_dialog(Some("window.close"));
+                return glib::signal::Inhibit(true);
+            }
+
+            glib::signal::Inhibit(false)
+        }
     }
 
     impl ApplicationWindowImpl for ApplicationWindow {}
@@ -155,31 +158,43 @@ impl ApplicationWindow {
     fn setup_gactions(&self) {
         // Open project
         let open_action = gio::ActionEntry::builder("open")
-            .activate(Self::open_file_dialog)
+            .activate(|window: &Self, _, _| {
+                if window.project_model().dirty() {
+                    log::debug!("Project is dirty.");
+                    window.confirm_save_dialog(Some("win.open"));
+                } else {
+                    window.open_file_dialog();
+                }
+            })
             .build();
         // New project
         let new_action = gio::ActionEntry::builder("new")
             .activate(|window: &Self, _, _| {
-                window.emit_by_name::<()>("new-project", &[]);
+                if window.project_model().dirty() {
+                    log::debug!("Project is dirty.");
+                    window.confirm_save_dialog(Some("win.new"));
+                } else {
+                    window.emit_by_name::<()>("new-project", &[]);
+                }
             })
             .build();
         // Save project
         let save_action = gio::ActionEntry::builder("save")
-            .activate(|window: &Self, action, v| {
+            .activate(|window: &Self, _, _| {
                 if !window.project_model().opened() {
                     return;
                 }
                 match window.project_model().path() {
-                    Some(path) => window.save_project_file(path),
-                    None => window.save_file_dialog(action, v),
+                    Some(path) => window.save_project_file(path, None),
+                    None => window.save_file_dialog(None),
                 }
             })
             .build();
         // Save project as another file
         let save_as_action = gio::ActionEntry::builder("save-as")
-            .activate(|window: &Self, action, v| {
+            .activate(|window: &Self, _, _| {
                 if window.project_model().opened() {
-                    window.save_file_dialog(action, v);
+                    window.save_file_dialog(None);
                 }
             })
             .build();
@@ -200,7 +215,7 @@ impl ApplicationWindow {
     }
 
     /// Shows `Open File` dialog.
-    fn open_file_dialog(&self, _action: &gio::SimpleAction, _v: Option<&glib::Variant>) {
+    fn open_file_dialog(&self) {
         let imp = self.imp();
         // Skip if dialog is already opened
         if imp.file_dialog.borrow().is_some() {
@@ -278,7 +293,8 @@ impl ApplicationWindow {
 
     /// Creates a new project and sets it as the current project.
     pub fn new_project(&self) {
-        self.project_model().set_project(Some(Project::new()));
+        // self.project_model().set_project(Some(Project::new()));
+        self.project_model().new_project();
         self.finish_open_project();
         self.imp()
             .toast_overlay
@@ -300,7 +316,7 @@ impl ApplicationWindow {
     }
 
     /// Shows `Save File` dialog.
-    fn save_file_dialog(&self, _action: &gio::SimpleAction, _v: Option<&glib::Variant>) {
+    fn save_file_dialog(&self, next_action: Option<&'static str>) {
         let imp = self.imp();
         // Skip if dialog is already opened
         if imp.file_dialog.borrow().is_some() {
@@ -319,7 +335,7 @@ impl ApplicationWindow {
             glib::clone!(@strong self as window => move |dialog, response| {
                 if response == gtk::ResponseType::Accept {
                     if let Some(Some(path)) = dialog.file().map(|f| f.path()) {
-                        window.save_project_file(path);
+                        window.save_project_file(path, next_action);
                     } else {
                         log::error!("Invalid file.");
                     }
@@ -335,7 +351,7 @@ impl ApplicationWindow {
     }
 
     /// Save the current project.
-    pub fn save_project_file<P: AsRef<Path>>(&self, path: P) {
+    pub fn save_project_file<P: AsRef<Path>>(&self, path: P, next_action: Option<&'static str>) {
         log::info!("Saving file: {:?}", path.as_ref());
 
         self.commit_all_views();
@@ -357,7 +373,10 @@ impl ApplicationWindow {
                                 .unwrap_or_default()
                         );
                         window.imp().toast_overlay.add_toast(adw::Toast::new(&msg));
-                        // window.update_title();
+                        if let Some(action) = next_action {
+                            gtk::prelude::WidgetExt::activate_action(&window, action, None)
+                                .unwrap_or_default();
+                        }
                     }
                     Err(e) => {
                         log::error!("Error saving file: {}", e);
@@ -373,6 +392,34 @@ impl ApplicationWindow {
                 }
             }
         });
+    }
+
+    /// Shows save confirmation dialog.
+    pub fn confirm_save_dialog(&self, next_action: Option<&'static str>) {
+        let builder =
+            gtk::Builder::from_resource("/com/github/manenfu/Khazanah/ui/confirm_save_dialog.ui");
+        let dialog = builder.object::<adw::MessageDialog>("dialog").unwrap();
+        dialog.set_transient_for(Some(self));
+        dialog.connect_closure(
+            "response",
+            false,
+            glib::closure_local!(@strong self as window => move |_: &adw::MessageDialog, response: &str| {
+                match response {
+                    "save" => match window.project_model().path() {
+                        Some(path) => window.save_project_file(path, next_action),
+                        None => window.save_file_dialog(next_action),
+                    }
+                    "discard" => {
+                        if let Some(action) = next_action {
+                            window.project_model().set_dirty(false);
+                            gtk::prelude::WidgetExt::activate_action(&window, action, None).unwrap_or_default();
+                        }
+                    }
+                    _ => {}
+                }
+            })
+        );
+        dialog.present();
     }
 
     // VIEWS

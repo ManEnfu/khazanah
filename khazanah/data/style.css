@@ -5,7 +5,7 @@
 searchbar.flat > revealer > box {
   background: none;
   box-shadow: none;
-  border-top: none;
+  border-bottom: none;
 }
 
 actionbar.flat > revealer > box {

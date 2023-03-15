@@ -15,5 +15,7 @@
     <file compressed="true" preprocess="xml-stripblanks">ui/view_switcher_dropdown.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/main_menu_button.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/header_bar.ui</file>
+
+    <file compressed="true" preprocess="xml-stripblanks">ui/confirm_save_dialog.ui</file>
   </gresource>
 </gresources>

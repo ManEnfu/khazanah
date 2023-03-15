@@ -66,6 +66,7 @@
             <property name="child">
               <object class="GtkButton" id="delete_button">
                 <property name="icon-name">user-trash-symbolic</property>
+                <property name="tooltip-text">Delete word</property>
                 <style>
                   <class name="destructive-action"/>
                 </style>

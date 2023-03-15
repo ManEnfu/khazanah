@@ -257,13 +257,10 @@ impl ui::View for ProjectLexiconView {
         log::debug!("Loading view state.");
 
         let imp = self.imp();
-        let dirty = self.project_model().dirty();
 
         imp.word_list_view.load_state();
 
         self.load_selected_word();
-
-        self.project_model().set_dirty(dirty);
     }
 
     fn commit_state(&self) {
@@ -271,8 +268,6 @@ impl ui::View for ProjectLexiconView {
 
         let imp = self.imp();
         imp.word_list_view.commit_state();
-
-        self.project_model().set_dirty(true);
     }
 
     fn connect_headerbar(&self, header_bar: &ui::HeaderBar) {
