@@ -53,6 +53,9 @@ mod imp {
         #[property(get, set)]
         pub narrow: Cell<bool>,
 
+        #[property(get, set)]
+        pub force_action: Cell<bool>,
+
         pub current_view_index: Cell<MainViews>,
 
         pub file_dialog: RefCell<Option<gtk::FileChooserNative>>,
@@ -123,7 +126,7 @@ mod imp {
 
     impl WindowImpl for ApplicationWindow {
         fn close_request(&self) -> glib::signal::Inhibit {
-            if self.project_model.borrow().dirty() {
+            if self.project_model.borrow().dirty() && !self.force_action.get() {
                 log::debug!("Project is dirty.");
                 self.obj().confirm_save_dialog(Some("window.close"));
                 return glib::signal::Inhibit(true);
@@ -159,10 +162,11 @@ impl ApplicationWindow {
         // Open project
         let open_action = gio::ActionEntry::builder("open")
             .activate(|window: &Self, _, _| {
-                if window.project_model().dirty() {
+                if window.project_model().dirty() && !window.force_action() {
                     log::debug!("Project is dirty.");
                     window.confirm_save_dialog(Some("win.open"));
                 } else {
+                    window.set_force_action(false);
                     window.open_file_dialog();
                 }
             })
@@ -170,10 +174,11 @@ impl ApplicationWindow {
         // New project
         let new_action = gio::ActionEntry::builder("new")
             .activate(|window: &Self, _, _| {
-                if window.project_model().dirty() {
+                if window.project_model().dirty() && !window.force_action() {
                     log::debug!("Project is dirty.");
                     window.confirm_save_dialog(Some("win.new"));
                 } else {
+                    window.set_force_action(false);
                     window.emit_by_name::<()>("new-project", &[]);
                 }
             })
@@ -422,7 +427,7 @@ impl ApplicationWindow {
                     }
                     "discard" => {
                         if let Some(action) = next_action {
-                            window.project_model().set_dirty(false);
+                            window.set_force_action(true);
                             gtk::prelude::WidgetExt::activate_action(&window, action, None).unwrap_or_default();
                         }
                     }
