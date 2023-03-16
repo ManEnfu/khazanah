@@ -66,6 +66,19 @@
           </object>
         </child>
 
+        <child type="title">
+          <object class="AdwWindowTitle">
+            <property name="title"
+                      bind-source="KhzHeaderBar"
+                      bind-property="title"
+                      bind-flags="sync-create"/>
+            <property name="subtitle"
+                      bind-source="KhzHeaderBar"
+                      bind-property="subtitle"
+                      bind-flags="sync-create"/>
+          </object>
+        </child>
+
         <child type="end">
           <object class="KhzMainMenuButton" id="main_menu_button"/>
         </child>

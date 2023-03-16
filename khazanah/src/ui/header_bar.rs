@@ -7,7 +7,7 @@ use adw::subclass::prelude::*;
 use crate::ui;
 
 mod imp {
-    use std::cell::Cell;
+    use std::cell::{Cell, RefCell};
 
     use super::*;
 
@@ -41,6 +41,11 @@ mod imp {
         pub reveal_back_button: Cell<bool>,
         #[property(get, set)]
         pub reveal_toolbar_buttons: Cell<bool>,
+
+        #[property(get, set)]
+        pub title: RefCell<Option<String>>,
+        #[property(get, set)]
+        pub subtitle: RefCell<Option<String>>,
     }
 
     #[glib::object_subclass]

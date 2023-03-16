@@ -212,6 +212,19 @@ impl ApplicationWindow {
                 Some(s.map_or("Khazanah".to_string(), |s| format!("{} - Khazanah", s)))
             })
             .build();
+
+        self.project_model()
+            .bind_property("title", &self.imp().header_bar.get(), "title")
+            .sync_create()
+            .transform_to(|_, s: Option<String>| {
+                Some(s.unwrap_or("Khazanah".to_string()))
+            })
+            .build();
+        
+        self.project_model()
+            .bind_property("path", &self.imp().header_bar.get(), "subtitle")
+            .sync_create()
+            .build();
     }
 
     /// Shows `Open File` dialog.
