@@ -1,4 +1,5 @@
 use conlang::Word;
+use gtk::glib::FromVariant;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gio, glib};
@@ -20,10 +21,7 @@ use super::ProjectLexiconWordListRow;
 mod imp {
     use std::cell::{Cell, RefCell};
 
-    use gtk::glib::{
-        subclass::{Signal, SignalType},
-        FromVariant,
-    };
+    use gtk::glib::subclass::{Signal, SignalType};
     use once_cell::sync::Lazy;
 
     use crate::models;
@@ -39,6 +37,8 @@ mod imp {
 
         #[template_child]
         pub search_word_button: TemplateChild<gtk::ToggleButton>,
+        #[template_child]
+        pub sort_word_button: TemplateChild<gtk::MenuButton>,
         #[template_child]
         pub add_word_button: TemplateChild<gtk::Button>,
         #[template_child]
@@ -75,6 +75,11 @@ mod imp {
         #[property(get, set)]
         pub selection_model: RefCell<Option<gtk::SingleSelection>>,
 
+        #[property(get, set)]
+        pub filter_category: RefCell<String>,
+
+        pub action_group: RefCell<gio::SimpleActionGroup>,
+
         pub selected_id: Cell<Uuid>,
         pub old_selected_word: RefCell<Option<WordObject>>,
     }
@@ -88,24 +93,6 @@ mod imp {
         fn class_init(klass: &mut Self::Class) {
             klass.bind_template();
             klass.bind_template_instance_callbacks();
-
-            klass.install_action("lexicon-list.add-word", None, move |widget, _, _| {
-                widget.add_word();
-            });
-
-            // Param type: string
-            klass.install_action(
-                "lexicon-list.delete-word",
-                Some("s"),
-                move |widget, _, v| {
-                    if let Some(id) = v
-                        .and_then(String::from_variant)
-                        .and_then(|s| Uuid::try_parse(&s).ok())
-                    {
-                        widget.delete_word_by_id(id);
-                    }
-                },
-            );
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -118,6 +105,7 @@ mod imp {
             self.parent_constructed();
 
             let obj = self.obj();
+            obj.setup_gactions();
             obj.setup_list();
             obj.setup_search();
         }
@@ -165,7 +153,9 @@ glib::wrapper! {
 
 #[gtk::template_callbacks]
 impl ProjectLexiconWordListView {
-    /// Setup models and list
+    // SETUPS
+
+    /// Setups models and list
     fn setup_list(&self) {
         let imp = self.imp();
 
@@ -251,7 +241,83 @@ impl ProjectLexiconWordListView {
         let imp = self.imp();
 
         imp.search_bar.connect_entry(&imp.search_entry.get());
+        self.set_filter_category("all");
     }
+
+    /// Setups actions for this view.
+    pub fn setup_gactions(&self) {
+        let imp = self.imp();
+        let action_group = &*imp.action_group.borrow();
+
+        self.insert_action_group("lexicon-list", Some(action_group));
+
+        action_group.add_action_entries([
+            // Adds word to list.
+            gio::ActionEntry::builder("add-word")
+                .activate(glib::clone!(@weak self as view => move |_, _, _| {
+                    view.add_word();
+                }))
+                .build(),
+            // Deletes word of id `id` to list.
+            gio::ActionEntry::builder("delete-word")
+                .parameter_type(Some(&String::static_variant_type()))
+                .activate(glib::clone!(@weak self as view => move |_, _, v| {
+                    if let Some(id) = v
+                        .and_then(String::from_variant)
+                        .and_then(|s| Uuid::try_parse(&s).ok())
+                    {
+                        view.delete_word_by_id(id);
+                    }
+                }))
+                .build(),
+            // Sorts by category.
+            gio::ActionEntry::builder("sort-category")
+                .parameter_type(Some(&String::static_variant_type()))
+                .state("romanization".to_variant())
+                .activate(glib::clone!(@weak self as view => move |_, action, v| {
+                    if let Some(v) = v.and_then(String::from_variant) {
+                        let sort_by = match v.as_str() {
+                            "romanization" => models::WordSortBy::Romanization,
+                            "translation" => models::WordSortBy::Translation,
+                            "part-of-speech" => models::WordSortBy::PartOfSpeech,
+                            s => {
+                                log::warn!("Unknown sort category: {}", s);
+                                models::WordSortBy::Romanization
+                            }
+                        };
+                        view.set_sort_category(sort_by);
+                        action.set_state(v.to_variant());
+                    }
+                }))
+                .build(),
+            // Sets sorting order.
+            gio::ActionEntry::builder("sort-order")
+                .parameter_type(Some(&bool::static_variant_type()))
+                .state(false.to_variant())
+                .activate(glib::clone!(@weak self as view => move |_, action, v| {
+                    if let Some(descending) = v.and_then(bool::from_variant) {
+                        view.set_sort_order(descending);
+                        action.set_state(descending.to_variant());
+                    }
+                }))
+                .build(),
+            // Filters by category.
+            gio::ActionEntry::builder("filter-category")
+                .parameter_type(Some(&String::static_variant_type()))
+                .state("all".to_variant())
+                .activate(glib::clone!(@weak self as view => move |_, action, v| {
+                    if let Some(v) = v.and_then(String::from_variant) {
+                        action.set_state(v.to_variant());
+                        log::debug!("Set filter category to {}.", &v);
+                        view.set_filter_category(v);
+                        view.handle_search_entry_changed(&view.imp().search_entry.get());
+                    }
+                }))
+                .build(),
+        ]);
+    }
+
+    // LIST OPERATIONS
 
     /// Gets current selected word.
     pub fn selected_word(&self) -> Option<WordObject> {
@@ -358,13 +424,22 @@ impl ProjectLexiconWordListView {
         }
     }
 
+    // SEARCHING
+
     /// Responds to `search-changed` signal from search entry.
     #[template_callback]
     pub fn handle_search_entry_changed(&self, entry: &gtk::SearchEntry) {
         let filter_text = entry.text().to_string();
 
-        let filter_by = models::WordFilterBy::Romanization(filter_text);
-
+        let filter_by = match self.filter_category().as_str() {
+            "all" => models::WordFilterBy::AllAttrs(filter_text),
+            "romanization" => models::WordFilterBy::Romanization(filter_text),
+            "translation" => models::WordFilterBy::Translation(filter_text),
+            s => {
+                log::warn!("Unknown filter category: {}", s);
+                models::WordFilterBy::AllAttrs(filter_text)
+            }
+        };
         log::debug!("Searching by {:?}.", &filter_by);
         self.search_word(filter_by);
     }
@@ -402,6 +477,38 @@ impl ProjectLexiconWordListView {
             self.emit_by_name::<()>("search-changed", &[])
         }
     }
+
+    // SORTING
+
+    // Sets the category by which the list will be sorted.
+    pub fn set_sort_category(&self, sort_by: models::WordSortBy) {
+        if let Some(sorter) = self
+            .sort_model()
+            .and_then(|sm| sm.sorter())
+            .and_then(|s| s.downcast::<models::WordSorter>().ok())
+        {
+            log::debug!("Sort by: {:?}", &sort_by);
+            sorter.set_sort_by(sort_by);
+        }
+    }
+
+    // Sets the order of the sorting. `false` for ascending, `true` for descending.
+    pub fn set_sort_order(&self, descending: bool) {
+        if let Some(sorter) = self
+            .sort_model()
+            .and_then(|sm| sm.sorter())
+            .and_then(|s| s.downcast::<models::WordSorter>().ok())
+        {
+            log::debug!("Sort order descending: {}", descending);
+            sorter.set_descending(descending);
+            self.imp().sort_word_button.set_icon_name(match descending {
+                false => "view-sort-ascending-symbolic",
+                true => "view-sort-descending-symbolic",
+            })
+        }
+    }
+
+    // VIEW SWITCHING
 
     /// Switches to a stack page according to this view's state.
     pub fn switch_stack_page(&self) {

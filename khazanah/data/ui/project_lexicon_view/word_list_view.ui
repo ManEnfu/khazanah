@@ -3,6 +3,61 @@
   <requires lib="gtk" version="4.6"/>
   <requires lib="Adw" version="1.2"/>
 
+  <menu id="sort_menu">
+    <section>
+      <attribute name="label" translatable="yes">Category</attribute>
+      <item>
+        <attribute name="label" translatable="yes">_Romanization</attribute>
+        <attribute name="action">lexicon-list.sort-category</attribute>
+        <attribute name="target" type="s">'romanization'</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Translation</attribute>
+        <attribute name="action">lexicon-list.sort-category</attribute>
+        <attribute name="target" type="s">'translation'</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Part of Speech</attribute>
+        <attribute name="action">lexicon-list.sort-category</attribute>
+        <attribute name="target" type="s">'part-of-speech'</attribute>
+      </item>
+    </section>
+    <section>
+      <attribute name="label" translatable="yes">Order</attribute>
+      <item>
+        <attribute name="label" translatable="yes">_Ascending</attribute>
+        <attribute name="action">lexicon-list.sort-order</attribute>
+        <attribute name="target" type="b">false</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Descending</attribute>
+        <attribute name="action">lexicon-list.sort-order</attribute>
+        <attribute name="target" type="b">true</attribute>
+      </item>
+    </section>
+  </menu>
+
+  <menu id="filter_menu">
+    <section>
+      <attribute name="label" translatable="yes">Filter By</attribute>
+      <item>
+        <attribute name="label" translatable="yes">_All Attributes</attribute>
+        <attribute name="action">lexicon-list.filter-category</attribute>
+        <attribute name="target" type="s">'all'</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Romanization</attribute>
+        <attribute name="action">lexicon-list.filter-category</attribute>
+        <attribute name="target" type="s">'romanization'</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Translation</attribute>
+        <attribute name="action">lexicon-list.filter-category</attribute>
+        <attribute name="target" type="s">'translation'</attribute>
+      </item>
+    </section>
+  </menu>
+
   <!-- A List view of words in the lexicon with related controls. -->
   <template class="KhzProjectLexiconWordListView" parent="AdwBin">
     <child>
@@ -32,6 +87,13 @@
                   <object class="GtkMenuButton" id="sort_word_button">
                     <property name="icon-name">view-sort-ascending-symbolic</property>
                     <property name="tooltip-text">Sort word</property>
+                    <property name="direction">right</property>
+                    <property name="popover">
+                      <object class="GtkPopoverMenu">
+                        <property name="valign">start</property>
+                        <property name="menu-model">sort_menu</property>
+                      </object>
+                    </property>
                   </object>
                 </child>
                 <child>
@@ -90,6 +152,7 @@
                         <child>
                           <object class="GtkMenuButton" id="search_filter_button">
                             <property name="icon-name" translatable="yes">funnel-symbolic</property>
+                            <property name="menu-model">filter_menu</property>
                           </object>
                         </child>
                       </object>

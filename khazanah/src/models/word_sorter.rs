@@ -7,11 +7,11 @@ use gtk::subclass::prelude::*;
 #[repr(u32)]
 pub enum WordSortBy {
     #[default]
-    None = 0,
-    Romanization = 1,
-    Translation = 2,
-    Pronunciation = 3,
-    PartOfSpeech = 4,
+    None,
+    Romanization,
+    Translation,
+    Pronunciation,
+    PartOfSpeech,
 }
 
 #[doc(hidden)]
@@ -27,6 +27,7 @@ mod imp {
     #[derive(Debug, Default)]
     pub struct WordSorter {
         pub sort_by: Cell<WordSortBy>,
+        pub descending: Cell<bool>,
     }
 
     #[glib::object_subclass]
@@ -53,6 +54,9 @@ mod imp {
 
             match self.sort_by.get() {
                 WordSortBy::Romanization => self.compare_by_romanization(word1, word2),
+                WordSortBy::Translation => self.compare_by_translation(word1, word2),
+                WordSortBy::Pronunciation => self.compare_by_pronunciation(word1, word2),
+                WordSortBy::PartOfSpeech => self.compare_by_part_of_speech(word1, word2),
                 _ => gtk::Ordering::Equal,
             }
         }
@@ -65,11 +69,45 @@ mod imp {
             self.convert_ordering(v1.cmp(&v2))
         }
 
+        fn compare_by_translation(&self, word1: &WordObject, word2: &WordObject) -> gtk::Ordering {
+            let v1 = word1.translation();
+            let v2 = word2.translation();
+            self.convert_ordering(v1.cmp(&v2))
+        }
+
+        fn compare_by_pronunciation(
+            &self,
+            word1: &WordObject,
+            word2: &WordObject,
+        ) -> gtk::Ordering {
+            let v1 = word1.pronunciation();
+            let v2 = word2.pronunciation();
+            self.convert_ordering(v1.cmp(&v2))
+        }
+
+        fn compare_by_part_of_speech(
+            &self,
+            word1: &WordObject,
+            word2: &WordObject,
+        ) -> gtk::Ordering {
+            let v1 = word1.part_of_speech();
+            let v2 = word2.part_of_speech();
+            self.convert_ordering(v1.cmp(&v2))
+        }
+
         fn convert_ordering(&self, ordering: cmp::Ordering) -> gtk::Ordering {
-            match ordering {
-                cmp::Ordering::Less => gtk::Ordering::Smaller,
-                cmp::Ordering::Greater => gtk::Ordering::Larger,
-                cmp::Ordering::Equal => gtk::Ordering::Equal,
+            if self.descending.get() {
+                match ordering {
+                    cmp::Ordering::Less => gtk::Ordering::Larger,
+                    cmp::Ordering::Greater => gtk::Ordering::Smaller,
+                    cmp::Ordering::Equal => gtk::Ordering::Equal,
+                }
+            } else {
+                match ordering {
+                    cmp::Ordering::Less => gtk::Ordering::Smaller,
+                    cmp::Ordering::Greater => gtk::Ordering::Larger,
+                    cmp::Ordering::Equal => gtk::Ordering::Equal,
+                }
             }
         }
     }
@@ -98,5 +136,12 @@ impl WordSorter {
     /// Gets the criteria of the sort.
     pub fn sort_by(&self) -> WordSortBy {
         self.imp().sort_by.get()
+    }
+
+    pub fn set_descending(&self, descending: bool) {
+        if self.imp().descending.get() != descending {
+            self.imp().descending.set(descending);
+            self.changed(gtk::SorterChange::Inverted);
+        }
     }
 }

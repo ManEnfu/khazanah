@@ -7,6 +7,7 @@ use gtk::subclass::prelude::*;
 pub enum WordFilterBy {
     #[default]
     None,
+    AllAttrs(String),
     Romanization(String),
     Translation(String),
     Pronunciation(String),
@@ -41,6 +42,11 @@ mod imp {
                 .downcast_ref::<WordObject>()
                 .expect("`KhzWordFilter` expected `KhzWordObject` to match.");
             match &*self.filter_by.borrow() {
+                WordFilterBy::AllAttrs(s) => {
+                    let s = s.to_lowercase();
+                    word.romanization().to_lowercase().contains(&s)
+                        || word.translation().to_lowercase().contains(&s)
+                }
                 WordFilterBy::Romanization(s) => word
                     .romanization()
                     .to_lowercase()
