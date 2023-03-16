@@ -25,15 +25,6 @@ mod imp {
     #[properties(wrapper_type = super::ProjectLexiconView)]
     #[template(resource = "/com/github/manenfu/Khazanah/ui/project_lexicon_view.ui")]
     pub struct ProjectLexiconView {
-        // #[template_child]
-        // pub pos_dropdown: TemplateChild<adw::ComboRow>,
-
-        // #[template_child]
-        // pub romanization_entry: TemplateChild<adw::EntryRow>,
-        // #[template_child]
-        // pub translation_entry: TemplateChild<adw::EntryRow>,
-        // #[template_child]
-        // pub pronunciation_entry: TemplateChild<adw::EntryRow>,
         #[template_child]
         pub leaflet: TemplateChild<adw::Leaflet>,
 
@@ -126,6 +117,14 @@ impl ProjectLexiconView {
             false,
             glib::closure_local!(@strong self as view => move |_: &ProjectLexiconWordListView| {
                 view.handle_activate_word();
+            }),
+        );
+
+        imp.word_list_view.connect_closure(
+            "search-changed",
+            false,
+            glib::closure_local!(@strong self as view => move |_: &ProjectLexiconWordListView| {
+                view.load_selected_word();
             }),
         );
 

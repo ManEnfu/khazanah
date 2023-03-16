@@ -10,7 +10,8 @@ pub enum WordSortBy {
     None = 0,
     Romanization = 1,
     Translation = 2,
-    PartOfSpeech = 3,
+    Pronunciation = 3,
+    PartOfSpeech = 4,
 }
 
 #[doc(hidden)]

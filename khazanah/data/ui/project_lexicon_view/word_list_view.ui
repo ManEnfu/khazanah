@@ -68,6 +68,9 @@
                               bind-source="search_word_button"
                               bind-property="active"
                               bind-flags="sync-create|bidirectional"/>
+                    <signal name="notify::search-mode-enabled"
+                            handler="handle_search_mode_toggle"
+                            swapped="true"/>
                     <style>
                       <class name="flat"/>
                     </style>
@@ -79,6 +82,9 @@
                           <object class="GtkSearchEntry" id="search_entry">
                             <property name="placeholder-text" translatable="yes">Search word</property>
                             <property name="hexpand">True</property>
+                            <signal name="search-changed"
+                                    handler="handle_search_entry_changed"
+                                    swapped="true"/>
                           </object>
                         </child>
                         <child>
@@ -92,16 +98,34 @@
                 </child>
                 
                 <child>
-                  <object class="GtkScrolledWindow">
-                    <property name="vexpand">True</property>
+                  <object class="GtkStack" id="search_stack">
+                    <property name="visible-child">scrolled_window</property>
+                    <property name="transition-type">crossfade</property>
                     <child>
-                      <object class="GtkListView" id="list_view">
-                        <style>
-                          <class name="navigation-sidebar"/>
-                          <class name="background"/>
-                        </style>
-                        <signal name="activate" handler="handle_row_activated" swapped="true"/>
+                      <object class="GtkScrolledWindow" id="scrolled_window">
+                        <property name="vexpand">True</property>
+                        <child>
+                          <object class="GtkListView" id="list_view">
+                            <style>
+                              <class name="navigation-sidebar"/>
+                              <class name="background"/>
+                            </style>
+                            <signal name="activate" handler="handle_row_activated" swapped="true"/>
+                          </object>
+                        </child>
                       </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwStatusPage" id="search_result_empty">
+                        <property name="icon-name">system-search-symbolic</property>
+                        <property name="title">No Results Found</property>
+                        <property name="description">Try a different search.</property>
+                        <property name="vexpand">true</property>
+                        <style>
+                          <class name="compact"/>
+                        </style>
+                      </object> <!-- AdwStatusPage -->
                     </child>
                   </object>
                 </child>
@@ -131,9 +155,9 @@
             <style>
               <class name="compact"/>
             </style>
-          </object>
+          </object> <!-- AdwStatusPage -->
         </child>
-      </object>
+      </object> <!-- GtkStack -->
     </child>
   </template>
 </interface>

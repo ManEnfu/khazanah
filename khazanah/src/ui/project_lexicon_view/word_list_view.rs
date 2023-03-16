@@ -51,6 +51,18 @@ mod imp {
         #[template_child]
         pub list_empty_page: TemplateChild<adw::StatusPage>,
 
+        #[template_child]
+        pub search_bar: TemplateChild<gtk::SearchBar>,
+        #[template_child]
+        pub search_entry: TemplateChild<gtk::SearchEntry>,
+
+        #[template_child]
+        pub search_stack: TemplateChild<gtk::Stack>,
+        #[template_child]
+        pub scrolled_window: TemplateChild<gtk::ScrolledWindow>,
+        #[template_child]
+        pub search_result_empty: TemplateChild<adw::StatusPage>,
+
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
 
@@ -107,6 +119,7 @@ mod imp {
 
             let obj = self.obj();
             obj.setup_list();
+            obj.setup_search();
         }
 
         fn properties() -> &'static [glib::ParamSpec] {
@@ -128,6 +141,9 @@ mod imp {
                         .param_types(Vec::<SignalType>::new())
                         .build(),
                     Signal::builder("word-activated")
+                        .param_types(Vec::<SignalType>::new())
+                        .build(),
+                    Signal::builder("search-changed")
                         .param_types(Vec::<SignalType>::new())
                         .build(),
                 ]
@@ -157,8 +173,10 @@ impl ProjectLexiconWordListView {
         let word_list_model = gio::ListStore::new(WordObject::static_type());
         self.set_word_list_model(word_list_model.clone());
 
-        let filter_model =
-            gtk::FilterListModel::new(Some(word_list_model), Option::<gtk::CustomFilter>::None);
+        let filter_model = gtk::FilterListModel::new(
+            Some(word_list_model),
+            Some(models::WordFilter::new(models::WordFilterBy::None)),
+        );
         self.set_filter_model(filter_model.clone());
 
         let sort_model = gtk::SortListModel::new(
@@ -228,6 +246,13 @@ impl ProjectLexiconWordListView {
         );
     }
 
+    /// Setups search bar
+    pub fn setup_search(&self) {
+        let imp = self.imp();
+
+        imp.search_bar.connect_entry(&imp.search_entry.get());
+    }
+
     /// Gets current selected word.
     pub fn selected_word(&self) -> Option<WordObject> {
         self.selection_model()?.selected_item().and_downcast()
@@ -239,6 +264,9 @@ impl ProjectLexiconWordListView {
             .project_model()
             .update(|project| project.lexicon_mut().add_word(Word::new()))
         {
+            // Exits search mode first.
+            self.imp().search_bar.set_search_mode(false);
+
             log::debug!("Added word of id {}", id);
             let word_object = WordObject::new(self.project_model(), id);
 
@@ -327,6 +355,51 @@ impl ProjectLexiconWordListView {
 
         if let Some(position) = word_list_model.find(word) {
             word_list_model.items_changed(position, 1, 1);
+        }
+    }
+
+    /// Responds to `search-changed` signal from search entry.
+    #[template_callback]
+    pub fn handle_search_entry_changed(&self, entry: &gtk::SearchEntry) {
+        let filter_text = entry.text().to_string();
+
+        let filter_by = models::WordFilterBy::Romanization(filter_text);
+
+        log::debug!("Searching by {:?}.", &filter_by);
+        self.search_word(filter_by);
+    }
+
+    /// Responds to `notify::search-mode-enabled` signal from search bar.
+    #[template_callback]
+    pub fn handle_search_mode_toggle(&self, _pspec: glib::ParamSpec, bar: &gtk::SearchBar) {
+        let imp = self.imp();
+
+        if bar.is_search_mode() {
+        } else {
+            imp.search_entry.set_text("");
+            self.search_word(models::WordFilterBy::None);
+        }
+    }
+
+    /// Updates the search.
+    pub fn search_word(&self, filter_by: models::WordFilterBy) {
+        if let Some(filter_model) = self.filter_model() {
+            if let Some(filter) = filter_model
+                .filter()
+                .and_then(|f| f.downcast::<models::WordFilter>().ok())
+            {
+                filter.set_filter_by(filter_by);
+            }
+
+            // Displays status page if search result is empty.
+            let imp = self.imp();
+            if filter_model.n_items() > 0 {
+                imp.search_stack.set_visible_child(&*imp.scrolled_window);
+            } else {
+                imp.search_stack
+                    .set_visible_child(&*imp.search_result_empty);
+            }
+            self.emit_by_name::<()>("search-changed", &[])
         }
     }
 
