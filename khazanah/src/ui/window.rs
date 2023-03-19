@@ -238,12 +238,16 @@ impl ApplicationWindow {
             return;
         }
 
+        let filter = gtk::FileFilter::new();
+        filter.add_suffix(conlang::PROJECT_FILE_EXT);
+
         let dialog = gtk::FileChooserNative::builder()
             .title("Open File")
             .transient_for(self)
             .action(gtk::FileChooserAction::Open)
             .accept_label("_Open")
             .cancel_label("_Cancel")
+            .filter(&filter)
             .build();
 
         dialog.connect_response(
@@ -339,12 +343,16 @@ impl ApplicationWindow {
             return;
         }
 
+        let filter = gtk::FileFilter::new();
+        filter.add_suffix(conlang::PROJECT_FILE_EXT);
+
         let dialog = gtk::FileChooserNative::builder()
             .title("Save File")
             .transient_for(self)
             .action(gtk::FileChooserAction::Save)
             .accept_label("_Save")
             .cancel_label("_Cancel")
+            .filter(&filter)
             .build();
 
         dialog.connect_response(
