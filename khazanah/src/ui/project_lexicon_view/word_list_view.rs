@@ -552,8 +552,8 @@ impl ui::View for ProjectLexiconWordListView {
         self.switch_stack_page();
     }
 
-    fn commit_state(&self) {
-        log::debug!("Committing view state.");
+    fn unload_state(&self) {
+        log::debug!("Unload view state.");
 
         if let Some(word) = self.selected_word() {
             self.imp().selected_id.set(word.id());

@@ -149,15 +149,15 @@ impl ProjectModel {
     pub fn save_file<P: AsRef<Path>>(&self, path: P) -> Result<(), project::Error> {
         let result = match self.project_mut().as_mut() {
             Some(project) => {
-                project.save_file(path)?;
+                project.save_file(&path)?;
                 Ok(())
             }
             None => Err(project::Error::WrongMimeType),
         };
         if result.is_ok() {
             self.set_dirty(false);
+            self.set_path(path.as_ref().to_string_lossy().to_string());
             self.notify_title();
-            self.notify_path();
         }
         result
     }

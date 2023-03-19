@@ -180,8 +180,8 @@ impl ui::View for ProjectLexiconWordEditView {
         self.clear_fields();
     }
 
-    fn commit_state(&self) {
-        log::debug!("Committing view state.");
+    fn unload_state(&self) {
+        log::debug!("Unloading view state.");
 
         self.unbind();
     }

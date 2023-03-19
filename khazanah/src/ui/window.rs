@@ -468,6 +468,7 @@ impl ApplicationWindow {
 
         if current_view != MainViews::Unknown {
             self.commit_view_state(current_view);
+            self.unload_view_state(current_view);
         }
 
         self.load_view_state(view);
@@ -518,6 +519,24 @@ impl ApplicationWindow {
     pub fn commit_all_views(&self) {
         for view in ui::ALL_MAIN_VIEWS.iter() {
             self.commit_view_state(*view);
+        }
+    }
+    
+    /// Unloads view state from the project model.
+    pub fn unload_view_state(&self, view: MainViews) {
+        let imp = self.imp();
+
+        match view {
+            MainViews::Overview => imp.project_overview_view.unload_state(),
+            MainViews::Lexicon => imp.project_lexicon_view.unload_state(),
+            _ => log::warn!("Attempting to load unknown view."),
+        }
+    }
+
+    /// Unloads all view states from the project model.
+    pub fn unload_all_views(&self) {
+        for view in ui::ALL_MAIN_VIEWS.iter() {
+            self.unload_view_state(*view);
         }
     }
 

@@ -6,6 +6,9 @@ pub trait View {
     /// Commits widget states to the project model.
     fn commit_state(&self) {}
 
+    /// Unloads widget states
+    fn unload_state(&self) {}
+
     /// Called on window resize.
     fn on_window_size(&self, _width: i32, _height: i32) {}
 

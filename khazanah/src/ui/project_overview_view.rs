@@ -137,8 +137,8 @@ impl ui::View for ProjectOverviewView {
         );
     }
 
-    fn commit_state(&self) {
-        log::debug!("Committing view state.");
+    fn unload_state(&self) {
+        log::debug!("Unloading view state.");
 
         let imp = self.imp();
 

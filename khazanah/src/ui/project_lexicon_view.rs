@@ -207,12 +207,12 @@ impl ui::View for ProjectLexiconView {
         self.load_selected_word();
     }
 
-    fn commit_state(&self) {
-        log::debug!("Committing view state.");
+    fn unload_state(&self) {
+        log::debug!("Unloading view state.");
 
         let imp = self.imp();
-        imp.word_list_view.commit_state();
-        imp.word_edit_view.commit_state();
+        imp.word_list_view.unload_state();
+        imp.word_edit_view.unload_state();
     }
 
     fn connect_headerbar(&self, header_bar: &ui::HeaderBar) {
