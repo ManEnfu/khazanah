@@ -37,6 +37,13 @@
                                   bind-source="KhzProjectLexiconWordEditView"
                                   bind-property="fields-sensitive"
                                   bind-flags="sync-create"/>
+                        <child>
+                          <object class="GtkButton">
+                            <property name="icon-name">format-text-rich-symbolic</property>
+                            <property name="tooltip-text">Convert from pronunciation</property>
+                            <property name="valign">center</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>
@@ -54,6 +61,30 @@
                         <property name="sensitive"
                                   bind-source="KhzProjectLexiconWordEditView"
                                   bind-property="fields-sensitive"
+                                  bind-flags="sync-create"/>
+                        <property name="editable"
+                                  bind-source="xsampa_toggle_button"
+                                  bind-property="active"
+                                  bind-flags="sync-create|invert-boolean"/>
+                        <child>
+                          <object class="GtkToggleButton" id="xsampa_toggle_button">
+                            <property name="icon-name">format-text-plaintext-symbolic</property>
+                            <property name="tooltip-text">Convert from X-SAMPA</property>
+                            <property name="valign">center</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwEntryRow" id="xsampa_entry">
+                        <property name="title">X-SAMPA Pronunciation</property>
+                        <property name="sensitive"
+                                  bind-source="KhzProjectLexiconWordEditView"
+                                  bind-property="fields-sensitive"
+                                  bind-flags="sync-create"/>
+                        <property name="visible"
+                                  bind-source="xsampa_toggle_button"
+                                  bind-property="active"
                                   bind-flags="sync-create"/>
                       </object>
                     </child>

@@ -27,6 +27,10 @@ mod imp {
             get = Self::get_pos, set = Self::set_pos)]
         #[property(name = "part-of-speech-label", 
             get = Self::get_pos_label, type = String)]
+        #[property(name = "use-xsampa", type = bool,
+            get = Self::get_use_xsampa, set = Self::set_use_xsampa)]
+        #[property(name = "xsampa-pronunciation", type = String,
+            get = Self::get_xsampa_pronunciation, set = Self::set_xsampa_pronunciation)]
         #[property(get, set, construct_only)]
         pub project_model: RefCell<models::ProjectModel>,
 
@@ -112,6 +116,38 @@ mod imp {
                     .map(|s| s.label().to_owned())
                     .unwrap_or_default()
             })
+        }
+
+        fn get_xsampa_pronunciation(&self) -> String {
+            self.get_word_property(|word| word.xsampa_pronunciation.to_owned().unwrap_or_default())
+        }
+
+        fn set_xsampa_pronunciation(&self, value: String) {
+            self.set_word_property(value, |word, value| {
+                if word.xsampa_pronunciation.is_some() {
+                    word.set_xsampa_pronunciation(Some(value));
+                }
+            });
+            self.obj().notify_pronunciation();
+        }
+
+        fn get_use_xsampa(&self) -> bool {
+            self.get_word_property(|word| word.xsampa_pronunciation.is_some())
+        }
+
+        fn set_use_xsampa(&self, value: bool) {
+            self.set_word_property(value, |word, value| {
+                if value {
+                    if word.xsampa_pronunciation.is_none() {
+                        word.set_xsampa_pronunciation(Some("".to_string()));
+                    }
+                } else {
+                    word.set_xsampa_pronunciation(None);
+                }
+            });
+            let obj = self.obj();
+            obj.notify_xsampa_pronunciation();
+            obj.notify_pronunciation();
         }
     }
 

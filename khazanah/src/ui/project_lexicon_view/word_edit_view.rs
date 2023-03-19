@@ -27,6 +27,10 @@ mod imp {
         #[template_child]
         pub pronunciation_entry: TemplateChild<adw::EntryRow>,
         #[template_child]
+        pub xsampa_toggle_button: TemplateChild<gtk::Button>,
+        #[template_child]
+        pub xsampa_entry: TemplateChild<adw::EntryRow>,
+        #[template_child]
         pub pos_dropdown: TemplateChild<adw::ComboRow>,
 
         #[property(get, set)]
@@ -122,6 +126,20 @@ impl ProjectLexiconWordEditView {
 
         bindings.push(
             word.bind_property("pronunciation", &imp.pronunciation_entry.get(), "text")
+                .sync_create()
+                .bidirectional()
+                .build(),
+        );
+
+        bindings.push(
+            word.bind_property("use-xsampa", &imp.xsampa_toggle_button.get(), "active")
+                .sync_create()
+                .bidirectional()
+                .build(),
+        );
+
+        bindings.push(
+            word.bind_property("xsampa-pronunciation", &imp.xsampa_entry.get(), "text")
                 .sync_create()
                 .bidirectional()
                 .build(),
