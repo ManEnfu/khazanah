@@ -28,6 +28,9 @@ pub mod meta;
 // The MIME type of a project file.
 pub const PROJECT_MIME_TYPE: &str = "application/khz";
 
+// The file extension of a project file.
+pub const PROJECT_FILE_EXT: &str = "khz";
+
 /// A project.
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct Project {
