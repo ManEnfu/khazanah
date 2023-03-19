@@ -134,7 +134,11 @@ impl Application {
         let about_action = gio::ActionEntry::builder("about")
             .activate(move |app: &Self, _, _| app.show_about())
             .build();
-        self.add_action_entries([quit_action, about_action]);
+        let show_xsampa_transliterator_action =
+            gio::ActionEntry::builder("show-x-sampa-transliterator")
+                .activate(move |app: &Self, _, _| app.show_xsampa_view_window())
+                .build();
+        self.add_action_entries([quit_action, about_action, show_xsampa_transliterator_action]);
     }
 
     /// Setup shortcuts for the application.
@@ -166,6 +170,21 @@ impl Application {
                 .build();
 
             about.present();
+        }
+    }
+
+    fn show_xsampa_view_window(&self) {
+        if let Some(window) = self.active_window() {
+            // let new_window = adw::Window::builder()
+            //     .transient_for(&window)
+            //     .default_width(400)
+            //     .default_width(300)
+            //     .title("X-SAMPA Transliterator")
+            //     .content(&ui::XSampaView::new())
+            //     .build();
+            let new_window = ui::XSampaViewWindow::new();
+            new_window.set_transient_for(Some(&window));
+            new_window.show();
         }
     }
 

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.6"/>
+  <requires lib="Adw" version="1.2"/>
+
+  <!-- The first view when the application is started. -->
+  <template class="KhzXSampaViewWindow" parent="AdwWindow">
+    <property name="title">X-SAMPA Transliterator</property>
+    <!-- <property name="default-height">300</property> -->
+    <property name="default-width">400</property>
+    <style>
+      <class name="devel"/>
+    </style>
+    <property name="content">
+      <object class="AdwToastOverlay" id="toast_overlay">
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+
+            <child>
+              <object class="AdwHeaderBar">
+                <style>
+                  <class name="flat"/>
+                </style>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkBox">
+                <property name="vexpand">True</property>
+                <property name="orientation">vertical</property>
+                <property name="margin-top">12</property>
+                <property name="margin-bottom">12</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="halign">start</property>
+                    <property name="label">X-SAMPA</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="xsampa_entry">
+                    <property name="hexpand">True</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="halign">start</property>
+                    <property name="label">IPA</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="ipa_entry">
+                    <property name="hexpand">True</property>
+                    <property name="editable">False</property>
+                    <property name="secondary-icon-name">edit-copy-symbolic</property>
+                    <property name="secondary-icon-activatable">True</property>
+                    <signal name="icon-press"
+                            handler="handle_icon_clicked"
+                            swapped="true"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </template> <!-- KhzStartView --> 
+
+</interface>

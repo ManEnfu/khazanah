@@ -7,11 +7,11 @@
     <section>
       <item>
         <attribute name="label" translatable="yes">_X-SAMPA Transliterator</attribute>
-        <attribute name="action">win.show-x-sampa-transliterator</attribute>
+        <attribute name="action">app.show-x-sampa-transliterator</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_IPA Charts</attribute>
-        <attribute name="action">win.show-ipa-chart</attribute>
+        <attribute name="action">app.show-ipa-chart</attribute>
       </item>
     </section>
   </menu>

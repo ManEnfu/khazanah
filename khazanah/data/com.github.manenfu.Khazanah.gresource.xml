@@ -18,5 +18,6 @@
     <file compressed="true" preprocess="xml-stripblanks">ui/header_bar.ui</file>
 
     <file compressed="true" preprocess="xml-stripblanks">ui/confirm_save_dialog.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/xsampa_view_window.ui</file>
   </gresource>
 </gresources>

@@ -16,6 +16,8 @@ mod project_overview_view;
 mod start_view;
 mod view;
 
+mod xsampa_view_window;
+
 pub use header_bar::HeaderBar;
 pub use main_menu_button::MainMenuButton;
 pub use project_lexicon_view::ProjectLexiconView;
@@ -26,3 +28,4 @@ pub use toolbar_start_controls::ToolbarStartControls;
 pub use view::{MainViews, View, ALL_MAIN_VIEWS};
 pub use view_switcher_dropdown::ViewSwitcherDropDown;
 pub use window::ApplicationWindow;
+pub use xsampa_view_window::XSampaViewWindow;

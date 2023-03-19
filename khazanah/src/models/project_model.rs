@@ -157,6 +157,7 @@ impl ProjectModel {
         if result.is_ok() {
             self.set_dirty(false);
             self.notify_title();
+            self.notify_path();
         }
         result
     }
