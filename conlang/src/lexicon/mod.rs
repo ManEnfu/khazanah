@@ -121,7 +121,11 @@ impl Lexicon {
             w.write_text(&word.romanization)?;
             w.write_tag_end("romanization")?;
 
-            w.write_tag_start("pronunciation")?;
+            if let Some(xs) = &word.xsampa_pronunciation {
+                w.write_tag_start_with_attributes("pronunciation", [("xsampa", xs.as_str())])?;
+            } else {
+                w.write_tag_start("pronunciation")?;
+            }
             w.write_text(&word.pronunciation)?;
             w.write_tag_end("pronunciation")?;
 
@@ -198,11 +202,12 @@ impl XmlReaderProcess for XmlReaderProcessor {
             (None, Some("lexicon")) => {}
             // Insert new word
             (Some("lexicon"), Some("word")) => {
+                // If there's no id attribute, generate a random one for this word.
                 self.current_id = attrs
                     .iter()
                     .find(|&x| x.0 == "id")
                     .map(|x| Uuid::parse_str(&x.1))
-                    .ok_or(ReadError::NoId)??;
+                    .unwrap_or_else(|| Ok(Uuid::new_v4()))?;
                 data.words.insert(self.current_id, Word::new());
             }
             // Clear word properties
@@ -210,7 +215,12 @@ impl XmlReaderProcess for XmlReaderProcessor {
                 word?.romanization.clear();
             }
             (Some("word"), Some("pronunciation")) => {
-                word?.pronunciation.clear();
+                let word = word?;
+                word.xsampa_pronunciation = attrs
+                    .iter()
+                    .find(|&x| x.0 == "xsampa")
+                    .map(|x| x.1.to_owned());
+                word.pronunciation.clear();
             }
             (Some("word"), Some("translation")) => {
                 word?.translation.clear();
@@ -218,7 +228,6 @@ impl XmlReaderProcess for XmlReaderProcessor {
             (Some("word"), Some("part-of-speech")) => {
                 word?.part_of_speech = None;
             }
-            // Invalid tag
             _ => {
                 return Err(ReadError::WrongContext {
                     ptag: ptag.unwrap_or_default().to_string(),

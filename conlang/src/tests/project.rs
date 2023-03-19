@@ -20,18 +20,21 @@ fn test_proj() -> Project {
         pronunciation: "ˈni.ɸu.tu".to_string(),
         translation: "sun".to_string(),
         part_of_speech: Some(PartOfSpeech::Noun),
+        ..Default::default()
     });
     lex.add_word(Word {
         romanization: "xahlauraqi".to_string(),
         pronunciation: "ˈxa.ɬa.u.ɹa.qi".to_string(),
         translation: "story".to_string(),
         part_of_speech: Some(PartOfSpeech::Noun),
+        ..Default::default()
     });
     lex.add_word(Word {
         romanization: "pfunutsaaxi".to_string(),
         pronunciation: "ˈpɸu.nu.tsaː.xi".to_string(),
         translation: "flow".to_string(),
         part_of_speech: Some(PartOfSpeech::Verb),
+        ..Default::default()
     });
 
     Project { meta, lexicon: lex }
