@@ -137,7 +137,7 @@ where
                         let attr = a?;
                         attrs.push((
                             std::str::from_utf8(attr.key.into_inner())?,
-                            std::str::from_utf8(&attr.value)?.to_owned(),
+                            attr.unescape_value()?.to_string(),
                         ));
                     }
                     self.context.push(name.to_owned());
