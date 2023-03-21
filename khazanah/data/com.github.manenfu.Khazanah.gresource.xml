@@ -17,7 +17,12 @@
     <file compressed="true" preprocess="xml-stripblanks">ui/main_menu_button.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/header_bar.ui</file>
 
+    <file compressed="true" preprocess="xml-stripblanks">ui/ipa_chart/pulmonic_consonants.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/ipa_chart/coarticulated_consonants.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/ipa_chart.ui</file>
+
     <file compressed="true" preprocess="xml-stripblanks">ui/confirm_save_dialog.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/xsampa_view_window.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/ipa_chart_view_window.ui</file>
   </gresource>
 </gresources>

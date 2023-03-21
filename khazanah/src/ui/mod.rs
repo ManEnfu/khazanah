@@ -5,6 +5,7 @@ mod window;
 
 // Common Components
 mod header_bar;
+mod ipa_chart;
 mod main_menu_button;
 mod toolbar_end_controls;
 mod toolbar_start_controls;
@@ -16,9 +17,12 @@ mod project_overview_view;
 mod start_view;
 mod view;
 
+mod ipa_chart_view_window;
 mod xsampa_view_window;
 
 pub use header_bar::HeaderBar;
+pub use ipa_chart::IpaChart;
+pub use ipa_chart_view_window::IpaChartViewWindow;
 pub use main_menu_button::MainMenuButton;
 pub use project_lexicon_view::ProjectLexiconView;
 pub use project_overview_view::ProjectOverviewView;

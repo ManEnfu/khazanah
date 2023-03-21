@@ -88,7 +88,6 @@ impl XSampaViewWindow {
 
     #[template_callback]
     fn handle_icon_clicked(&self, icon: gtk::EntryIconPosition, entry: &gtk::Entry) {
-        log::debug!("{:?}", icon);
         if icon == gtk::EntryIconPosition::Secondary {
             let text = entry.text();
 

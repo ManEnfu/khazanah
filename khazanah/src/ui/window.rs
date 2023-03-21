@@ -521,7 +521,7 @@ impl ApplicationWindow {
             self.commit_view_state(*view);
         }
     }
-    
+
     /// Unloads view state from the project model.
     pub fn unload_view_state(&self, view: MainViews) {
         let imp = self.imp();

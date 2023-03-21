@@ -138,7 +138,15 @@ impl Application {
             gio::ActionEntry::builder("show-x-sampa-transliterator")
                 .activate(move |app: &Self, _, _| app.show_xsampa_view_window())
                 .build();
-        self.add_action_entries([quit_action, about_action, show_xsampa_transliterator_action]);
+        let show_ipa_chart_action = gio::ActionEntry::builder("show-ipa-chart")
+            .activate(move |app: &Self, _, _| app.show_ipa_chart_view_window())
+            .build();
+        self.add_action_entries([
+            quit_action,
+            about_action,
+            show_xsampa_transliterator_action,
+            show_ipa_chart_action,
+        ]);
     }
 
     /// Setup shortcuts for the application.
@@ -173,16 +181,19 @@ impl Application {
         }
     }
 
+    /// Shows X-SAMPA view window.
     fn show_xsampa_view_window(&self) {
         if let Some(window) = self.active_window() {
-            // let new_window = adw::Window::builder()
-            //     .transient_for(&window)
-            //     .default_width(400)
-            //     .default_width(300)
-            //     .title("X-SAMPA Transliterator")
-            //     .content(&ui::XSampaView::new())
-            //     .build();
             let new_window = ui::XSampaViewWindow::new();
+            new_window.set_transient_for(Some(&window));
+            new_window.show();
+        }
+    }
+
+    /// Shows IPA chart window.
+    fn show_ipa_chart_view_window(&self) {
+        if let Some(window) = self.active_window() {
+            let new_window = ui::IpaChartViewWindow::new();
             new_window.set_transient_for(Some(&window));
             new_window.show();
         }

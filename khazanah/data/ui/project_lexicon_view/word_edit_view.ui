@@ -42,6 +42,9 @@
                             <property name="icon-name">format-text-rich-symbolic</property>
                             <property name="tooltip-text">Convert from pronunciation</property>
                             <property name="valign">center</property>
+                            <style>
+                              <class name="flat"/>
+                            </style>
                           </object>
                         </child>
                       </object>
@@ -71,6 +74,9 @@
                             <property name="icon-name">format-text-plaintext-symbolic</property>
                             <property name="tooltip-text">Convert from X-SAMPA</property>
                             <property name="valign">center</property>
+                            <style>
+                              <class name="flat"/>
+                            </style>
                           </object>
                         </child>
                       </object>

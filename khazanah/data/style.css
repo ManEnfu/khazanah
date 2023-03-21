@@ -13,3 +13,44 @@ actionbar.flat > revealer > box {
   box-shadow: none;
   border-top: none;
 }
+
+grid.ipa-chart {
+  background-color: @window_bg_color;
+}
+
+grid.ipa-chart > label {
+  padding: 4px;
+}
+
+grid.ipa-chart > button {
+  padding: 4px;
+  border-radius: 0px;
+}
+
+grid.ipa-chart > button.symbol > label {
+  font-weight: normal;
+}
+
+grid.ipa-chart > button.table-title {
+  margin-right: 1px;
+}
+
+grid.ipa-chart > button.symbol-right {
+  margin-right: 1px;
+}
+
+grid.ipa-chart > button.corner-top-left {
+  border-top-left-radius: 12px;
+}
+
+grid.ipa-chart > button.corner-top-right {
+  border-top-right-radius: 12px;
+}
+
+grid.ipa-chart > button.corner-bottom-left {
+  border-bottom-left-radius: 12px;
+}
+
+grid.ipa-chart > button.corner-bottom-right {
+  border-bottom-right-radius: 12px;
+}
