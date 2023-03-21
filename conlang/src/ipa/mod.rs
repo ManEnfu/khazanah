@@ -7,9 +7,9 @@ mod xsampa;
 use std::str::FromStr;
 
 pub use enums::{
-    Delimiter, Diacritic, DiacriticPosition, FricativeVariant, Ipa, MannerOfArticulation,
-    Phonation, PlaceOfArticulation, Prosody, Tone, VowelBackness, VowelHeight, VowelRounding,
-    IPA_CHAR_MAP, IPA_CHAR_MAP_MAX_PATTERN_LEN,
+    ClickMannerOfArticulation, Delimiter, Diacritic, DiacriticPosition, FricativeVariant, Ipa,
+    MannerOfArticulation, Phonation, PlaceOfArticulation, Prosody, Tone, VowelBackness,
+    VowelHeight, VowelRounding, IPA_CHAR_MAP, IPA_CHAR_MAP_MAX_PATTERN_LEN,
 };
 pub use error::Error;
 pub use xsampa::{transliterate_xsampa, XSAMPA_CHAR_MAP};

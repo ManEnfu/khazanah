@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 use bimap::BiBTreeMap;
 use lazy_static::lazy_static;
@@ -9,6 +9,15 @@ use lazy_static::lazy_static;
 pub enum Phonation {
     Voiced,
     Voiceless,
+}
+
+impl Display for Phonation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Voiced => write!(f, "voiced"),
+            Self::Voiceless => write!(f, "voiceless"),
+        }
+    }
 }
 
 /// Place of articulation of a consonant.
@@ -34,6 +43,29 @@ pub enum PlaceOfArticulation {
     SjSound,
 }
 
+impl Display for PlaceOfArticulation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PlaceOfArticulation::Bilabial => write!(f, "bilabial"),
+            PlaceOfArticulation::Labiodental => write!(f, "labiodental"),
+            PlaceOfArticulation::Dental => write!(f, "dental"),
+            PlaceOfArticulation::Alveolar => write!(f, "alveolar"),
+            PlaceOfArticulation::PostAlveolar => write!(f, "post-alveolar"),
+            PlaceOfArticulation::Retroflex => write!(f, "retroflex"),
+            PlaceOfArticulation::Palatal => write!(f, "palatal"),
+            PlaceOfArticulation::Velar => write!(f, "velar"),
+            PlaceOfArticulation::Uvular => write!(f, "uvular"),
+            PlaceOfArticulation::Pharyngeal => write!(f, "pharyngeal"),
+            PlaceOfArticulation::Glottal => write!(f, "glottal"),
+            PlaceOfArticulation::LabialAlveolar => write!(f, "labial-alveolar"),
+            PlaceOfArticulation::LabialVelar => write!(f, "labial-velar"),
+            PlaceOfArticulation::LabialPalatal => write!(f, "labial-palatal"),
+            PlaceOfArticulation::UvularPharyngeal => write!(f, "uvular-pharyngeal"),
+            PlaceOfArticulation::SjSound => write!(f, "sj-sound"),
+        }
+    }
+}
+
 /// Manner of articulation of a consonant.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
@@ -49,8 +81,49 @@ pub enum MannerOfArticulation {
     LateralAffricate,
     Approximant,
     LateralApproximant,
-    Implosive,
-    Click,
+}
+
+impl Display for MannerOfArticulation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MannerOfArticulation::Plosive => write!(f, "plosive"),
+            MannerOfArticulation::Nasal => write!(f, "nasal"),
+            MannerOfArticulation::Trill => write!(f, "trill"),
+            MannerOfArticulation::Flap => write!(f, "tap/flap"),
+            MannerOfArticulation::LateralFlap => write!(f, "lateral tap/flap"),
+            MannerOfArticulation::Fricative(s) => write!(f, "{} fricative", s),
+            MannerOfArticulation::Affricate(s) => write!(f, "{} affricate", s),
+            MannerOfArticulation::LateralFricative => write!(f, "lateral fricative"),
+            MannerOfArticulation::LateralAffricate => write!(f, "lateral affricate"),
+            MannerOfArticulation::Approximant => write!(f, "approximant"),
+            MannerOfArticulation::LateralApproximant => write!(f, "lateral approximant"),
+        }
+    }
+}
+
+/// Manner of articulation of a click consonant.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[repr(u8)]
+pub enum ClickMannerOfArticulation {
+    Tenuis,
+    Voiced,
+    Nasal,
+    TenuisLateral,
+    VoicedLateral,
+    NasalLateral,
+}
+
+impl Display for ClickMannerOfArticulation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Tenuis => write!(f, "tenuis"),
+            Self::Voiced => write!(f, "voiced"),
+            Self::Nasal => write!(f, "nasal"),
+            Self::TenuisLateral => write!(f, "tenuis lateral"),
+            Self::VoicedLateral => write!(f, "voiced lateral"),
+            Self::NasalLateral => write!(f, "nasal lateral"),
+        }
+    }
 }
 
 /// Variants of fricative consonants.
@@ -59,6 +132,15 @@ pub enum MannerOfArticulation {
 pub enum FricativeVariant {
     Sibilant,
     NonSibilant,
+}
+
+impl Display for FricativeVariant {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Sibilant => write!(f, "sibilant"),
+            Self::NonSibilant => write!(f, "non-sibilant"),
+        }
+    }
 }
 
 /// Height of a vowel.
@@ -74,6 +156,20 @@ pub enum VowelHeight {
     Open,
 }
 
+impl Display for VowelHeight {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            VowelHeight::Close => write!(f, "close"),
+            VowelHeight::NearClose => write!(f, "near-close"),
+            VowelHeight::CloseMid => write!(f, "close-mid"),
+            VowelHeight::Mid => write!(f, "mid"),
+            VowelHeight::OpenMid => write!(f, "open-mid"),
+            VowelHeight::NearOpen => write!(f, "near-open"),
+            VowelHeight::Open => write!(f, "open"),
+        }
+    }
+}
+
 /// Backness of a vowel.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
@@ -83,12 +179,31 @@ pub enum VowelBackness {
     Back,
 }
 
+impl Display for VowelBackness {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            VowelBackness::Front => write!(f, "front"),
+            VowelBackness::Central => write!(f, "central"),
+            VowelBackness::Back => write!(f, "back"),
+        }
+    }
+}
+
 /// Rounding of a vowel.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
 pub enum VowelRounding {
     Unrounded,
     Rounded,
+}
+
+impl Display for VowelRounding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            VowelRounding::Unrounded => write!(f, "unrounded"),
+            VowelRounding::Rounded => write!(f, "rounded"),
+        }
+    }
 }
 
 /// Prosody symbols.
@@ -108,6 +223,24 @@ pub enum Prosody {
     GlobalFall,
 }
 
+impl Display for Prosody {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Prosody::PrimaryStress => write!(f, "primary stress"),
+            Prosody::SecondaryStress => write!(f, "secondary stress"),
+            Prosody::Long => write!(f, "long"),
+            Prosody::HalfLong => write!(f, "half long"),
+            Prosody::ExtraShort => write!(f, "extra short"),
+            Prosody::SyllableBreak => write!(f, "syllable break"),
+            Prosody::MinorGroup => write!(f, "minor group"),
+            Prosody::MajorGroup => write!(f, "major group"),
+            Prosody::Linking => write!(f, "linking"),
+            Prosody::GlobalRise => write!(f, "global rise"),
+            Prosody::GlobalFall => write!(f, "global fall"),
+        }
+    }
+}
+
 /// Tone symbols.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
@@ -119,6 +252,20 @@ pub enum Tone {
     ExtraHigh,
     Downstep,
     Upstep,
+}
+
+impl Display for Tone {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Tone::ExtraLow => write!(f, "extra-low tone"),
+            Tone::Low => write!(f, "low tone"),
+            Tone::Mid => write!(f, "mid tone"),
+            Tone::High => write!(f, "high tone"),
+            Tone::ExtraHigh => write!(f, "extra-high tone"),
+            Tone::Downstep => write!(f, "downstep"),
+            Tone::Upstep => write!(f, "upstep"),
+        }
+    }
 }
 
 /// Delimiters.
@@ -133,7 +280,23 @@ pub enum Delimiter {
     ObscuredOpen,
     ObscuredClose,
     ProsodicOpen,
-    ProsodicClosed,
+    ProsodicClose,
+}
+
+impl Display for Delimiter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Delimiter::PhoneticOpen => write!(f, "phonetic open"),
+            Delimiter::PhoneticClose => write!(f, "phonetic close"),
+            Delimiter::Phonemic => write!(f, "phonemic"),
+            Delimiter::SilentOpen => write!(f, "silent open"),
+            Delimiter::SilentClose => write!(f, "silent close"),
+            Delimiter::ObscuredOpen => write!(f, "obscured open"),
+            Delimiter::ObscuredClose => write!(f, "obscured close"),
+            Delimiter::ProsodicOpen => write!(f, "prosodic open"),
+            Delimiter::ProsodicClose => write!(f, "prosodic close"),
+        }
+    }
 }
 
 /// IPA Diactritics.
@@ -172,9 +335,55 @@ pub enum Diacritic {
     NoAudibleRelease,
     MidCentralVowelRelease,
     VoicelessDentalFricativeRelease,
-    VoicelesVelarFricativeRelease,
+    VoicelessVelarFricativeRelease,
     Ejective,
     DoubleArticulation(DiacriticPosition),
+}
+
+impl Display for Diacritic {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Diacritic::Voiceless(_) => write!(f, "voiceless"),
+            Diacritic::Voiced => write!(f, "voiced"),
+            Diacritic::Aspirated => write!(f, "aspirated"),
+            Diacritic::MoreRounded(_) => write!(f, "more rounded"),
+            Diacritic::LessRounded(_) => write!(f, "less rounded"),
+            Diacritic::Advanced(_) => write!(f, "advanced"),
+            Diacritic::Retracted(_) => write!(f, "retracted"),
+            Diacritic::Centralized => write!(f, "centralized"),
+            Diacritic::MidCentralized => write!(f, "mid-centralized"),
+            Diacritic::Syllabic(_) => write!(f, "syllabic"),
+            Diacritic::NonSyllabic(_) => write!(f, "non-syllabic"),
+            Diacritic::Rhoticity => write!(f, "rhoticity"),
+            Diacritic::BreathyVoiced => write!(f, "breathy voiced"),
+            Diacritic::CreakyVoiced => write!(f, "creaky voiced"),
+            Diacritic::Linguolabial => write!(f, "linguolabial"),
+            Diacritic::Labialized => write!(f, "labialized"),
+            Diacritic::Palatalized => write!(f, "palatalized"),
+            Diacritic::Velarized => write!(f, "velarized"),
+            Diacritic::Pharyngealized => write!(f, "pharyngealized"),
+            Diacritic::Raised(_) => write!(f, "raised"),
+            Diacritic::Lowered(_) => write!(f, "lowered"),
+            Diacritic::ATR(_) => write!(f, "ATR"),
+            Diacritic::RTR(_) => write!(f, "RTR"),
+            Diacritic::Dental(_) => write!(f, "dental"),
+            Diacritic::Apical => write!(f, "apical"),
+            Diacritic::Laminal => write!(f, "laminal"),
+            Diacritic::Nasalized => write!(f, "nasalized"),
+            Diacritic::NasalRelease => write!(f, "nasal release"),
+            Diacritic::LateralRelease => write!(f, "lateral release"),
+            Diacritic::NoAudibleRelease => write!(f, "no audible release"),
+            Diacritic::MidCentralVowelRelease => write!(f, "mid-central vowel release"),
+            Diacritic::VoicelessDentalFricativeRelease => {
+                write!(f, "voiceless dental fricative release")
+            }
+            Diacritic::VoicelessVelarFricativeRelease => {
+                write!(f, "voiceless velar fricative release")
+            }
+            Diacritic::Ejective => write!(f, "ejective"),
+            Diacritic::DoubleArticulation(_) => write!(f, "double articulation"),
+        }
+    }
 }
 
 /// Position of a diacritic.
@@ -186,16 +395,45 @@ pub enum DiacriticPosition {
     Inline,
 }
 
+impl Display for DiacriticPosition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DiacriticPosition::Top => write!(f, "top"),
+            DiacriticPosition::Bottom => write!(f, "bottom"),
+            DiacriticPosition::Inline => write!(f, "inline"),
+        }
+    }
+}
+
 /// IPA symbols.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
 pub enum Ipa {
     Consonant(Phonation, PlaceOfArticulation, MannerOfArticulation),
+    ImplosiveConsonant(Phonation, PlaceOfArticulation),
+    EjectiveConsonant(PlaceOfArticulation, MannerOfArticulation),
+    ClickConsonant(PlaceOfArticulation, ClickMannerOfArticulation),
     Vowel(VowelHeight, VowelBackness, VowelRounding),
     Prosody(Prosody),
     Tone(Tone),
     Delimiter(Delimiter),
     Diacritic(Diacritic),
+}
+
+impl Display for Ipa {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Ipa::Consonant(v, p, m) => write!(f, "{} {} {}", v, p, m),
+            Ipa::ImplosiveConsonant(v, p) => write!(f, "{} {} implosive", v, p),
+            Ipa::EjectiveConsonant(p, m) => write!(f, "{} ejective {}", p, m),
+            Ipa::ClickConsonant(p, m) => write!(f, "{} {} click", m, p),
+            Ipa::Vowel(h, b, r) => write!(f, "{} {} {} vowel", h, b, r),
+            Ipa::Prosody(p) => write!(f, "{}", p),
+            Ipa::Tone(t) => write!(f, "{}", t),
+            Ipa::Delimiter(d) => write!(f, "{}", d),
+            Ipa::Diacritic(d) => write!(f, "{}", d),
+        }
+    }
 }
 
 impl Ipa {
@@ -283,8 +521,8 @@ fn ipa_char_map() -> BiBTreeMap<&'static str, Ipa> {
             Consonant(Voiceless, PostAlveolar, Affricate(Sibilant)),
         );
         map.insert("d͡ʒ", Consonant(Voiced, PostAlveolar, Affricate(Sibilant)));
-        map.insert("ʈ͡ʂ", Consonant(Voiceless, Retroflex, Affricate(Sibilant)));
-        map.insert("ɖ͡ʐ", Consonant(Voiced, Retroflex, Affricate(Sibilant)));
+        map.insert("t͡ʂ", Consonant(Voiceless, Retroflex, Affricate(Sibilant)));
+        map.insert("d͡ʐ", Consonant(Voiced, Retroflex, Affricate(Sibilant)));
         map.insert("t͡ɕ", Consonant(Voiceless, Palatal, Affricate(Sibilant)));
         map.insert("d͡ʑ", Consonant(Voiced, Palatal, Affricate(Sibilant)));
 
@@ -431,6 +669,82 @@ fn ipa_char_map() -> BiBTreeMap<&'static str, Ipa> {
         map.insert("k͡p", Consonant(Voiceless, LabialVelar, Plosive));
         map.insert("ɡ͡b", Consonant(Voiced, LabialVelar, Plosive));
         map.insert("q͡ʡ", Consonant(Voiceless, UvularPharyngeal, Plosive));
+
+        // Ejectives
+        map.insert("pʼ", EjectiveConsonant(Bilabial, Plosive));
+        map.insert("tʼ", EjectiveConsonant(Alveolar, Plosive));
+        map.insert("ʈʼ", EjectiveConsonant(Retroflex, Plosive));
+        map.insert("cʼ", EjectiveConsonant(Palatal, Plosive));
+        map.insert("kʼ", EjectiveConsonant(Velar, Plosive));
+        map.insert("qʼ", EjectiveConsonant(Uvular, Plosive));
+        map.insert("ʡʼ", EjectiveConsonant(Pharyngeal, Plosive));
+
+        map.insert("ɸʼ", EjectiveConsonant(Bilabial, Fricative(NonSibilant)));
+        map.insert("fʼ", EjectiveConsonant(Labiodental, Fricative(NonSibilant)));
+        map.insert("θʼ", EjectiveConsonant(Dental, Fricative(NonSibilant)));
+        map.insert("sʼ", EjectiveConsonant(Alveolar, Fricative(Sibilant)));
+        map.insert("ʃʼ", EjectiveConsonant(PostAlveolar, Fricative(Sibilant)));
+        map.insert("ʂʼ", EjectiveConsonant(Retroflex, Fricative(Sibilant)));
+        map.insert("ɕʼ", EjectiveConsonant(Palatal, Fricative(Sibilant)));
+        map.insert("xʼ", EjectiveConsonant(Velar, Fricative(NonSibilant)));
+        map.insert("ꭓʼ", EjectiveConsonant(Uvular, Fricative(NonSibilant)));
+
+        map.insert("t͡θʼ", EjectiveConsonant(Dental, Affricate(NonSibilant)));
+        map.insert("t͡sʼ", EjectiveConsonant(Alveolar, Affricate(Sibilant)));
+        map.insert("t͡ʃʼ", EjectiveConsonant(PostAlveolar, Affricate(Sibilant)));
+        map.insert("t͡ʂʼ", EjectiveConsonant(Retroflex, Affricate(Sibilant)));
+        map.insert("k͡xʼ", EjectiveConsonant(Velar, Affricate(NonSibilant)));
+        map.insert("q͡ꭓʼ", EjectiveConsonant(Uvular, Affricate(NonSibilant)));
+
+        map.insert("ɬʼ", EjectiveConsonant(Alveolar, LateralFricative));
+
+        map.insert("t͡ɬʼ", EjectiveConsonant(Alveolar, LateralAffricate));
+        map.insert("c͡ʎ̥ʼ", EjectiveConsonant(Palatal, LateralAffricate));
+        map.insert("k͡ʟ̝̊ʼ", EjectiveConsonant(Velar, LateralAffricate));
+
+        // Implosives
+        map.insert("ɓ̥", ImplosiveConsonant(Voiceless, Bilabial));
+        map.insert("ɗ̥", ImplosiveConsonant(Voiceless, Alveolar));
+        map.insert("ᶑ̊", ImplosiveConsonant(Voiceless, Retroflex));
+        map.insert("ʄ̊", ImplosiveConsonant(Voiceless, Palatal));
+        map.insert("ɠ̊", ImplosiveConsonant(Voiceless, Velar));
+        map.insert("ʛ̥", ImplosiveConsonant(Voiceless, Uvular));
+
+        map.insert("ɓ", ImplosiveConsonant(Voiced, Bilabial));
+        map.insert("ɗ", ImplosiveConsonant(Voiced, Alveolar));
+        map.insert("ᶑ", ImplosiveConsonant(Voiced, Retroflex));
+        map.insert("ʄ", ImplosiveConsonant(Voiced, Palatal));
+        map.insert("ɠ", ImplosiveConsonant(Voiced, Velar));
+        map.insert("ʛ", ImplosiveConsonant(Voiced, Uvular));
+    }
+    // Clicks
+    {
+        use ClickMannerOfArticulation::*;
+        use PlaceOfArticulation::*;
+
+        map.insert("ʘ", ClickConsonant(Bilabial, Tenuis));
+        map.insert("g͡ʘ", ClickConsonant(Bilabial, Voiced));
+        map.insert("ŋ͡ʘ", ClickConsonant(Bilabial, Nasal));
+
+        map.insert("ǀ", ClickConsonant(Dental, Tenuis));
+        map.insert("g͡ǀ", ClickConsonant(Dental, Voiced));
+        map.insert("ŋ͡ǀ", ClickConsonant(Dental, Nasal));
+
+        map.insert("ǃ", ClickConsonant(Alveolar, Tenuis));
+        map.insert("g͡ǃ", ClickConsonant(Alveolar, Voiced));
+        map.insert("ŋ͡ǃ", ClickConsonant(Alveolar, Nasal));
+
+        map.insert("ǁ", ClickConsonant(Alveolar, TenuisLateral));
+        map.insert("g͡ǁ", ClickConsonant(Alveolar, VoicedLateral));
+        map.insert("ŋ͡ǁ", ClickConsonant(Alveolar, NasalLateral));
+
+        map.insert("‼", ClickConsonant(Retroflex, Tenuis));
+        map.insert("g͡‼", ClickConsonant(Retroflex, Voiced));
+        map.insert("ŋ͡‼", ClickConsonant(Retroflex, Nasal));
+
+        map.insert("ǂ", ClickConsonant(Palatal, Tenuis));
+        map.insert("g͡ǂ", ClickConsonant(Palatal, Voiced));
+        map.insert("ŋ͡ǂ", ClickConsonant(Palatal, Nasal));
     }
     // Vowels
     {
@@ -540,7 +854,7 @@ fn ipa_char_map() -> BiBTreeMap<&'static str, Ipa> {
         map.insert("\u{031a}", Diacritic(NoAudibleRelease));
         map.insert("ᵊ", Diacritic(MidCentralVowelRelease));
         map.insert("ᶿ", Diacritic(VoicelessDentalFricativeRelease));
-        map.insert("ˣ", Diacritic(VoicelesVelarFricativeRelease));
+        map.insert("ˣ", Diacritic(VoicelessVelarFricativeRelease));
         map.insert("ʼ", Diacritic(Ejective));
         map.insert("\u{0361}", Diacritic(DoubleArticulation(Top)));
         map.insert("\u{035c}", Diacritic(DoubleArticulation(Bottom)));
@@ -566,7 +880,7 @@ fn ipa_char_map() -> BiBTreeMap<&'static str, Ipa> {
         map.insert("⸨", Delimiter(ObscuredOpen));
         map.insert("⸩", Delimiter(ObscuredClose));
         map.insert("{", Delimiter(ProsodicOpen));
-        map.insert("}", Delimiter(ProsodicClosed));
+        map.insert("}", Delimiter(ProsodicClose));
     }
 
     map

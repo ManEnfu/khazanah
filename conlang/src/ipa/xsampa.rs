@@ -150,17 +150,16 @@ fn xsampa_char_map() -> BTreeMap<&'static str, &'static str> {
     map.insert("=\\", "ǂ");
     map.insert("-\\", "\u{0361}");
     map.insert("_", "\u{0361}");
+    map.insert("__", "\u{0361}");
 
     map.insert("_\"", "\u{0308}"); // Centralized
     map.insert("_+", "\u{031f}"); // Advanced
     map.insert("_-", "\u{0320}"); // Retracted
-                                  // map.insert("_/", ""); // Rising tone
     map.insert("_0", "\u{0325}"); // Voiceless
     map.insert("=", "\u{0329}"); // Syllabic
     map.insert("_=", "\u{329}"); // Syllabic
     map.insert("_>", "ʼ"); // Ejective
     map.insert("_?\\", "ˤ"); // Pharyngealized
-                             // map.insert("_\\", ""); // Falling tone
     map.insert("_^", "\u{032f}"); // Non syllabic
     map.insert("_}", "\u{031a}"); // No audible release
     map.insert("`", "˞"); // Rhotacization
@@ -169,15 +168,11 @@ fn xsampa_char_map() -> BTreeMap<&'static str, &'static str> {
     map.insert("_A", "꭪"); // ATR
     map.insert("_a", "\u{033a}"); // Apical
     map.insert("_B", "˩"); // Extra low tone
-                           // map.insert("_B_L", ""); // Low rising tone
     map.insert("_c", "\u{031c}"); // Less rounded
     map.insert("_d", "\u{032a}"); // Dental
-                                  // map.insert("_e", ""); //
     map.insert("<F>", "↘"); // Global fall
-                            // map.insert("_F", ""); // Falling tone
     map.insert("_G", "ˠ"); // Velarized
     map.insert("_H", "˦"); // High tone
-                           // map.insert("_H_T", ""); // High rising tone
     map.insert("_h", "ʰ"); // Aspirated
     map.insert("_j", "ʲ"); // Palatalized
     map.insert("_k", ""); // Creaky voice
