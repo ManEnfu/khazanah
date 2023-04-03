@@ -22,10 +22,26 @@
             <property name="hexpand">True</property>
             <property name="spacing">6</property>
             <child>
-              <object class="GtkLabel" id="word_label">
-                <property name="halign">start</property>
+              <object class="GtkBox">
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="word_label">
+                    <!-- <property name="halign">start</property> -->
+                    <property name="ellipsize">end</property>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkLabel" id="pronunciation_label">
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                    <property name="ellipsize">end</property>
+                  </object>
+                </child>
               </object>
             </child>
+
             <child>
               <object class="GtkBox">
                 <property name="spacing">6</property>
@@ -46,6 +62,7 @@
                 </child>
                 <child>
                   <object class="GtkLabel" id="translation_label">
+                    <property name="ellipsize">end</property>
                     <style>
                       <class name="dim-label"/>
                     </style>

@@ -25,6 +25,8 @@ mod imp {
         pub pos_label: TemplateChild<gtk::Label>,
         #[template_child]
         pub translation_label: TemplateChild<gtk::Label>,
+        #[template_child]
+        pub pronunciation_label: TemplateChild<gtk::Label>,
 
         #[property(get, set)]
         pub reveal_action_buttons: Cell<bool>,
@@ -88,6 +90,7 @@ impl ProjectLexiconWordListRow {
         let word_label = self.imp().word_label.get();
         let pos_label = self.imp().pos_label.get();
         let translation_label = self.imp().translation_label.get();
+        let pronunciation_label = self.imp().pronunciation_label.get();
 
         let mut bindings = self.imp().bindings.borrow_mut();
 
@@ -102,6 +105,23 @@ impl ProjectLexiconWordListRow {
                         }
                     }
                     Some("(New word)".to_string())
+                })
+                .build(),
+        );
+        
+        bindings.push(
+            word_object
+                .bind_property("pronunciation", &pronunciation_label, "label")
+                .sync_create()
+                .transform_to(|_, s: Option<String>| {
+                    if let Some(s) = s {
+                        if !s.is_empty() {
+                            return Some(format!("/{}/", s));
+                        } else {
+                            return Some(s);
+                        }
+                    }
+                    Some("".to_string())
                 })
                 .build(),
         );
