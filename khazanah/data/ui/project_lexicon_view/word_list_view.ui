@@ -68,37 +68,42 @@
 
         <child>
           <object class="GtkBox" id="main_page">
-            <property name="orientation">horizontal</property>
+            <property name="orientation">vertical</property>
+            <property name="hexpand">True</property>
 
             <child>
-              <object class="GtkBox" id="word_toolbar">
-                <property name="spacing">6</property>
-                <property name="orientation">vertical</property>
+              <object class="GtkCenterBox" id="word_toolbar">
+                <property name="orientation">horizontal</property>
                 <style>
                   <class name="word-toolbar"/>
                 </style>
-                <child>
-                  <object class="GtkToggleButton" id="search_word_button">
-                    <property name="icon-name">system-search-symbolic</property>
-                    <property name="tooltip-text">Search word</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkMenuButton" id="sort_word_button">
-                    <property name="icon-name">view-sort-ascending-symbolic</property>
-                    <property name="tooltip-text">Sort word</property>
-                    <property name="direction">right</property>
-                    <property name="popover">
-                      <object class="GtkPopoverMenu">
-                        <property name="valign">start</property>
-                        <property name="menu-model">sort_menu</property>
-                      </object>
-                    </property>
-                  </object>
-                </child>
-                <child>
+                <child type="end">
                   <object class="GtkBox">
-                    <property name="orientation">vertical</property>
+                    <property name="spacing">6</property>
+                    <property name="orientation">horizontal</property>
+                    <child>
+                      <object class="GtkMenuButton" id="sort_word_button">
+                        <property name="icon-name">view-sort-ascending-symbolic</property>
+                        <property name="tooltip-text">Sort word</property>
+                        <property name="popover">
+                          <object class="GtkPopoverMenu">
+                            <property name="menu-model">sort_menu</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="search_word_button">
+                        <property name="icon-name">system-search-symbolic</property>
+                        <property name="tooltip-text">Search word</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+
+                <child type="start">
+                  <object class="GtkBox">
+                    <property name="orientation">horizontal</property>
                     <style>
                       <class name="linked"/>
                     </style>
@@ -117,83 +122,89 @@
                     </child>
                   </object>
                 </child>
+
+                <child type="center">
+                  <object class="GtkLabel">
+                    <attributes>
+                      <attribute name="weight" value="PANGO_WEIGHT_BOLD"/>
+                    </attributes>
+                    <property name="label">Words</property>
+                  </object>
+                </child>
               </object>
             </child>
 
             <child>
-              <object class="GtkBox">
-                <property name="orientation">vertical</property>
-                <property name="hexpand">True</property>
-                <child>
-                  <object class="GtkSearchBar" id="search_bar">
-                    <property name="search-mode-enabled"
-                              bind-source="search_word_button"
-                              bind-property="active"
-                              bind-flags="sync-create|bidirectional"/>
-                    <signal name="notify::search-mode-enabled"
-                            handler="handle_search_mode_toggle"
-                            swapped="true"/>
-                    <style>
-                      <class name="flat"/>
-                    </style>
-                    <property name="child">
-                      <object class="GtkBox">
-                        <property name="spacing">6</property>
+              <object class="GtkSearchBar" id="search_bar">
+                <property name="search-mode-enabled"
+                          bind-source="search_word_button"
+                          bind-property="active"
+                          bind-flags="sync-create|bidirectional"/>
+                <signal name="notify::search-mode-enabled"
+                        handler="handle_search_mode_toggle"
+                        swapped="true"/>
+                <style>
+                  <class name="flat"/>
+                </style>
+                <property name="child">
+                  <object class="GtkBox">
+                    <property name="spacing">6</property>
+                    <property name="hexpand">True</property>
+                    <child>
+                      <object class="GtkSearchEntry" id="search_entry">
+                        <property name="placeholder-text" translatable="yes">Search word</property>
                         <property name="hexpand">True</property>
-                        <child>
-                          <object class="GtkSearchEntry" id="search_entry">
-                            <property name="placeholder-text" translatable="yes">Search word</property>
-                            <property name="hexpand">True</property>
-                            <signal name="search-changed"
-                                    handler="handle_search_entry_changed"
-                                    swapped="true"/>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkMenuButton" id="search_filter_button">
-                            <property name="icon-name" translatable="yes">funnel-symbolic</property>
-                            <property name="menu-model">filter_menu</property>
-                          </object>
-                        </child>
+                        <signal name="search-changed"
+                                handler="handle_search_entry_changed"
+                                swapped="true"/>
                       </object>
-                    </property>
+                    </child>
+                    <child>
+                      <object class="GtkMenuButton" id="search_filter_button">
+                        <property name="icon-name" translatable="yes">funnel-symbolic</property>
+                        <property name="menu-model">filter_menu</property>
+                      </object>
+                    </child>
                   </object>
-                </child>
-                
+                </property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkSeparator"/>
+            </child>
+
+            <child>
+              <object class="GtkStack" id="search_stack">
+                <property name="visible-child">scrolled_window</property>
+                <property name="transition-type">crossfade</property>
                 <child>
-                  <object class="GtkStack" id="search_stack">
-                    <property name="visible-child">scrolled_window</property>
-                    <property name="transition-type">crossfade</property>
+                  <object class="GtkScrolledWindow" id="scrolled_window">
+                    <property name="vexpand">True</property>
                     <child>
-                      <object class="GtkScrolledWindow" id="scrolled_window">
-                        <property name="vexpand">True</property>
-                        <child>
-                          <object class="GtkListView" id="list_view">
-                            <style>
-                              <class name="navigation-sidebar"/>
-                              <class name="background"/>
-                            </style>
-                            <signal name="activate" handler="handle_row_activated" swapped="true"/>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-
-                    <child>
-                      <object class="AdwStatusPage" id="search_result_empty">
-                        <property name="icon-name">system-search-symbolic</property>
-                        <property name="title">No Results Found</property>
-                        <property name="description">Try a different search.</property>
-                        <property name="vexpand">true</property>
+                      <object class="GtkListView" id="list_view">
                         <style>
-                          <class name="compact"/>
+                          <class name="navigation-sidebar"/>
+                          <class name="background"/>
                         </style>
-                      </object> <!-- AdwStatusPage -->
+                        <signal name="activate" handler="handle_row_activated" swapped="true"/>
+                      </object>
                     </child>
                   </object>
                 </child>
 
-              </object> <!-- GtkBox -->
+                <child>
+                  <object class="AdwStatusPage" id="search_result_empty">
+                    <property name="icon-name">system-search-symbolic</property>
+                    <property name="title">No Results Found</property>
+                    <property name="description">Try a different search.</property>
+                    <property name="vexpand">true</property>
+                    <style>
+                      <class name="compact"/>
+                    </style>
+                  </object> <!-- AdwStatusPage -->
+                </child>
+              </object>
             </child>
 
           </object> <!-- GtkBox -->
