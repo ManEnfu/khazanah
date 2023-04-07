@@ -445,6 +445,18 @@ impl Ipa {
     pub fn to_str(&self) -> Option<&'static str> {
         IPA_CHAR_MAP.get_by_right(self).copied()
     }
+
+    pub fn from_symbol(s: &str) -> Option<Ipa> {
+        IPA_CHAR_MAP.get_by_left(s).copied()
+    }
+
+    pub fn symbol(&self) -> Option<&'static str> {
+        IPA_CHAR_MAP.get_by_right(self).copied()
+    }
+
+    pub fn name(&self) -> String {
+        todo!()
+    }
 }
 
 impl FromStr for Ipa {
@@ -461,6 +473,18 @@ lazy_static! {
         .map(|&r| r.as_bytes().len())
         .max()
         .unwrap_or_default();
+    pub static ref IPA_BASE_PHONEMES: Vec<Ipa> = IPA_CHAR_MAP
+        .right_values()
+        .filter(|&x| matches!(
+            x,
+            Ipa::Vowel(_, _, _)
+                | Ipa::Consonant(_, _, _)
+                | Ipa::ImplosiveConsonant(_, _)
+                | Ipa::EjectiveConsonant(_, _)
+                | Ipa::ClickConsonant(_, _)
+        ))
+        .copied()
+        .collect();
 }
 
 #[doc(hidden)]
