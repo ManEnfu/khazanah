@@ -56,11 +56,13 @@ mod imp {
 }
 
 glib::wrapper! {
+    /// List of base phonemes available.
     pub struct  AddPhonemeListModel(ObjectSubclass<imp::AddPhonemeListModel>)
         @implements gio::ListModel;
 }
 
 impl AddPhonemeListModel {
+    /// Creates new list.
     pub fn new() -> Self {
         glib::Object::builder().build()
     }

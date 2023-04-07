@@ -77,7 +77,7 @@ impl AddPhonemeRow {
         glib::Object::builder().build()
     }
 
-    /// Binds widget to a word object.
+    /// Binds widget to a object.
     pub fn bind(&self, phoneme_object: &AddPhonemeObject) {
         let mut bindings = self.imp().bindings.borrow_mut();
         let imp = self.imp();

@@ -32,6 +32,13 @@ mod imp {
         #[template_child]
         pub search_entry: TemplateChild<gtk::SearchEntry>,
 
+        #[template_child]
+        pub search_stack: TemplateChild<gtk::Stack>,
+        #[template_child]
+        pub scrolled_window: TemplateChild<gtk::ScrolledWindow>,
+        #[template_child]
+        pub search_result_empty: TemplateChild<adw::StatusPage>,
+
         #[property(get, set)]
         pub phoneme_list_model: RefCell<Option<models::AddPhonemeListModel>>,
         #[property(get, set)]
@@ -99,6 +106,7 @@ glib::wrapper! {
 
 #[gtk::template_callbacks]
 impl AddPhonemeButton {
+    /// Setup phoneme list.
     fn setup_list(&self) {
         let imp = self.imp();
 
@@ -159,6 +167,7 @@ impl AddPhonemeButton {
         imp.list_view.set_factory(Some(&factory));
     }
 
+    /// Responds to `search-changed` signal from search entry.
     #[template_callback]
     pub fn handle_search_entry_changed(&self, entry: &gtk::SearchEntry) {
         let text = entry.text().to_lowercase();
@@ -174,9 +183,19 @@ impl AddPhonemeButton {
                         .unwrap_or_default()
                 })
             }
+
+            // Displays status page if search result is empty.
+            let imp = self.imp();
+            if filter_model.n_items() > 0 {
+                imp.search_stack.set_visible_child(&*imp.scrolled_window);
+            } else {
+                imp.search_stack
+                    .set_visible_child(&*imp.search_result_empty);
+            }
         }
     }
 
+    /// Responds to `activated` signal from list view.
     #[template_callback]
     pub fn handle_row_activated(&self, position: u32, list_view: &gtk::ListView) {
         if let Some(p) = list_view
