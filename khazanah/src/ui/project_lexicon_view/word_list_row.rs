@@ -108,7 +108,7 @@ impl ProjectLexiconWordListRow {
                 })
                 .build(),
         );
-        
+
         bindings.push(
             word_object
                 .bind_property("pronunciation", &pronunciation_label, "label")

@@ -36,6 +36,8 @@ mod imp {
         pub project_overview_view: TemplateChild<ui::ProjectOverviewView>,
         #[template_child]
         pub project_lexicon_view: TemplateChild<ui::ProjectLexiconView>,
+        #[template_child]
+        pub project_phonology_view: TemplateChild<ui::ProjectPhonologyView>,
 
         #[template_child]
         pub header_bar: TemplateChild<ui::HeaderBar>,
@@ -476,6 +478,7 @@ impl ApplicationWindow {
 
         match view {
             MainViews::Overview => main_stack.set_visible_child(&*imp.project_overview_view),
+            MainViews::Phonology => main_stack.set_visible_child(&*imp.project_phonology_view),
             MainViews::Lexicon => main_stack.set_visible_child(&*imp.project_lexicon_view),
             _ => log::warn!("Attempting to switch to unknown view."),
         }
@@ -491,6 +494,7 @@ impl ApplicationWindow {
 
         match view {
             MainViews::Overview => imp.project_overview_view.load_state(),
+            MainViews::Phonology => imp.project_phonology_view.load_state(),
             MainViews::Lexicon => imp.project_lexicon_view.load_state(),
             _ => log::warn!("Attempting to load unknown view."),
         }
@@ -509,9 +513,9 @@ impl ApplicationWindow {
 
         match view {
             MainViews::Overview => imp.project_overview_view.commit_state(),
+            MainViews::Phonology => imp.project_phonology_view.commit_state(),
             MainViews::Lexicon => imp.project_lexicon_view.commit_state(),
-            MainViews::Unknown => {}
-            _ => log::warn!("Attempting to commit unknown view."),
+            MainViews::Unknown => {} // _ => log::warn!("Attempting to commit unknown view."),
         }
     }
 
@@ -528,6 +532,7 @@ impl ApplicationWindow {
 
         match view {
             MainViews::Overview => imp.project_overview_view.unload_state(),
+            MainViews::Phonology => imp.project_phonology_view.unload_state(),
             MainViews::Lexicon => imp.project_lexicon_view.unload_state(),
             _ => log::warn!("Attempting to load unknown view."),
         }

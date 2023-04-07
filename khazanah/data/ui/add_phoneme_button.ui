@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.6"/>
+  <requires lib="Adw" version="1.2"/>
+
+  <!-- View switcher dropdown. -->
+  <template class="KhzAddPhonemeButton" parent="AdwBin">
+    <child>
+      <object class="GtkMenuButton" id="button">
+        <property name="child">
+          <object class="AdwButtonContent">
+            <property name="icon-name">list-add-symbolic</property>
+            <property name="label">Phoneme</property>
+          </object>
+        </property>
+        <property name="popover">
+          <object class="GtkPopover" id="popover">
+            <property name="height-request">350</property>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkSearchEntry" id="search_entry">
+                        <property name="placeholder-text">Search Phonemes</property>
+                        <signal name="search-changed"
+                                handler="handle_search_entry_changed"
+                                swapped="true"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="vexpand">true</property>
+                    <property name="hscrollbar-policy">never</property>
+                    <property name="child">
+                      <object class="GtkListView" id="list_view">
+                        <property name="single-click-activate">true</property>
+                        <signal name="activate"
+                                handler="handle_row_activated"
+                                swapped="true"/>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </child>
+  </template> <!-- KhzAddPhonemeButton -->
+
+</interface>

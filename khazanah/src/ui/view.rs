@@ -29,7 +29,11 @@ pub enum MainViews {
     Unknown = u32::MAX,
 }
 
-pub const ALL_MAIN_VIEWS: &[MainViews] = &[MainViews::Overview, MainViews::Lexicon];
+pub const ALL_MAIN_VIEWS: &[MainViews] = &[
+    MainViews::Overview,
+    MainViews::Phonology,
+    MainViews::Lexicon,
+];
 
 impl From<u32> for MainViews {
     fn from(value: u32) -> Self {

@@ -1,3 +1,5 @@
+pub use add_phoneme_list::AddPhonemeListModel;
+pub use add_phoneme_object::AddPhonemeObject;
 pub use meta_object::MetaObject;
 pub use project_model::ProjectModel;
 pub use word_filter::{WordFilter, WordFilterBy};
@@ -9,3 +11,6 @@ mod project_model;
 mod word_filter;
 mod word_object;
 mod word_sorter;
+
+mod add_phoneme_list;
+mod add_phoneme_object;

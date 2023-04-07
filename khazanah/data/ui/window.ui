@@ -56,6 +56,15 @@
                 </child>
 
                 <child>
+                  <object class="KhzProjectPhonologyView" id="project_phonology_view">
+                    <property name="project-model"
+                              bind-source="KhzApplicationWindow"
+                              bind-property="project-model"
+                              bind-flags="sync-create"/>
+                  </object>
+                </child>
+
+                <child>
                   <object class="KhzProjectLexiconView" id="project_lexicon_view">
                     <property name="project-model"
                               bind-source="KhzApplicationWindow"
