@@ -1,6 +1,13 @@
 //! Generic reader and writer for XML files in UTF-8 encoding.
 
-use std::{borrow::Cow, io::BufRead, str::Utf8Error};
+use std::{
+    borrow::Cow,
+    fs::File,
+    io::{BufRead, BufReader, Cursor, Write},
+    path::Path,
+    str::Utf8Error,
+    string::FromUtf8Error,
+};
 
 use quick_xml::{
     events::{
@@ -11,8 +18,11 @@ use quick_xml::{
 };
 
 /// Error type for `XMLReader` and `XMLWriter`..
-#[derive(Clone, Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum XmlError<E> {
+    /// Filesystem error
+    #[error("Filesystem error: {0}")]
+    Fs(#[from] std::io::Error),
     /// Error produced by `quick_xml`.
     #[error(transparent)]
     Qxml(#[from] quick_xml::Error),
@@ -21,11 +31,14 @@ pub enum XmlError<E> {
     /// Encoding error.
     #[error(transparent)]
     Utf8(#[from] Utf8Error),
+    #[error("Error in converting to string from UTF-8: {0}")]
+    FromUtf8(#[from] FromUtf8Error),
     /// Other, domain specific error.
     #[error(transparent)]
     Other(E),
 }
 
+/// Processor for `XmlReader`.
 pub trait XmlReaderProcess {
     type Output: Default;
     type Error;
@@ -67,9 +80,6 @@ pub struct XmlReader<R, P> {
     context: Vec<String>,
 
     processor: P,
-    // process_tag_start: Option<Box<dyn Fn(O, &[String], &str, Vec<(&str, String)>) -> Result<O, E>>>,
-    // process_text: Option<Box<dyn Fn(O, &[String], Cow<str>) -> Result<O, E>>>,
-    // process_tag_end: Option<Box<dyn Fn(O, &[String], &str) -> Result<O, E>>>,
 }
 
 impl<R, P> XmlReader<R, P>
@@ -90,33 +100,6 @@ where
             processor,
         }
     }
-
-    // /// Assigns a callback when encountering an opening tag.
-    // pub fn process_tag_start<F>(&mut self, f: F) -> &mut Self
-    // where
-    //     F: Fn(O, &[String], &str, Vec<(&str, String)>) -> Result<O, E> + 'static,
-    // {
-    //     self.process_tag_start = Some(Box::new(f));
-    //     self
-    // }
-
-    // /// Assigns a callback when encountering a text.
-    // pub fn process_text<F>(&mut self, f: F) -> &mut Self
-    // where
-    //     F: Fn(O, &[String], Cow<str>) -> Result<O, E> + 'static,
-    // {
-    //     self.process_text = Some(Box::new(f));
-    //     self
-    // }
-
-    // /// Assigns a callback when encountering a closing tag.
-    // pub fn process_tag_end<F>(&mut self, f: F) -> &mut Self
-    // where
-    //     F: Fn(O, &[String], &str) -> Result<O, E> + 'static,
-    // {
-    //     self.process_tag_end = Some(Box::new(f));
-    //     self
-    // }
 
     /// Reads the content.
     pub fn read(&mut self) -> Result<P::Output, XmlError<P::Error>> {
@@ -169,6 +152,11 @@ where
         }
 
         Ok(data)
+    }
+
+    /// Finishes reading and returns the underlying reader.
+    pub fn finish(self) -> R {
+        self.reader.into_inner()
     }
 }
 
@@ -230,5 +218,52 @@ impl<W: std::io::Write> XmlWriter<W> {
     /// Finishes writing and returns the underlying writer.
     pub fn finish(self) -> W {
         self.writer.into_inner()
+    }
+}
+
+/// A trait for object that can be read from XML.
+pub trait ReadXml
+where
+    Self: Sized,
+{
+    type Error;
+
+    /// Reads fro XML.
+    fn read_xml<R: BufRead>(reader: R) -> Result<(Self, R), XmlError<Self::Error>>;
+
+    /// Loads from XML file.
+    fn load_xml_file<P: AsRef<Path>>(path: P) -> Result<Self, XmlError<Self::Error>> {
+        let f = File::open(path)?;
+        Self::read_xml(BufReader::new(f)).map(|r| r.0)
+    }
+
+    /// Loads from XML string.
+    fn load_xml_str(s: &str) -> Result<Self, XmlError<Self::Error>> {
+        Self::read_xml(s.as_bytes()).map(|r| r.0)
+    }
+}
+
+/// A trait for object that can be written into XML.
+pub trait WriteXml
+where
+    Self: Sized,
+{
+    type Error;
+
+    /// Writes to XML.
+    fn write_xml<W: Write>(&self, writer: W) -> Result<W, XmlError<Self::Error>>;
+
+    /// Saves to XML file.
+    fn save_xml_file<P: AsRef<Path>>(&self, path: P) -> Result<(), XmlError<Self::Error>> {
+        let f = File::create(path)?;
+        self.write_xml(f)?;
+        Ok(())
+    }
+
+    /// Saves to XML string.
+    fn save_xml_string(&self) -> Result<String, XmlError<Self::Error>> {
+        let w = self.write_xml(Cursor::new(Vec::<u8>::new()))?;
+        let ar = w.into_inner();
+        String::from_utf8(ar).map_err(XmlError::from)
     }
 }

@@ -1,4 +1,7 @@
-use crate::{Lexicon, PartOfSpeech, Word};
+use crate::{
+    xml::{ReadXml, WriteXml},
+    Lexicon, PartOfSpeech, Word,
+};
 
 fn test_lex() -> Lexicon {
     let mut lex = Lexicon::new();

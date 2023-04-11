@@ -20,7 +20,10 @@ use std::{
 };
 use zip::{result::ZipError, write::FileOptions, ZipArchive, ZipWriter};
 
-use crate::Lexicon;
+use crate::{
+    xml::{ReadXml, WriteXml},
+    Lexicon,
+};
 
 mod error;
 pub mod meta;
@@ -81,14 +84,14 @@ impl Project {
 
         // Load metadata
         let meta = match archive.by_name("meta.xml") {
-            Ok(f) => Meta::read_xml(BufReader::new(f))?,
+            Ok(f) => Meta::read_xml(BufReader::new(f))?.0,
             Err(ZipError::FileNotFound) => Meta::new(),
             Err(e) => return Err(Error::Zip(e)),
         };
 
         // Load lexicon
         let lexicon = match archive.by_name("lexicon.xml") {
-            Ok(f) => Lexicon::read_xml(BufReader::new(f))?,
+            Ok(f) => Lexicon::read_xml(BufReader::new(f))?.0,
             Err(ZipError::FileNotFound) => Lexicon::new(),
             Err(e) => return Err(Error::Zip(e)),
         };

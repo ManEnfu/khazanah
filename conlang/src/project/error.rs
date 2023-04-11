@@ -4,6 +4,8 @@ use crate::lexicon;
 
 use super::meta;
 
+use crate::xml::XmlError;
+
 /// Error type for `Project`.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -15,10 +17,10 @@ pub enum Error {
     Zip(#[from] ZipError),
     /// Error at meta operation.
     #[error("Meta: {0}")]
-    Meta(#[from] meta::Error),
+    Meta(#[from] XmlError<meta::Error>),
     /// Error at lexicon operation.
     #[error("Lexicon: {0}")]
-    Lexicon(#[from] lexicon::Error),
+    Lexicon(#[from] XmlError<lexicon::Error>),
     /// Wrong MIME type.
     #[error("This file has wrong MIME type")]
     WrongMimeType,

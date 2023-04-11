@@ -1,6 +1,6 @@
 //! Module for lexicon and related data structures.
 
-pub use error::{Error, ReadError};
+pub use error::Error;
 pub use pos::{PartOfSpeech, ALL_PARTS_OF_SPEECH};
 use uuid::Uuid;
 pub use word::Word;
@@ -10,12 +10,10 @@ use std::{
         hash_map::{Iter, Keys},
         HashMap,
     },
-    fs::File,
-    io::{BufRead, BufReader, Cursor, Write},
-    path::Path,
+    io::{BufRead, Write},
 };
 
-use crate::xml::{XmlReader, XmlReaderProcess, XmlWriter};
+use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlReaderProcess, XmlWriter};
 
 mod error;
 mod pos;
@@ -88,27 +86,125 @@ impl Lexicon {
     pub fn ids(&self) -> Keys<Uuid, Word> {
         self.words.keys()
     }
+}
 
-    /// Reads from XML.
-    pub fn read_xml<R: BufRead>(reader: R) -> Result<Self, Error> {
-        XmlReader::new(reader, XmlReaderProcessor::new())
-            .read()
-            .map_err(Error::Xml)
+impl ReadXml for Lexicon {
+    type Error = Error;
+
+    fn read_xml<R: BufRead>(reader: R) -> Result<(Self, R), XmlError<Self::Error>> {
+        let mut xml_reader = XmlReader::new(reader, XmlReaderProcessor::new());
+        let ret = xml_reader.read()?;
+        Ok((ret, xml_reader.finish()))
+    }
+}
+
+struct XmlReaderProcessor {
+    current_id: Uuid,
+}
+
+impl XmlReaderProcessor {
+    pub fn new() -> Self {
+        Self {
+            current_id: Uuid::default(),
+        }
+    }
+}
+
+impl XmlReaderProcess for XmlReaderProcessor {
+    type Output = Lexicon;
+    type Error = Error;
+
+    fn process_tag_start(
+        &mut self,
+        mut data: Self::Output,
+        context: &[String],
+        _name: &str,
+        attrs: Vec<(&str, String)>,
+    ) -> Result<Self::Output, Self::Error> {
+        let l = context.len();
+        let tag = context.last().map(|s| s.as_str());
+        let ptag = match l {
+            2.. => context.get(l - 2).map(|s| s.as_str()),
+            _ => None,
+        };
+
+        let word = data
+            .words
+            .get_mut(&self.current_id)
+            .ok_or(Error::WriteInvalidWord);
+
+        match (ptag, tag) {
+            // Root tag;
+            (None, Some("lexicon")) => {}
+            // Insert new word
+            (Some("lexicon"), Some("word")) => {
+                // If there's no id attribute, generate a random one for this word.
+                self.current_id = attrs
+                    .iter()
+                    .find(|&x| x.0 == "id")
+                    .map(|x| Uuid::parse_str(&x.1))
+                    .unwrap_or_else(|| Ok(Uuid::new_v4()))?;
+                data.words.insert(self.current_id, Word::new());
+            }
+            // Clear word properties
+            (Some("word"), Some("romanization")) => {
+                word?.romanization.clear();
+            }
+            (Some("word"), Some("pronunciation")) => {
+                let word = word?;
+                word.xsampa_pronunciation = attrs
+                    .iter()
+                    .find(|&x| x.0 == "xsampa")
+                    .map(|x| x.1.to_owned());
+                word.pronunciation.clear();
+            }
+            (Some("word"), Some("translation")) => {
+                word?.translation.clear();
+            }
+            (Some("word"), Some("part-of-speech")) => {
+                word?.part_of_speech = None;
+            }
+            _ => {
+                return Err(Error::WrongContext {
+                    ptag: ptag.unwrap_or_default().to_string(),
+                    tag: tag.unwrap_or_default().to_string(),
+                })
+            }
+        }
+        Ok(data)
     }
 
-    /// Load `Lexicon` from XML file.
-    pub fn load_xml_file<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
-        let f = File::open(path)?;
-        Self::read_xml(BufReader::new(f))
-    }
+    fn process_text(
+        &mut self,
+        mut data: Self::Output,
+        context: &[String],
+        text: std::borrow::Cow<str>,
+    ) -> Result<Self::Output, Self::Error> {
+        let tag = context.last().map(|s| s.as_str());
 
-    /// Load `Lexicon` from XML string.
-    pub fn load_xml_str(s: &str) -> Result<Self, Error> {
-        Self::read_xml(s.as_bytes())
-    }
+        let word = data
+            .words
+            .get_mut(&self.current_id)
+            .ok_or(Error::WriteInvalidWord);
 
-    /// Writes to XML.
-    pub fn write_xml<W: Write>(&self, writer: W) -> Result<W, Error> {
+        match tag {
+            // Set word properties
+            Some("romanization") => word?.romanization += &text,
+            Some("pronunciation") => word?.pronunciation += &text,
+            Some("translation") => word?.translation += &text,
+            Some("part-of-speech") => {
+                word?.part_of_speech = Some(text.as_ref().into());
+            }
+            _ => {}
+        }
+        Ok(data)
+    }
+}
+
+impl WriteXml for Lexicon {
+    type Error = Error;
+
+    fn write_xml<W: Write>(&self, writer: W) -> Result<W, XmlError<Self::Error>> {
         let mut w = XmlWriter::new(writer);
 
         w.write_init()?;
@@ -145,122 +241,5 @@ impl Lexicon {
         w.write_tag_end("lexicon")?;
 
         Ok(w.finish())
-    }
-
-    /// Saves `Lexicon` to XML file.
-    pub fn save_xml_file<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
-        let f = File::create(path)?;
-        self.write_xml(f)?;
-        Ok(())
-    }
-
-    /// Saves `Lexicon` to XML string.
-    pub fn save_xml_string(&self) -> Result<String, Error> {
-        let w = self.write_xml(Cursor::new(Vec::<u8>::new())).unwrap();
-        let ar = w.into_inner();
-        String::from_utf8(ar).map_err(Error::from)
-    }
-}
-
-struct XmlReaderProcessor {
-    current_id: Uuid,
-}
-
-impl XmlReaderProcessor {
-    pub fn new() -> Self {
-        Self {
-            current_id: Uuid::default(),
-        }
-    }
-}
-
-impl XmlReaderProcess for XmlReaderProcessor {
-    type Output = Lexicon;
-    type Error = ReadError;
-
-    fn process_tag_start(
-        &mut self,
-        mut data: Self::Output,
-        context: &[String],
-        _name: &str,
-        attrs: Vec<(&str, String)>,
-    ) -> Result<Self::Output, Self::Error> {
-        let l = context.len();
-        let tag = context.last().map(|s| s.as_str());
-        let ptag = match l {
-            2.. => context.get(l - 2).map(|s| s.as_str()),
-            _ => None,
-        };
-
-        let word = data
-            .words
-            .get_mut(&self.current_id)
-            .ok_or(ReadError::WriteInvalidWord);
-
-        match (ptag, tag) {
-            // Root tag;
-            (None, Some("lexicon")) => {}
-            // Insert new word
-            (Some("lexicon"), Some("word")) => {
-                // If there's no id attribute, generate a random one for this word.
-                self.current_id = attrs
-                    .iter()
-                    .find(|&x| x.0 == "id")
-                    .map(|x| Uuid::parse_str(&x.1))
-                    .unwrap_or_else(|| Ok(Uuid::new_v4()))?;
-                data.words.insert(self.current_id, Word::new());
-            }
-            // Clear word properties
-            (Some("word"), Some("romanization")) => {
-                word?.romanization.clear();
-            }
-            (Some("word"), Some("pronunciation")) => {
-                let word = word?;
-                word.xsampa_pronunciation = attrs
-                    .iter()
-                    .find(|&x| x.0 == "xsampa")
-                    .map(|x| x.1.to_owned());
-                word.pronunciation.clear();
-            }
-            (Some("word"), Some("translation")) => {
-                word?.translation.clear();
-            }
-            (Some("word"), Some("part-of-speech")) => {
-                word?.part_of_speech = None;
-            }
-            _ => {
-                return Err(ReadError::WrongContext {
-                    ptag: ptag.unwrap_or_default().to_string(),
-                    tag: tag.unwrap_or_default().to_string(),
-                })
-            }
-        }
-        Ok(data)
-    }
-
-    fn process_text(
-        &mut self,
-        mut data: Self::Output,
-        context: &[String],
-        text: std::borrow::Cow<str>,
-    ) -> Result<Self::Output, Self::Error> {
-        let tag = context.last().map(|s| s.as_str());
-
-        let word = data
-            .words
-            .get_mut(&self.current_id)
-            .ok_or(ReadError::WriteInvalidWord);
-
-        match tag {
-            // Set word properties
-            Some("romanization") => word?.romanization += &text,
-            Some("pronunciation") => word?.pronunciation += &text,
-            Some("translation") => word?.translation += &text,
-            Some("part-of-speech") => {
-                word?.part_of_speech = Some(text.as_ref().into());
-            }
-            _ => {}
-        }
-        Ok(data)
     }
 }

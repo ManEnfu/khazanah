@@ -1,4 +1,4 @@
-use std::io::{BufReader, Cursor};
+use std::io::Cursor;
 
 use crate::{
     lexicon::{Lexicon, PartOfSpeech, Word},
@@ -54,7 +54,10 @@ fn write_and_read() {
 }
 
 mod meta {
-    use crate::Meta;
+    use crate::{
+        xml::{ReadXml, WriteXml},
+        Meta,
+    };
 
     fn test_meta() -> Meta {
         Meta {
