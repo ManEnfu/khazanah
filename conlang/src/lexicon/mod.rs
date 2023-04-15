@@ -13,7 +13,7 @@ use std::{
     io::{BufRead, Write},
 };
 
-use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlReaderProcess, XmlWriter};
+use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
 
 mod error;
 mod pos;
@@ -32,8 +32,11 @@ impl Lexicon {
     }
 
     /// Adds a `Word` to `Lexicon` and returns its id.
-    pub fn add_word(&mut self, word: Word) -> Uuid {
-        let id = Uuid::new_v4();
+    pub fn add_word(&mut self, mut word: Word) -> Uuid {
+        if word.id.is_none() {
+            word.id = Some(Uuid::new_v4());
+        }
+        let id = word.id.unwrap();
         self.words.insert(id, word);
         id
     }
@@ -91,155 +94,71 @@ impl Lexicon {
 impl ReadXml for Lexicon {
     type Error = Error;
 
-    fn read_xml<R: BufRead>(reader: R) -> Result<(Self, R), XmlError<Self::Error>> {
-        let mut xml_reader = XmlReader::new(reader, XmlReaderProcessor::new());
-        let ret = xml_reader.read()?;
-        Ok((ret, xml_reader.finish()))
-    }
-}
+    type ReaderState = ();
 
-struct XmlReaderProcessor {
-    current_id: Uuid,
-}
+    const TAG: &'static str = "lexicon";
 
-impl XmlReaderProcessor {
-    pub fn new() -> Self {
-        Self {
-            current_id: Uuid::default(),
-        }
-    }
-}
-
-impl XmlReaderProcess for XmlReaderProcessor {
-    type Output = Lexicon;
-    type Error = Error;
-
-    fn process_tag_start(
+    fn process_tag_start<R: BufRead>(
         &mut self,
-        mut data: Self::Output,
-        context: &[String],
-        _name: &str,
-        attrs: Vec<(&str, String)>,
-    ) -> Result<Self::Output, Self::Error> {
-        let l = context.len();
-        let tag = context.last().map(|s| s.as_str());
+        reader: &mut XmlReader<R>,
+        _state: &mut Self::ReaderState,
+        name: String,
+        attrs: Vec<(String, String)>,
+    ) -> Result<(), XmlError<Self::Error>> {
+        let l = reader.context.len();
+        let tag = reader.context.last().map(|s| s.as_str());
         let ptag = match l {
-            2.. => context.get(l - 2).map(|s| s.as_str()),
+            2.. => reader.context.get(l - 2).map(|s| s.as_str()),
             _ => None,
         };
-
-        let word = data
-            .words
-            .get_mut(&self.current_id)
-            .ok_or(Error::WriteInvalidWord);
 
         match (ptag, tag) {
             // Root tag;
             (None, Some("lexicon")) => {}
             // Insert new word
             (Some("lexicon"), Some("word")) => {
-                // If there's no id attribute, generate a random one for this word.
-                self.current_id = attrs
-                    .iter()
-                    .find(|&x| x.0 == "id")
-                    .map(|x| Uuid::parse_str(&x.1))
-                    .unwrap_or_else(|| Ok(Uuid::new_v4()))?;
-                data.words.insert(self.current_id, Word::new());
+                let word = Word::deserialize_xml(reader, Some((name, attrs)))?;
+                self.add_word(word);
             }
-            // Clear word properties
-            (Some("word"), Some("romanization")) => {
-                word?.romanization.clear();
-            }
-            (Some("word"), Some("pronunciation")) => {
-                let word = word?;
-                word.xsampa_pronunciation = attrs
-                    .iter()
-                    .find(|&x| x.0 == "xsampa")
-                    .map(|x| x.1.to_owned());
-                word.pronunciation.clear();
-            }
-            (Some("word"), Some("translation")) => {
-                word?.translation.clear();
-            }
-            (Some("word"), Some("part-of-speech")) => {
-                word?.part_of_speech = None;
-            }
-            _ => {
-                return Err(Error::WrongContext {
-                    ptag: ptag.unwrap_or_default().to_string(),
-                    tag: tag.unwrap_or_default().to_string(),
-                })
-            }
+            _ => return Err(XmlError::InvalidTag(tag.unwrap_or_default().to_string())),
         }
-        Ok(data)
+        Ok(())
     }
 
-    fn process_text(
+    fn process_text<R: BufRead>(
         &mut self,
-        mut data: Self::Output,
-        context: &[String],
-        text: std::borrow::Cow<str>,
-    ) -> Result<Self::Output, Self::Error> {
-        let tag = context.last().map(|s| s.as_str());
+        _reader: &mut XmlReader<R>,
+        _state: &mut Self::ReaderState,
+        _text: String,
+    ) -> Result<(), XmlError<Self::Error>> {
+        Ok(())
+    }
 
-        let word = data
-            .words
-            .get_mut(&self.current_id)
-            .ok_or(Error::WriteInvalidWord);
-
-        match tag {
-            // Set word properties
-            Some("romanization") => word?.romanization += &text,
-            Some("pronunciation") => word?.pronunciation += &text,
-            Some("translation") => word?.translation += &text,
-            Some("part-of-speech") => {
-                word?.part_of_speech = Some(text.as_ref().into());
-            }
-            _ => {}
-        }
-        Ok(data)
+    fn process_tag_end<R: BufRead>(
+        &mut self,
+        _reader: &mut XmlReader<R>,
+        _state: &mut Self::ReaderState,
+        _name: String,
+    ) -> Result<(), XmlError<Self::Error>> {
+        Ok(())
     }
 }
 
 impl WriteXml for Lexicon {
     type Error = Error;
 
-    fn write_xml<W: Write>(&self, writer: W) -> Result<W, XmlError<Self::Error>> {
-        let mut w = XmlWriter::new(writer);
+    fn serialize_xml<W: Write>(
+        &self,
+        writer: &mut XmlWriter<W>,
+    ) -> Result<(), XmlError<Self::Error>> {
+        writer.write_tag_start("lexicon")?;
 
-        w.write_init()?;
-        w.write_tag_start("lexicon")?;
-
-        for (id, word) in self.words.iter() {
-            w.write_tag_start_with_attributes("word", [("id", id.to_string().as_str())])?;
-
-            w.write_tag_start("romanization")?;
-            w.write_text(&word.romanization)?;
-            w.write_tag_end("romanization")?;
-
-            if let Some(xs) = &word.xsampa_pronunciation {
-                w.write_tag_start_with_attributes("pronunciation", [("xsampa", xs.as_str())])?;
-            } else {
-                w.write_tag_start("pronunciation")?;
-            }
-            w.write_text(&word.pronunciation)?;
-            w.write_tag_end("pronunciation")?;
-
-            w.write_tag_start("translation")?;
-            w.write_text(&word.translation)?;
-            w.write_tag_end("translation")?;
-
-            if let Some(pos) = &word.part_of_speech {
-                w.write_tag_start("part-of-speech")?;
-                w.write_text(pos.name())?;
-                w.write_tag_end("part-of-speech")?;
-            }
-
-            w.write_tag_end("word")?;
+        for (_, word) in self.words.iter() {
+            word.serialize_xml(writer)?;
         }
 
-        w.write_tag_end("lexicon")?;
+        writer.write_tag_end("lexicon")?;
 
-        Ok(w.finish())
+        Ok(())
     }
 }

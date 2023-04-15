@@ -1,17 +1,10 @@
-use std::{
-    borrow::Cow,
-    io::{BufRead, Write},
-};
+use std::io::{BufRead, Write};
 
-use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlReaderProcess, XmlWriter};
+use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
 
 /// Error type that can be emitted by reading a `Meta` file.
 #[derive(Clone, Debug, thiserror::Error)]
 pub enum Error {
-    /// A valid tag in a wrong context.
-    #[error("tag <{}> should not be inside <{}>", .tag, .ptag)]
-    WrongContext { ptag: String, tag: String },
-
     #[error("<word> tag doesn't have attribute `id`")]
     NoId,
 }
@@ -39,36 +32,21 @@ impl Meta {
 impl ReadXml for Meta {
     type Error = Error;
 
-    fn read_xml<R: BufRead>(reader: R) -> Result<(Self, R), XmlError<Self::Error>> {
-        let mut xml_reader = XmlReader::new(reader, XmlReaderProcessor::new());
-        let ret = xml_reader.read()?;
-        Ok((ret, xml_reader.finish()))
-    }
-}
+    type ReaderState = ();
 
-struct XmlReaderProcessor();
+    const TAG: &'static str = "meta";
 
-impl XmlReaderProcessor {
-    pub fn new() -> Self {
-        Self()
-    }
-}
-
-impl XmlReaderProcess for XmlReaderProcessor {
-    type Output = Meta;
-    type Error = Error;
-
-    fn process_tag_start(
+    fn process_tag_start<R: BufRead>(
         &mut self,
-        mut meta: Self::Output,
-        context: &[String],
-        _name: &str,
-        _attrs: Vec<(&str, String)>,
-    ) -> Result<Self::Output, Self::Error> {
-        let l = context.len();
-        let tag = context.last().map(|s| s.as_str());
+        reader: &mut XmlReader<R>,
+        _state: &mut Self::ReaderState,
+        _name: String,
+        _attrs: Vec<(String, String)>,
+    ) -> Result<(), XmlError<Self::Error>> {
+        let l = reader.context.len();
+        let tag = reader.context.last().map(|s| s.as_str());
         let ptag = match l {
-            2.. => context.get(l - 2).map(|s| s.as_str()),
+            2.. => reader.context.get(l - 2).map(|s| s.as_str()),
             _ => None,
         };
 
@@ -77,54 +55,55 @@ impl XmlReaderProcess for XmlReaderProcessor {
             (None, Some("project")) => {}
             // Clear meta properties
             (Some("project"), Some("name")) => {
-                meta.name.clear();
+                self.name.clear();
             }
             (Some("project"), Some("local-lang")) => {
-                meta.local_lang.clear();
+                self.local_lang.clear();
             }
             (Some("project"), Some("author")) => {
-                meta.author.clear();
+                self.author.clear();
             }
             (Some("project"), Some("description")) => {
-                meta.description.clear();
+                self.description.clear();
             }
             // Invalid tag
-            _ => {
-                return Err(Error::WrongContext {
-                    ptag: ptag.unwrap_or_default().to_string(),
-                    tag: tag.unwrap_or_default().to_string(),
-                })
-            }
+            _ => return Err(XmlError::InvalidTag(tag.unwrap_or_default().to_string())),
         }
-        Ok(meta)
+        Ok(())
     }
 
-    fn process_text(
+    fn process_text<R: BufRead>(
         &mut self,
-        mut meta: Self::Output,
-        context: &[String],
-        text: Cow<str>,
-    ) -> Result<Self::Output, Self::Error> {
-        let tag = context.last().map(|s| s.as_str());
+        reader: &mut XmlReader<R>,
+        _state: &mut Self::ReaderState,
+        text: String,
+    ) -> Result<(), XmlError<Self::Error>> {
+        let tag = reader.context.last().map(|s| s.as_str());
 
         match tag {
-            Some("name") => meta.name += &text,
-            Some("local-lang") => meta.local_lang += &text,
-            Some("author") => meta.author += &text,
-            Some("description") => meta.description += &text,
+            Some("name") => self.name += &text,
+            Some("local-lang") => self.local_lang += &text,
+            Some("author") => self.author += &text,
+            Some("description") => self.description += &text,
             _ => {}
         }
-        Ok(meta)
+        Ok(())
+    }
+
+    fn process_tag_end<R: BufRead>(
+        &mut self,
+        _reader: &mut XmlReader<R>,
+        _state: &mut Self::ReaderState,
+        _name: String,
+    ) -> Result<(), XmlError<Self::Error>> {
+        Ok(())
     }
 }
 
 impl WriteXml for Meta {
     type Error = Error;
 
-    fn write_xml<W: Write>(&self, writer: W) -> Result<W, XmlError<Self::Error>> {
-        let mut w = XmlWriter::new(writer);
-
-        w.write_init()?;
+    fn serialize_xml<W: Write>(&self, w: &mut XmlWriter<W>) -> Result<(), XmlError<Self::Error>> {
         w.write_tag_start("project")?;
 
         w.write_tag_start("name")?;
@@ -145,6 +124,6 @@ impl WriteXml for Meta {
 
         w.write_tag_end("project")?;
 
-        Ok(w.finish())
+        Ok(())
     }
 }

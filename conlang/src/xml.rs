@@ -26,13 +26,18 @@ pub enum XmlError<E> {
     /// Error produced by `quick_xml`.
     #[error(transparent)]
     Qxml(#[from] quick_xml::Error),
+    /// Error produced by processing tag attributes.
     #[error(transparent)]
     Qattr(#[from] AttrError),
     /// Encoding error.
-    #[error(transparent)]
+    #[error("Error in converting to str from UTF-8: {0}")]
     Utf8(#[from] Utf8Error),
+    /// Encoding error. 
     #[error("Error in converting to string from UTF-8: {0}")]
     FromUtf8(#[from] FromUtf8Error),
+    /// Invalid tag.
+    #[error("Invalid tag: <{0}>")]
+    InvalidTag(String),
     /// Other, domain specific error.
     #[error(transparent)]
     Other(E),
@@ -41,6 +46,7 @@ pub enum XmlError<E> {
 /// Processor for `XmlReader`.
 pub trait XmlReaderProcess {
     type Output: Default;
+
     type Error;
 
     fn process_tag_start(
@@ -74,21 +80,18 @@ pub trait XmlReaderProcess {
 
 /// Generic XML reader.
 #[allow(clippy::type_complexity)]
-pub struct XmlReader<R, P> {
+pub struct XmlReader<R> {
     reader: Reader<R>,
     buf: Vec<u8>,
-    context: Vec<String>,
-
-    processor: P,
+    pub context: Vec<String>,
 }
 
-impl<R, P> XmlReader<R, P>
+impl<R> XmlReader<R>
 where
     R: BufRead,
-    P: XmlReaderProcess,
 {
     /// Creates a new reader.
-    pub fn new(reader: R, processor: P) -> Self {
+    pub fn new(reader: R) -> Self {
         let mut reader = Reader::from_reader(reader);
         reader.trim_text(true);
 
@@ -96,62 +99,26 @@ where
             reader,
             buf: Vec::new(),
             context: Vec::new(),
-
-            processor,
         }
     }
 
-    /// Reads the content.
-    pub fn read(&mut self) -> Result<P::Output, XmlError<P::Error>> {
-        let mut data: P::Output = Default::default();
-
-        loop {
-            match self.reader.read_event_into(&mut self.buf) {
-                Err(e) => {
-                    return Err(XmlError::Qxml(e));
-                }
-
-                Ok(Event::Eof) => break,
-
-                Ok(Event::Start(e)) => {
-                    let name = std::str::from_utf8(e.name().into_inner())?;
-                    let mut attrs = Vec::new();
-                    for a in e.attributes() {
-                        let attr = a?;
-                        attrs.push((
-                            std::str::from_utf8(attr.key.into_inner())?,
-                            attr.unescape_value()?.to_string(),
-                        ));
-                    }
-                    self.context.push(name.to_owned());
-                    data = self
-                        .processor
-                        .process_tag_start(data, &self.context, name, attrs)
-                        .map_err(XmlError::Other)?;
-                }
-
-                Ok(Event::Text(e)) => {
-                    let text = e.unescape()?;
-                    data = self
-                        .processor
-                        .process_text(data, &self.context, text)
-                        .map_err(XmlError::Other)?;
-                }
-
-                Ok(Event::End(e)) => {
-                    let name = std::str::from_utf8(e.name().into_inner())?;
-                    self.context.pop();
-                    data = self
-                        .processor
-                        .process_tag_end(data, &self.context, name)
-                        .map_err(XmlError::Other)?;
-                }
-
-                _ => {}
+    /// Reads next event.
+    pub fn read_event(&mut self) -> Result<Event, quick_xml::Error> {
+        self.buf.clear();
+        let ev = self.reader.read_event_into(&mut self.buf);
+        match &ev {
+            Ok(Event::Start(e)) => {
+                let name = std::str::from_utf8(e.name().into_inner()).unwrap();
+                self.context.push(name.to_owned());
             }
-        }
 
-        Ok(data)
+            Ok(Event::End(_)) => {
+                self.context.pop();
+            }
+
+            _ => {}
+        }
+        ev
     }
 
     /// Finishes reading and returns the underlying reader.
@@ -161,11 +128,17 @@ where
 }
 
 /// Generic XML writer.
-pub struct XmlWriter<W: std::io::Write> {
+pub struct XmlWriter<W> 
+where 
+    W: std::io::Write
+{
     pub writer: Writer<W>,
 }
 
-impl<W: std::io::Write> XmlWriter<W> {
+impl<W> XmlWriter<W> 
+where 
+    W: std::io::Write
+{
     /// Creates a new writer.
     pub fn new(writer: W) -> Self {
         Self {
@@ -180,13 +153,14 @@ impl<W: std::io::Write> XmlWriter<W> {
         Ok(())
     }
 
-    /// Writes an opening tag
+    /// Writes an opening tag.
     pub fn write_tag_start<E>(&mut self, name: &str) -> Result<(), XmlError<E>> {
         self.writer
             .write_event(Event::Start(BytesStart::new(name)))
             .map_err(XmlError::Qxml)
     }
 
+    /// Writes an opening tag with attributes.
     pub fn write_tag_start_with_attributes<'a, E, I>(
         &mut self,
         name: &str,
@@ -224,12 +198,98 @@ impl<W: std::io::Write> XmlWriter<W> {
 /// A trait for object that can be read from XML.
 pub trait ReadXml
 where
-    Self: Sized,
+    Self: Sized + Default,
 {
     type Error;
 
+    type ReaderState: Default;
+
+    const TAG: &'static str;
+
+    /// Processes an opening tag.
+    fn process_tag_start<R: BufRead>(
+        &mut self,
+        reader: &mut XmlReader<R>,
+        state: &mut Self::ReaderState,
+        name: String,
+        attrs: Vec<(String, String)>,
+    ) -> Result<(), XmlError<Self::Error>>;
+
+    /// Processes a text.
+    fn process_text<R: BufRead>(
+        &mut self,
+        reader: &mut XmlReader<R>,
+        state: &mut Self::ReaderState,
+        text: String,
+    ) -> Result<(), XmlError<Self::Error>>;
+
+    /// Processes a closing tag.
+    fn process_tag_end<R: BufRead>(
+        &mut self,
+        reader: &mut XmlReader<R>,
+        state: &mut Self::ReaderState,
+        name: String,
+    ) -> Result<(), XmlError<Self::Error>>;
+
+    /// Deserializes XML into object.
+    fn deserialize_xml<R: BufRead>(
+        reader: &mut XmlReader<R>,
+        tag_start: Option<(String, Vec<(String, String)>)>,
+    ) -> Result<Self, XmlError<Self::Error>> {
+        let mut data = Self::default();
+        let mut state = Self::ReaderState::default();
+
+        if let Some((name, attrs)) = tag_start {
+            data.process_tag_start(reader, &mut state, name, attrs)?;
+        }
+
+        loop {
+            match reader.read_event() {
+                Err(e) => {
+                    return Err(XmlError::Qxml(e));
+                }
+
+                Ok(Event::Eof) => break,
+
+                Ok(Event::Start(e)) => {
+                    let name = std::str::from_utf8(e.name().into_inner())?.to_string();
+                    let mut attrs = Vec::new();
+                    for a in e.attributes() {
+                        let attr = a?;
+                        attrs.push((
+                            std::str::from_utf8(attr.key.into_inner())?.to_string(),
+                            attr.unescape_value()?.to_string(),
+                        ));
+                    }
+                    data.process_tag_start(reader, &mut state, name, attrs)?;
+                }
+
+                Ok(Event::Text(e)) => {
+                    let text = e.unescape()?.to_string();
+                    data.process_text(reader, &mut state, text)?;
+                }
+
+                Ok(Event::End(e)) => {
+                    let name = std::str::from_utf8(e.name().into_inner())?.to_string();
+                    let tag_end = name == Self::TAG;
+                    data.process_tag_end(reader, &mut state, name)?;
+                    if tag_end {
+                        break;
+                    }
+                }
+
+                _ => {}
+            }
+        }
+        Ok(data)
+    }
+
     /// Reads fro XML.
-    fn read_xml<R: BufRead>(reader: R) -> Result<(Self, R), XmlError<Self::Error>>;
+    fn read_xml<R: BufRead>(reader: R) -> Result<(Self, R), XmlError<Self::Error>> {
+        let mut r = XmlReader::new(reader);
+        let ret = Self::deserialize_xml(&mut r, None)?;
+        Ok((ret, r.finish()))
+    }
 
     /// Loads from XML file.
     fn load_xml_file<P: AsRef<Path>>(path: P) -> Result<Self, XmlError<Self::Error>> {
@@ -250,8 +310,20 @@ where
 {
     type Error;
 
+    /// Serializes object into XML.
+    fn serialize_xml<W: Write>(
+        &self,
+        writer: &mut XmlWriter<W>,
+    ) -> Result<(), XmlError<Self::Error>>;
+
     /// Writes to XML.
-    fn write_xml<W: Write>(&self, writer: W) -> Result<W, XmlError<Self::Error>>;
+    fn write_xml<W: Write>(&self, writer: W) -> Result<W, XmlError<Self::Error>> {
+        let mut w = XmlWriter::new(writer);
+
+        w.write_init()?;
+        self.serialize_xml(&mut w)?;
+        Ok(w.finish())
+    }
 
     /// Saves to XML file.
     fn save_xml_file<P: AsRef<Path>>(&self, path: P) -> Result<(), XmlError<Self::Error>> {
