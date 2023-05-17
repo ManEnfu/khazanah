@@ -33,8 +33,8 @@
           "rustc"
           "rustfmt"
         ];
-      in pkgsFor.${system}.mkShell {
-        name = "build-env";
+      in pkgsFor.${system}.mkShell rec {
+        name = "khazanah-env";
 
         nativeBuildInputs = with pkgs; [
           wrapGAppsHook4
@@ -59,6 +59,7 @@
           export RUST_SRC_PATH="${toolchain}/lib/rustlib/src/rust/library"
           export RUST_LOG=debug
           export XDG_DATA_DIRS="$GSETTINGS_SCHEMAS_PATH:$XDG_DATA_DIRS"
+          export NIX_SHELL_ACTIVE=${name}
         '';
       };
     });
