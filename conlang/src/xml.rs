@@ -32,7 +32,7 @@ pub enum XmlError<E> {
     /// Encoding error.
     #[error("Error in converting to str from UTF-8: {0}")]
     Utf8(#[from] Utf8Error),
-    /// Encoding error. 
+    /// Encoding error.
     #[error("Error in converting to string from UTF-8: {0}")]
     FromUtf8(#[from] FromUtf8Error),
     /// Invalid tag.
@@ -128,16 +128,16 @@ where
 }
 
 /// Generic XML writer.
-pub struct XmlWriter<W> 
-where 
-    W: std::io::Write
+pub struct XmlWriter<W>
+where
+    W: std::io::Write,
 {
     pub writer: Writer<W>,
 }
 
-impl<W> XmlWriter<W> 
-where 
-    W: std::io::Write
+impl<W> XmlWriter<W>
+where
+    W: std::io::Write,
 {
     /// Creates a new writer.
     pub fn new(writer: W) -> Self {

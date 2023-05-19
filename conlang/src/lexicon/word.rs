@@ -12,17 +12,17 @@ use std::{fmt::Debug, io::Write};
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Word {
     /// The id of the word.
-    pub id: Option<Uuid>,
+    pub(crate) id: Option<Uuid>,
     /// Romanization of the word.
-    pub romanization: String,
+    pub(crate) romanization: String,
     /// Translation of the word.
-    pub translation: String,
+    pub(crate) translation: String,
     /// Pronunciation of word in IPA.
-    pub pronunciation: String,
+    pub(crate) pronunciation: String,
     /// Which part of speech this word belongs to.
-    pub part_of_speech: Option<PartOfSpeech>,
+    pub(crate) part_of_speech: Option<PartOfSpeech>,
     /// X-SAMPA pronunciation of the word, if exists.
-    pub xsampa_pronunciation: Option<String>,
+    pub(crate) xsampa_pronunciation: Option<String>,
 }
 
 impl Word {
@@ -31,6 +31,7 @@ impl Word {
         Self::default()
     }
 
+    /// Creates a new word with a specific id.
     pub fn new_with_id(id: Uuid) -> Self {
         Self {
             id: Some(id),
@@ -38,12 +39,64 @@ impl Word {
         }
     }
 
-    /// Sets X-SAMPA pronunciation of the word and converts it to IPA pronunciation.
+    /// Gets the id of the word.
+    pub fn id(&self) -> Option<Uuid> {
+        self.id
+    }
+
+    /// Gets the romanization of the word.
+    pub fn romanization(&self) -> &str {
+        self.romanization.as_str()
+    }
+
+    /// Sets the romanization of the word.
+    pub fn set_romanization(&mut self, value: String) {
+        self.romanization = value;
+    }
+
+    /// Gets the translation of the word.
+    pub fn translation(&self) -> &str {
+        self.translation.as_str()
+    }
+
+    /// Sets the translation of the word.
+    pub fn set_translation(&mut self, value: String) {
+        self.translation = value;
+    }
+
+    /// Gets the IPA pronunciation of the word.
+    pub fn pronunciation(&self) -> &str {
+        self.pronunciation.as_str()
+    }
+
+    /// Sets the IPA pronunciation of the word.
+    pub fn set_pronunciation(&mut self, value: String) {
+        self.pronunciation = value;
+    }
+
+    /// Gets the X-SAMPA pronunciation of the word.
+    pub fn xsampa_pronunciation(&self) -> Option<&str> {
+        self.xsampa_pronunciation.as_deref()
+    }
+
+    /// Sets the X-SAMPA pronunciation of the word.
+    /// The value will be converted to IPA pronunciation and used
+    /// to set the pronunciation of the word.
     pub fn set_xsampa_pronunciation(&mut self, s: Option<String>) {
         if let Some(s) = &s {
             self.pronunciation = ipa::transliterate_xsampa(s);
         }
         self.xsampa_pronunciation = s;
+    }
+
+    /// Sets the part of speech of the word.
+    pub fn part_of_speech(&self) -> Option<PartOfSpeech> {
+        self.part_of_speech
+    }
+
+    /// Sets the part of speech of the word.
+    pub fn set_part_of_speech(&mut self, value: Option<PartOfSpeech>) {
+        self.part_of_speech = value;
     }
 }
 

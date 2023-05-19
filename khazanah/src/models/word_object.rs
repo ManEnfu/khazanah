@@ -68,63 +68,67 @@ mod imp {
         }
 
         fn get_romanization(&self) -> String {
-            self.get_word_property(|word| word.romanization.to_owned())
+            self.get_word_property(|word| word.romanization().to_string())
         }
 
         fn set_romanization(&self, value: String) {
-            self.set_word_property(value, |word, value| word.romanization = value);
+            self.set_word_property(value, |word, value| word.set_romanization(value));
         }
 
         fn get_translation(&self) -> String {
-            self.get_word_property(|word| word.translation.to_owned())
+            self.get_word_property(|word| word.translation().to_string())
         }
 
         fn set_translation(&self, value: String) {
-            self.set_word_property(value, |word, value| word.translation = value);
+            self.set_word_property(value, |word, value| word.set_translation(value));
         }
 
         fn get_pronunciation(&self) -> String {
-            self.get_word_property(|word| word.pronunciation.to_owned())
+            self.get_word_property(|word| word.pronunciation().to_string())
         }
 
         fn set_pronunciation(&self, value: String) {
-            self.set_word_property(value, |word, value| word.pronunciation = value);
+            self.set_word_property(value, |word, value| word.set_pronunciation(value));
         }
 
         fn get_pos(&self) -> u32 {
             self.get_word_property(|word| {
                 ALL_PARTS_OF_SPEECH
                     .iter()
-                    .position(|&x| x == word.part_of_speech)
+                    .position(|&x| x == word.part_of_speech())
                     .unwrap_or_default() as u32
             })
         }
 
         fn set_pos(&self, value: u32) {
             self.set_word_property(value, |word, value| {
-                word.part_of_speech = ALL_PARTS_OF_SPEECH
-                    .get(value as usize)
-                    .copied()
-                    .unwrap_or_default();
+                word.set_part_of_speech(
+                    ALL_PARTS_OF_SPEECH
+                        .get(value as usize)
+                        .copied()
+                        .unwrap_or_default(),
+                );
             });
             self.obj().notify_part_of_speech_label();
         }
 
         fn get_pos_label(&self) -> String {
             self.get_word_property(|word| {
-                word.part_of_speech
-                    .map(|s| s.label().to_owned())
+                word.part_of_speech()
+                    .map(|s| s.label().to_string())
                     .unwrap_or_default()
             })
         }
 
         fn get_xsampa_pronunciation(&self) -> String {
-            self.get_word_property(|word| word.xsampa_pronunciation.to_owned().unwrap_or_default())
+            self.get_word_property(|word| {
+                word.xsampa_pronunciation().unwrap_or_default().to_string()
+            })
         }
 
         fn set_xsampa_pronunciation(&self, value: String) {
             self.set_word_property(value, |word, value| {
-                if word.xsampa_pronunciation.is_some() {
+                if word.xsampa_pronunciation().is_some() {
                     word.set_xsampa_pronunciation(Some(value));
                 }
             });
@@ -132,13 +136,13 @@ mod imp {
         }
 
         fn get_use_xsampa(&self) -> bool {
-            self.get_word_property(|word| word.xsampa_pronunciation.is_some())
+            self.get_word_property(|word| word.xsampa_pronunciation().is_some())
         }
 
         fn set_use_xsampa(&self, value: bool) {
             self.set_word_property(value, |word, value| {
                 if value {
-                    if word.xsampa_pronunciation.is_none() {
+                    if word.xsampa_pronunciation().is_none() {
                         word.set_xsampa_pronunciation(Some("".to_string()));
                     }
                 } else {
