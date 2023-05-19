@@ -8,7 +8,7 @@ use adw::subclass::prelude::*;
 use crate::models;
 use crate::ui;
 
-use conlang::ALL_PARTS_OF_SPEECH;
+use khazanah_core::ALL_PARTS_OF_SPEECH;
 
 #[doc(hidden)]
 mod imp {

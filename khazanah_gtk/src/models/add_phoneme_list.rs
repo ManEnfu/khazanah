@@ -8,7 +8,7 @@ mod imp {
 
     use crate::models;
 
-    use conlang::{ipa::IPA_BASE_PHONEMES, Phoneme};
+    use khazanah_core::{ipa::IPA_BASE_PHONEMES, Phoneme};
 
     use super::*;
 

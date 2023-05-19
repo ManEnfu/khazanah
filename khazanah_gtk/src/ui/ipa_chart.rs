@@ -5,7 +5,7 @@ use gtk::subclass::prelude::*;
 use adw::subclass::prelude::*;
 use once_cell::sync::Lazy;
 
-use conlang::ipa;
+use khazanah_core::ipa;
 
 use crate::ui;
 

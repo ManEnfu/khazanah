@@ -1,6 +1,6 @@
 [workspace]
 
 members=[
-    "conlang",
-    "khazanah",    
+    "khazanah_core",
+    "khazanah_gtk",    
 ]

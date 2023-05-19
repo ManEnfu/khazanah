@@ -1,4 +1,4 @@
-use conlang::Phoneme;
+use khazanah_core::Phoneme;
 use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
@@ -7,7 +7,7 @@ use gtk::subclass::prelude::*;
 mod imp {
     use std::cell::RefCell;
 
-    use conlang::Phoneme;
+    use khazanah_core::Phoneme;
 
     use super::*;
 

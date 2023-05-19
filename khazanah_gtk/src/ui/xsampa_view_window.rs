@@ -4,7 +4,7 @@ use gtk::{gdk, glib};
 
 use adw::subclass::prelude::*;
 
-use conlang::ipa;
+use khazanah_core::ipa;
 
 use crate::ui;
 

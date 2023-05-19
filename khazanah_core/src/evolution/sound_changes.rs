@@ -1,5 +1,5 @@
 use super::change::WordChange;
-use crate::lexicon::word::Word;
+use crate::lexicon::Word;
 
 use regex::{Captures, Regex};
 

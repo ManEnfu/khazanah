@@ -1,4 +1,4 @@
-use crate::lexicon::word::Word;
+use crate::lexicon::Word;
 
 pub trait WordChange {
     fn will_apply(&self, word: &Word) -> bool;

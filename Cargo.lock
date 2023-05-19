@@ -165,20 +165,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "conlang"
-version = "0.1.0"
-dependencies = [
- "bimap",
- "lazy_static",
- "quick-xml",
- "regex",
- "serde",
- "thiserror",
- "uuid",
- "zip",
-]
-
-[[package]]
 name = "constant_time_eq"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -674,13 +660,27 @@ dependencies = [
 ]
 
 [[package]]
-name = "khazanah"
+name = "khazanah_core"
 version = "0.1.0"
 dependencies = [
- "conlang",
+ "bimap",
+ "lazy_static",
+ "quick-xml",
+ "regex",
+ "serde",
+ "thiserror",
+ "uuid",
+ "zip",
+]
+
+[[package]]
+name = "khazanah_gtk"
+version = "0.1.0"
+dependencies = [
  "env_logger",
  "glib-build-tools",
  "gtk4",
+ "khazanah_core",
  "libadwaita",
  "log",
  "once_cell",

@@ -1,4 +1,4 @@
-use conlang::{Word, ALL_PARTS_OF_SPEECH};
+use khazanah_core::{Word, ALL_PARTS_OF_SPEECH};
 use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;

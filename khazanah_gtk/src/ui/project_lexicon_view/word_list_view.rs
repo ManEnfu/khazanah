@@ -1,4 +1,4 @@
-use conlang::Word;
+use khazanah_core::Word;
 use gtk::glib::FromVariant;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;

@@ -241,7 +241,7 @@ impl ApplicationWindow {
         }
 
         let filter = gtk::FileFilter::new();
-        filter.add_suffix(conlang::PROJECT_FILE_EXT);
+        filter.add_suffix(khazanah_core::PROJECT_FILE_EXT);
 
         let dialog = gtk::FileChooserNative::builder()
             .title("Open File")
@@ -346,7 +346,7 @@ impl ApplicationWindow {
         }
 
         let filter = gtk::FileFilter::new();
-        filter.add_suffix(conlang::PROJECT_FILE_EXT);
+        filter.add_suffix(khazanah_core::PROJECT_FILE_EXT);
 
         let dialog = gtk::FileChooserNative::builder()
             .title("Save File")

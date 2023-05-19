@@ -3,8 +3,8 @@ use std::cell::RefCell;
 use std::cell::RefMut;
 use std::path::Path;
 
-use conlang::project;
-use conlang::Project;
+use khazanah_core::project;
+use khazanah_core::Project;
 use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
@@ -14,7 +14,6 @@ mod imp {
 
     use super::*;
 
-    use conlang::Project;
     use gtk::glib::subclass::{Signal, SignalType};
     use once_cell::sync::Lazy;
 

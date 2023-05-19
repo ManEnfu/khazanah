@@ -1,3 +1,5 @@
+# Cargo flags
+
 conf = configuration_data()
 conf.set_quoted('VERSION', meson.project_version())
 
@@ -13,22 +15,18 @@ else
   rust_target = 'debug'
 endif
 
+# Build target
+
+khazanah_bin = 'khazanah'
+
 cargo_build = custom_target(
   'khazanah-cargo-build',
   build_by_default: true,
   build_always_stale: true,
-  output: meson.project_name(),
+  output: 'khazanah',
   console: true,
-  # install: true,
-  # install_dir: get_option('bindir'),
   command: [
-    'env', cargo_env,
-    cargo_bin, 'build',
+    cargo, 'build',
     cargo_opt, '&&', 'cp', 'target' / rust_target / meson.project_name(), '@OUTPUT@',
   ]
 )
-
-# executable(
-#   'khazanah',
-#   'src/main.rs',
-# )
