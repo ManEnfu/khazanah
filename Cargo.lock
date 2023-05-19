@@ -660,7 +660,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "khazanah_core"
+name = "khazanah-core"
 version = "0.1.0"
 dependencies = [
  "bimap",
@@ -674,13 +674,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "khazanah_gtk"
+name = "khazanah-gtk"
 version = "0.1.0"
 dependencies = [
  "env_logger",
  "glib-build-tools",
  "gtk4",
- "khazanah_core",
+ "khazanah-core",
  "libadwaita",
  "log",
  "once_cell",

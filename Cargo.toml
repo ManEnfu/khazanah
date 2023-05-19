@@ -1,6 +1,6 @@
 [workspace]
 
 members=[
-    "khazanah_core",
-    "khazanah_gtk",    
+    "khazanah-core",
+    "khazanah-gtk",    
 ]

@@ -1,10 +1,6 @@
 # Cargo flags
 
-conf = configuration_data()
-conf.set_quoted('VERSION', meson.project_version())
-
-cargo_bin  = find_program('cargo')
-cargo_opt  = [ '--manifest-path', meson.project_source_root() / 'khazanah/Cargo.toml' ]
+cargo_opt  = [ '--manifest-path', meson.project_source_root() / 'khazanah-core/Cargo.toml' ]
 cargo_opt += [ '--target-dir', meson.project_build_root()  / 'target' ]
 cargo_env  = [ 'CARGO_HOME=' + meson.project_build_root()  / 'cargo-home' ]
 
@@ -17,16 +13,21 @@ endif
 
 # Build target
 
-khazanah_bin = 'khazanah'
+rust_lib = 'libkhazanah_core.rlib'
 
 cargo_build = custom_target(
-  'khazanah-cargo-build',
+  rust_lib,
   build_by_default: true,
   build_always_stale: true,
-  output: 'khazanah',
+  output: rust_lib,
   console: true,
+  install: true,
+  install_dir: get_option('bindir'),
   command: [
     cargo, 'build',
-    cargo_opt, '&&', 'cp', 'target' / rust_target / meson.project_name(), '@OUTPUT@',
+    cargo_opt,
+    '&&',
+    'cp', 'target' / rust_target / rust_lib, '@OUTPUT@',
   ]
 )
+
