@@ -51,41 +51,59 @@
         </child>
 
         <child>
-          <object class="GtkScrolledWindow">
-            <property name="hscrollbar-policy">never</property>
-            <property name="vexpand">True</property>
+          <object class="GtkStack" id="stack">
+            <property name="visible-child">empty_inventory</property>
+            <property name="transition-type">crossfade</property>
             <child>
-              <object class="AdwClamp">
-                <property name="child">
-                  <object class="GtkBox">
-                    <property name="orientation">vertical</property>
-                    <property name="margin-top">24</property>
-                    <property name="margin-bottom">24</property>
-                    <property name="margin-start">12</property>
-                    <property name="margin-end">12</property>
-                    <property name="spacing">12</property>
+              <object class="AdwStatusPage" id="empty_inventory">
+                <property name="icon-name">format-text-rich-symbolic</property>
+                <property name="title">Empty Inventory</property>
+                <property name="description">Add a new phoneme.</property>
+                <property name="vexpand">true</property>
+                <style>
+                  <class name="compact"/>
+                </style>
+              </object> <!-- AdwStatusPage -->
+            </child>
 
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="label">Phonemes</property>
-                        <property name="halign">start</property>
-                        <style>
-                          <class name="heading"/>
-                        </style>
-                      </object>
-                    </child>
+            <child>
+              <object class="GtkScrolledWindow" id="scrolled_window">
+                <property name="hscrollbar-policy">never</property>
+                <property name="vexpand">True</property>
+                <child>
+                  <object class="AdwClamp">
+                    <property name="child">
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="margin-top">24</property>
+                        <property name="margin-bottom">24</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                        <property name="spacing">12</property>
 
-                    <child>
-                      <object class="GtkListBox">
-                        <property name="selection-mode">none</property>
-                        <style>
-                          <class name="boxed-list"/>
-                        </style>
-                      </object>
-                    </child>
-                  </object> <!-- GtkBox -->
-                </property>
-              </object> <!-- AdwClamp -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Phonemes</property>
+                            <property name="halign">start</property>
+                            <style>
+                              <class name="heading"/>
+                            </style>
+                          </object>
+                        </child>
+
+                        <child>
+                          <object class="GtkListBox">
+                            <property name="selection-mode">none</property>
+                            <style>
+                              <class name="boxed-list"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object> <!-- GtkBox -->
+                    </property>
+                  </object> <!-- AdwClamp -->
+                </child>
+              </object> <!-- GtkScrolledWindow -->
             </child>
           </object>
         </child>

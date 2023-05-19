@@ -54,3 +54,9 @@ grid.ipa-chart > button.corner-bottom-left {
 grid.ipa-chart > button.corner-bottom-right {
   border-bottom-right-radius: 12px;
 }
+
+.search-box {
+  background: @popover_bg_color;
+  border-bottom: 1px solid @borders;
+  padding: 6px;
+}
