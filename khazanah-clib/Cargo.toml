@@ -1,0 +1,17 @@
+[package]
+name = "khazanah-clib"
+description = "C binding of libkhazanah"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "khazanah"
+crate-type = [ "cdylib" ]
+
+[dependencies]
+khazanah-core = { path = "../khazanah-core" }
+libc = { version = "0.2" }
+uuid = { version = "1.3.0", features = ["v4"] }
+
+[build-dependencies]
+cbindgen = "0.24.0"
