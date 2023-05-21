@@ -127,3 +127,44 @@ impl WriteXml for Meta {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_meta() -> Meta {
+        Meta {
+            name: "Test Language".to_owned(),
+            local_lang: "English".to_owned(),
+            author: "ManEnfu".to_owned(),
+            description: "This is a language.".to_owned(),
+        }
+    }
+
+    fn test_xml() -> String {
+        r#"
+            <?xml version="1.0" encoding="UTF8"?>
+            <project>
+                <name>Test Language</name>
+                <local-lang>English</local-lang>
+                <author>ManEnfu</author>
+                <description>This is a language.</description>
+            </project>
+        "#
+        .to_string()
+    }
+
+    #[test]
+    fn read_xml() {
+        let meta = test_meta();
+        let xml = test_xml();
+        assert_eq!(Meta::load_xml_str(&xml).unwrap(), meta);
+    }
+
+    #[test]
+    fn write_xml() {
+        let meta = test_meta();
+        let xml = meta.save_xml_string().unwrap();
+        assert_eq!(Meta::load_xml_str(&xml).unwrap(), meta);
+    }
+}

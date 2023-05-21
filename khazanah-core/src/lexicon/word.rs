@@ -214,3 +214,107 @@ impl WriteXml for Word {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const UUID: Uuid = Uuid::from_fields(
+        0x49a1429b,
+        0xc82a,
+        0x1103,
+        &[0x54, 0x82, 0x11, 0xd9, 0x2e, 0x11, 0x32, 0x00],
+    );
+
+    const ROMANIZATION: &str = "nishr";
+    const TRANSLATION: &str = "sun";
+    const IPA: &str = "ˈni.ʃɹ";
+    const XSAMPA: &str = "\"ni.Sr\\";
+    const XSAMPA_ESC: &str = "&quot;ni.Sr\\";
+    const POS: PartOfSpeech = PartOfSpeech::Noun;
+
+    fn test_word() -> Word {
+        Word {
+            id: Some(UUID),
+            romanization: ROMANIZATION.to_string(),
+            translation: TRANSLATION.to_string(),
+            pronunciation: IPA.to_string(),
+            xsampa_pronunciation: Some(XSAMPA.to_string()),
+            part_of_speech: Some(POS),
+        }
+    }
+
+    fn test_xml() -> String {
+        format!(
+            r#"
+            <word id="{}">
+                <romanization>{}</romanization>
+                <pronunciation xsampa="{}">{}</pronunciation>
+                <translation>{}</translation>
+                <part-of-speech>{}</part-of-speech>
+            </word>
+            "#,
+            UUID.to_string(),
+            ROMANIZATION,
+            XSAMPA_ESC,
+            IPA,
+            TRANSLATION,
+            POS.name(),
+        )
+    }
+
+    #[test]
+    fn constructors() {
+        let word1 = Word::new();
+        assert_eq!(word1.id(), None);
+
+        let id2 = Uuid::new_v4();
+        let word2 = Word::new_with_id(id2);
+        assert_eq!(word2.id(), Some(id2));
+    }
+
+    #[test]
+    fn getters_and_setters() {
+        let mut word = Word::new();
+
+        let rmz = "nishr";
+        word.set_romanization(rmz.to_string());
+        assert_eq!(word.romanization(), rmz);
+
+        let tln = "sun";
+        word.set_translation(tln.to_string());
+        assert_eq!(word.translation(), tln);
+
+        let prn = "ni.shr";
+        word.set_pronunciation(prn.to_string());
+        assert_eq!(word.pronunciation(), prn);
+
+        let xsp = "\"ni.Sr\\";
+        let ipa = "ˈni.ʃɹ";
+        word.set_xsampa_pronunciation(Some(xsp.to_string()));
+        assert_eq!(word.xsampa_pronunciation(), Some(xsp));
+        assert_eq!(word.pronunciation(), ipa);
+
+        word.set_xsampa_pronunciation(None);
+        assert_eq!(word.xsampa_pronunciation(), None);
+        assert_eq!(word.pronunciation(), ipa);
+
+        let pos = PartOfSpeech::Noun;
+        word.set_part_of_speech(Some(pos));
+        assert_eq!(word.part_of_speech(), Some(pos));
+    }
+
+    #[test]
+    fn read_xml() {
+        let word = test_word();
+        let xml = test_xml();
+        assert_eq!(Word::load_xml_str(&xml).unwrap(), word);
+    }
+
+    #[test]
+    fn write_xml() {
+        let word = test_word();
+        let xml = word.save_xml_string().unwrap();
+        assert_eq!(Word::load_xml_str(&xml).unwrap(), word);
+    }
+}
