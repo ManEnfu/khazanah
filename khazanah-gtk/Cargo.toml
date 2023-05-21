@@ -1,5 +1,7 @@
 [package]
 name = "khazanah-gtk"
+description = "Language construction tool"
+authors = ["ManEnfu <manenfu@protonmail.com>"]
 version = "0.1.0"
 edition = "2021"
 
