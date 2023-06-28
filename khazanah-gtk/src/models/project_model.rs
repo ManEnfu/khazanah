@@ -3,11 +3,11 @@ use std::cell::RefCell;
 use std::cell::RefMut;
 use std::path::Path;
 
-use khazanah_core::project;
-use khazanah_core::Project;
 use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
+use khazanah_core::project;
+use khazanah_core::Project;
 
 mod imp {
     use std::cell::Cell;

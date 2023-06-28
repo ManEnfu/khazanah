@@ -1,7 +1,7 @@
-use khazanah_core::Phoneme;
 use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
+use khazanah_core::Phoneme;
 
 #[doc(hidden)]
 mod imp {

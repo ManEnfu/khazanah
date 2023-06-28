@@ -186,7 +186,7 @@ impl Application {
         if let Some(window) = self.active_window() {
             let new_window = ui::XSampaViewWindow::new();
             new_window.set_transient_for(Some(&window));
-            new_window.show();
+            new_window.set_visible(true);
         }
     }
 
@@ -195,7 +195,7 @@ impl Application {
         if let Some(window) = self.active_window() {
             let new_window = ui::IpaChartViewWindow::new();
             new_window.set_transient_for(Some(&window));
-            new_window.show();
+            new_window.set_visible(true);
         }
     }
 

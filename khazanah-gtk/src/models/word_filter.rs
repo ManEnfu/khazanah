@@ -1,7 +1,7 @@
-use khazanah_core::PartOfSpeech;
 use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
+use khazanah_core::PartOfSpeech;
 
 #[derive(Default, Debug, Clone)]
 pub enum WordFilterBy {

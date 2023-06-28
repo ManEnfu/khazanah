@@ -1,8 +1,8 @@
-use khazanah_core::Word;
 use gtk::glib::FromVariant;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gio, glib};
+use khazanah_core::Word;
 
 use adw::subclass::prelude::*;
 use uuid::Uuid;

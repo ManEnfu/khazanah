@@ -60,7 +60,7 @@ mod imp {
 
         pub current_view_index: Cell<MainViews>,
 
-        pub file_dialog: RefCell<Option<gtk::FileChooserNative>>,
+        pub file_dialog: RefCell<Option<gtk::FileDialog>>,
     }
 
     #[glib::object_subclass]
@@ -243,35 +243,35 @@ impl ApplicationWindow {
         let filter = gtk::FileFilter::new();
         filter.add_suffix(khazanah_core::PROJECT_FILE_EXT);
 
-        let dialog = gtk::FileChooserNative::builder()
+        let dialog = gtk::FileDialog::builder()
             .title("Open File")
-            .transient_for(self)
-            .action(gtk::FileChooserAction::Open)
             .accept_label("_Open")
-            .cancel_label("_Cancel")
-            .filter(&filter)
+            .default_filter(&filter)
             .build();
 
-        dialog.connect_response(
-            glib::clone!(@strong self as window => move |dialog, response| {
-                if response == gtk::ResponseType::Accept {
-                    if let Some(Some(path)) = dialog.file().map(|f| f.path()) {
-                        window.emit_by_name::<()>(
-                            "open-project",
-                            &[&path.to_string_lossy().to_string()]
-                        );
-                    } else {
-                        log::error!("Invalid file.");
+        imp.file_dialog.replace(Some(dialog.clone()));
+
+        log::info!("Open file dialog.");
+
+        dialog.open(
+            Some(self),
+            Option::<&gio::Cancellable>::None,
+            glib::clone!(@strong self as window => move |response| {
+                match response {
+                    Ok(f) => {
+                        if let Some(path) = f.path() {
+                            window.emit_by_name::<()>("open-project", &[&path]);
+                        } else {
+                            log::error!("Error opening file: Invalid path");
+                        }
+                    }
+                    Err(e) => {
+                        log::error!("Error opening file: {e}")
                     }
                 }
                 window.imp().file_dialog.replace(None);
             }),
         );
-
-        imp.file_dialog.replace(Some(dialog.clone()));
-
-        log::info!("Open file dialog.");
-        dialog.show();
     }
 
     /// Opens a project file for this window.
@@ -348,32 +348,35 @@ impl ApplicationWindow {
         let filter = gtk::FileFilter::new();
         filter.add_suffix(khazanah_core::PROJECT_FILE_EXT);
 
-        let dialog = gtk::FileChooserNative::builder()
-            .title("Save File")
-            .transient_for(self)
-            .action(gtk::FileChooserAction::Save)
+        let dialog = gtk::FileDialog::builder()
+            .title("Open File")
             .accept_label("_Save")
-            .cancel_label("_Cancel")
-            .filter(&filter)
+            .default_filter(&filter)
             .build();
 
-        dialog.connect_response(
-            glib::clone!(@strong self as window => move |dialog, response| {
-                if response == gtk::ResponseType::Accept {
-                    if let Some(Some(path)) = dialog.file().map(|f| f.path()) {
-                        window.save_project_file(path, next_action);
-                    } else {
-                        log::error!("Invalid file.");
+        imp.file_dialog.replace(Some(dialog.clone()));
+
+        log::info!("Save file dialog.");
+
+        dialog.save(
+            Some(self),
+            Option::<&gio::Cancellable>::None,
+            glib::clone!(@strong self as window => move |response| {
+                match response {
+                    Ok(f) => {
+                        if let Some(path) = f.path() {
+                            window.save_project_file(path, next_action)
+                        } else {
+                            log::error!("Error saving file: Invalid path");
+                        }
+                    }
+                    Err(e) => {
+                        log::error!("Error saving file: {e}")
                     }
                 }
                 window.imp().file_dialog.replace(None);
             }),
         );
-
-        imp.file_dialog.replace(Some(dialog.clone()));
-
-        log::info!("Open file dialog.");
-        dialog.show();
     }
 
     /// Save the current project.
@@ -502,7 +505,7 @@ impl ApplicationWindow {
 
     /// Loads all view states from the project model.
     pub fn load_all_views(&self) {
-        for view in ui::ALL_MAIN_VIEWS.iter() {
+        for view in ui::MainViews::ALL.iter() {
             self.load_view_state(*view);
         }
     }
@@ -521,7 +524,7 @@ impl ApplicationWindow {
 
     /// Commits all view states to the project model.
     pub fn commit_all_views(&self) {
-        for view in ui::ALL_MAIN_VIEWS.iter() {
+        for view in ui::MainViews::ALL.iter() {
             self.commit_view_state(*view);
         }
     }
@@ -540,7 +543,7 @@ impl ApplicationWindow {
 
     /// Unloads all view states from the project model.
     pub fn unload_all_views(&self) {
-        for view in ui::ALL_MAIN_VIEWS.iter() {
+        for view in ui::MainViews::ALL.iter() {
             self.unload_view_state(*view);
         }
     }
