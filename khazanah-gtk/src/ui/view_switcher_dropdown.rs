@@ -7,6 +7,8 @@ use adw::subclass::prelude::*;
 mod imp {
     use std::cell::Cell;
 
+    use crate::ui;
+
     use super::*;
 
     #[derive(Debug, Default, gtk::CompositeTemplate, glib::Properties)]
@@ -46,6 +48,18 @@ mod imp {
 
         fn property(&self, id: usize, pspec: &glib::ParamSpec) -> glib::Value {
             self.derived_property(id, pspec)
+        }
+
+        fn constructed(&self) {
+            self.parent_constructed();
+
+            let string_list: Vec<String> =
+                ui::MainView::ALL.iter().map(ToString::to_string).collect();
+
+            let str_list: Vec<&str> = string_list.iter().map(String::as_str).collect();
+
+            let model = gtk::StringList::new(&str_list);
+            self.view_dropdown.set_model(Some(&model));
         }
     }
 

@@ -17,16 +17,6 @@
                   bind-source="KhzViewSwitcherDropDown"
                   bind-property="selected-view-index"
                   bind-flags="sync-create|bidirectional"/>
-        <property name="model">
-          <object class="GtkStringList" id="main_views">
-            <items>
-              <item>Overview</item>
-              <item>Phonology</item>
-              <item>Lexicon</item>
-              <item>Grammar</item>
-            </items>
-          </object>
-        </property>
       </object>
     </child>
   </template> <!-- KhzViewSwitcherDropDown -->

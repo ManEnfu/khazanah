@@ -179,7 +179,10 @@ impl AddPhonemeButton {
             {
                 filter.set_filter_func(move |p| {
                     p.downcast_ref::<models::AddPhonemeObject>()
-                        .map(|p| p.name().to_lowercase().contains(&text))
+                        .map(|p| {
+                            p.name().to_lowercase().contains(&text)
+                                || p.symbol().to_lowercase().contains(&text)
+                        })
                         .unwrap_or_default()
                 })
             }

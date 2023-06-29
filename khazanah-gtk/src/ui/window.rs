@@ -6,7 +6,7 @@ use gtk::{gio, glib};
 
 use adw::subclass::prelude::*;
 
-use crate::ui::{self, MainViews, View};
+use crate::ui::{self, MainView, View};
 
 mod imp {
     use std::cell::{Cell, RefCell};
@@ -58,7 +58,7 @@ mod imp {
         #[property(get, set)]
         pub force_action: Cell<bool>,
 
-        pub current_view_index: Cell<MainViews>,
+        pub current_view_index: Cell<MainView>,
 
         pub file_dialog: RefCell<Option<gtk::FileDialog>>,
     }
@@ -333,7 +333,7 @@ impl ApplicationWindow {
             // self.update_title();
             self.load_all_views();
 
-            self.switch_view(MainViews::Overview);
+            self.switch_view(MainView::Overview);
         }
     }
 
@@ -455,8 +455,8 @@ impl ApplicationWindow {
 
     /// Switches to a view. This will set an internal property to sync with all view switchers in
     /// the window.
-    pub fn switch_view(&self, view: MainViews) {
-        if view != MainViews::Unknown {
+    pub fn switch_view(&self, view: MainView) {
+        if view != MainView::Unknown {
             self.set_selected_view_index(u32::from(view));
         }
     }
@@ -465,13 +465,13 @@ impl ApplicationWindow {
     #[template_callback]
     fn handle_selected_view_index_changed(&self, _pspec: glib::ParamSpec, _s: &Self) {
         let idx = self.selected_view_index();
-        let view = MainViews::from(idx);
+        let view = MainView::from(idx);
         log::debug!("Switching to view: {:?} ({})", view, idx);
 
         let imp = self.imp();
         let current_view = imp.current_view_index.get();
 
-        if current_view != MainViews::Unknown {
+        if current_view != MainView::Unknown {
             self.commit_view_state(current_view);
             self.unload_view_state(current_view);
         }
@@ -480,9 +480,9 @@ impl ApplicationWindow {
         let main_stack = imp.main_stack.get();
 
         match view {
-            MainViews::Overview => main_stack.set_visible_child(&*imp.project_overview_view),
-            MainViews::Phonology => main_stack.set_visible_child(&*imp.project_phonology_view),
-            MainViews::Lexicon => main_stack.set_visible_child(&*imp.project_lexicon_view),
+            MainView::Overview => main_stack.set_visible_child(&*imp.project_overview_view),
+            MainView::Phonology => main_stack.set_visible_child(&*imp.project_phonology_view),
+            MainView::Lexicon => main_stack.set_visible_child(&*imp.project_lexicon_view),
             _ => log::warn!("Attempting to switch to unknown view."),
         }
 
@@ -492,58 +492,58 @@ impl ApplicationWindow {
     }
 
     /// Loads view state from the project model.
-    pub fn load_view_state(&self, view: MainViews) {
+    pub fn load_view_state(&self, view: MainView) {
         let imp = self.imp();
 
         match view {
-            MainViews::Overview => imp.project_overview_view.load_state(),
-            MainViews::Phonology => imp.project_phonology_view.load_state(),
-            MainViews::Lexicon => imp.project_lexicon_view.load_state(),
+            MainView::Overview => imp.project_overview_view.load_state(),
+            MainView::Phonology => imp.project_phonology_view.load_state(),
+            MainView::Lexicon => imp.project_lexicon_view.load_state(),
             _ => log::warn!("Attempting to load unknown view."),
         }
     }
 
     /// Loads all view states from the project model.
     pub fn load_all_views(&self) {
-        for view in ui::MainViews::ALL.iter() {
+        for view in ui::MainView::ALL.iter() {
             self.load_view_state(*view);
         }
     }
 
     /// Commits view state to the project model.
-    pub fn commit_view_state(&self, view: MainViews) {
+    pub fn commit_view_state(&self, view: MainView) {
         let imp = self.imp();
 
         match view {
-            MainViews::Overview => imp.project_overview_view.commit_state(),
-            MainViews::Phonology => imp.project_phonology_view.commit_state(),
-            MainViews::Lexicon => imp.project_lexicon_view.commit_state(),
-            MainViews::Unknown => {} // _ => log::warn!("Attempting to commit unknown view."),
+            MainView::Overview => imp.project_overview_view.commit_state(),
+            MainView::Phonology => imp.project_phonology_view.commit_state(),
+            MainView::Lexicon => imp.project_lexicon_view.commit_state(),
+            MainView::Unknown => {} // _ => log::warn!("Attempting to commit unknown view."),
         }
     }
 
     /// Commits all view states to the project model.
     pub fn commit_all_views(&self) {
-        for view in ui::MainViews::ALL.iter() {
+        for view in ui::MainView::ALL.iter() {
             self.commit_view_state(*view);
         }
     }
 
     /// Unloads view state from the project model.
-    pub fn unload_view_state(&self, view: MainViews) {
+    pub fn unload_view_state(&self, view: MainView) {
         let imp = self.imp();
 
         match view {
-            MainViews::Overview => imp.project_overview_view.unload_state(),
-            MainViews::Phonology => imp.project_phonology_view.unload_state(),
-            MainViews::Lexicon => imp.project_lexicon_view.unload_state(),
+            MainView::Overview => imp.project_overview_view.unload_state(),
+            MainView::Phonology => imp.project_phonology_view.unload_state(),
+            MainView::Lexicon => imp.project_lexicon_view.unload_state(),
             _ => log::warn!("Attempting to load unknown view."),
         }
     }
 
     /// Unloads all view states from the project model.
     pub fn unload_all_views(&self) {
-        for view in ui::MainViews::ALL.iter() {
+        for view in ui::MainView::ALL.iter() {
             self.unload_view_state(*view);
         }
     }

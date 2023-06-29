@@ -35,7 +35,7 @@ pub use project_phonology_view::ProjectPhonologyView;
 pub use start_view::StartView;
 pub use toolbar_end_controls::ToolbarEndControls;
 pub use toolbar_start_controls::ToolbarStartControls;
-pub use view::{MainViews, View};
+pub use view::{MainView, View};
 pub use view_switcher_dropdown::ViewSwitcherDropDown;
 pub use window::ApplicationWindow;
 pub use xsampa_view_window::XSampaViewWindow;
