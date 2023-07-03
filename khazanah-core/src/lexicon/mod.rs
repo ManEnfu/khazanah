@@ -82,11 +82,12 @@ impl Lexicon {
         self.words.get_mut(&id)
     }
 
-    pub fn words_iter(&self) -> Iter<Uuid, Word> {
+    /// Iterates over words.
+    pub fn iter_words(&self) -> Iter<Uuid, Word> {
         self.words.iter()
     }
 
-    /// Iterates over words ids.
+    /// Iterates over word ids.
     pub fn ids(&self) -> Keys<Uuid, Word> {
         self.words.keys()
     }
@@ -204,7 +205,7 @@ mod tests {
             "#
         .to_string();
 
-        for (id, word) in lex.words_iter() {
+        for (id, word) in lex.iter_words() {
             xml += format!(
                 r#"
                 <word id="{}">

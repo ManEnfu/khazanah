@@ -1,3 +1,5 @@
+mod inventory;
 mod phoneme;
 
-pub use phoneme::Phoneme;
+pub use inventory::Inventory;
+pub use phoneme::{Phoneme, PhonemeBuilder};
