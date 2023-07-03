@@ -251,7 +251,7 @@ impl ApplicationWindow {
 
         imp.file_dialog.replace(Some(dialog.clone()));
 
-        log::info!("Open file dialog.");
+        log::debug!("Open file dialog.");
 
         dialog.open(
             Some(self),
@@ -262,11 +262,12 @@ impl ApplicationWindow {
                         if let Some(path) = f.path() {
                             window.emit_by_name::<()>("open-project", &[&path]);
                         } else {
-                            log::error!("Error opening file: Invalid path");
+                            log::error!("Open file dialog error: Invalid path");
                         }
                     }
-                    Err(e) => {
-                        log::error!("Error opening file: {e}")
+                    Err(e) => match e.kind::<gtk::DialogError>() {
+                        Some(gtk::DialogError::Dismissed) => log::debug!("Open file dialog dismissed"),
+                        _ => log::error!("Open file dialog error: {e:?}")
                     }
                 }
                 window.imp().file_dialog.replace(None);
@@ -276,7 +277,7 @@ impl ApplicationWindow {
 
     /// Opens a project file for this window.
     pub fn open_project_file<P: AsRef<Path>>(&self, path: P) {
-        log::info!("Opening file: {:?}", path.as_ref());
+        log::debug!("Opening file: {:?}", path.as_ref());
 
         let ctx = glib::MainContext::default();
         let self_weak = glib::SendWeakRef::from(self.downgrade());
@@ -356,7 +357,7 @@ impl ApplicationWindow {
 
         imp.file_dialog.replace(Some(dialog.clone()));
 
-        log::info!("Save file dialog.");
+        log::debug!("Save file dialog.");
 
         dialog.save(
             Some(self),
@@ -367,11 +368,12 @@ impl ApplicationWindow {
                         if let Some(path) = f.path() {
                             window.save_project_file(path, next_action)
                         } else {
-                            log::error!("Error saving file: Invalid path");
+                            log::error!("Save file dialog error: Invalid path");
                         }
                     }
-                    Err(e) => {
-                        log::error!("Error saving file: {e}")
+                    Err(e) => match e.kind::<gtk::DialogError>() {
+                        Some(gtk::DialogError::Dismissed) => log::debug!("Save file dialog dismissed"),
+                        _ => log::error!("Save file dialog error: {e:?}")
                     }
                 }
                 window.imp().file_dialog.replace(None);
@@ -381,7 +383,7 @@ impl ApplicationWindow {
 
     /// Save the current project.
     pub fn save_project_file<P: AsRef<Path>>(&self, path: P, next_action: Option<&'static str>) {
-        log::info!("Saving file: {:?}", path.as_ref());
+        log::debug!("Saving file: {:?}", path.as_ref());
 
         self.commit_all_views();
 
@@ -393,7 +395,7 @@ impl ApplicationWindow {
             if let Some(window) = self_weak.upgrade() {
                 match window.project_model().save_file(&path) {
                     Ok(_) => {
-                        log::info!("Project Saved: {:?}", &path);
+                        log::info!("Project saved: {:?}", &path);
                         let msg = format!(
                             "Saved \"{}\"",
                             path.file_name()

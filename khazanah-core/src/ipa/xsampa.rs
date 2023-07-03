@@ -6,11 +6,9 @@ use crate::utils;
 
 /// Transliterate X-SAMPA pronunciation into IPA pronunciation string.
 pub fn transliterate_xsampa(s: &str) -> String {
-    String::from_iter(
-        utils::transliterate(s, 5, |s| XSAMPA_CHAR_MAP.get(s).copied())
-            .iter()
-            .copied(),
-    )
+    String::from_iter(utils::transliterate(s, 5, |s| {
+        XSAMPA_CHAR_MAP.get(s).copied()
+    }))
 }
 
 lazy_static! {

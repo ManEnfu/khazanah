@@ -46,7 +46,7 @@ mod imp {
             self.project_model
                 .borrow()
                 .query(|project| {
-                    if let Some(word) = project.lexicon().word_by_id(&self.id.get()) {
+                    if let Some(word) = project.lexicon().word_by_id(self.id.get()) {
                         f(word)
                     } else {
                         Default::default()
@@ -61,7 +61,7 @@ mod imp {
             T: Clone,
         {
             self.project_model.borrow().update(|project| {
-                if let Some(word) = project.lexicon_mut().word_by_id_mut(&self.id.get()) {
+                if let Some(word) = project.lexicon_mut().word_by_id_mut(self.id.get()) {
                     f(word, value.clone());
                 }
             });

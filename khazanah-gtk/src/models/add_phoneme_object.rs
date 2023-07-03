@@ -26,7 +26,7 @@ mod imp {
             self.phoneme
                 .borrow()
                 .as_ref()
-                .map(|x| x.base.to_string())
+                .map(|x| x.base().to_string())
                 .unwrap_or_default()
         }
 
@@ -34,7 +34,7 @@ mod imp {
             self.phoneme
                 .borrow()
                 .as_ref()
-                .and_then(|x| x.base.symbol())
+                .and_then(|x| x.base().symbol())
                 .unwrap_or_default()
                 .to_string()
         }

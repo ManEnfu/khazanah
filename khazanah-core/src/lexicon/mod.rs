@@ -3,7 +3,7 @@
 pub use error::Error;
 pub use pos::{PartOfSpeech, ALL_PARTS_OF_SPEECH};
 use uuid::Uuid;
-pub use word::Word;
+pub use word::{Word, WordBuilder};
 
 use std::{
     collections::{
@@ -33,10 +33,11 @@ impl Lexicon {
 
     /// Adds a `Word` to `Lexicon` and returns its id.
     pub fn add_word(&mut self, mut word: Word) -> Uuid {
-        if word.id.is_none() {
-            word.id = Some(Uuid::new_v4());
-        }
-        let id = word.id.unwrap();
+        let id = if let Some(id) = word.id() {
+            id
+        } else {
+            word.generate_id()
+        };
         self.words.insert(id, word);
         id
     }
@@ -47,7 +48,7 @@ impl Lexicon {
     }
 
     /// Gets the number of words.
-    pub fn num_words(&self) -> usize {
+    pub fn n_words(&self) -> usize {
         self.words.len()
     }
 
@@ -72,13 +73,13 @@ impl Lexicon {
     // }
 
     /// Gets a reference to word by id.
-    pub fn word_by_id(&self, id: &Uuid) -> Option<&Word> {
-        self.words.get(id)
+    pub fn word_by_id(&self, id: Uuid) -> Option<&Word> {
+        self.words.get(&id)
     }
 
     /// Gets a mutable reference to word by id.
-    pub fn word_by_id_mut(&mut self, id: &Uuid) -> Option<&mut Word> {
-        self.words.get_mut(id)
+    pub fn word_by_id_mut(&mut self, id: Uuid) -> Option<&mut Word> {
+        self.words.get_mut(&id)
     }
 
     pub fn words_iter(&self) -> Iter<Uuid, Word> {
@@ -169,27 +170,30 @@ mod tests {
 
     fn test_lex() -> Lexicon {
         let mut lex = Lexicon::new();
-        lex.add_word(Word {
-            romanization: "nifutu".to_string(),
-            pronunciation: "ˈni.ɸu.tu".to_string(),
-            translation: "sun".to_string(),
-            part_of_speech: Some(PartOfSpeech::Noun),
-            ..Default::default()
-        });
-        lex.add_word(Word {
-            romanization: "xahlauraqi".to_string(),
-            pronunciation: "ˈxa.ɬa.u.ɹa.qi".to_string(),
-            translation: "story".to_string(),
-            part_of_speech: Some(PartOfSpeech::Noun),
-            ..Default::default()
-        });
-        lex.add_word(Word {
-            romanization: "pfunutsaaxi".to_string(),
-            pronunciation: "ˈpɸu.nu.tsaː.xi".to_string(),
-            translation: "flow".to_string(),
-            part_of_speech: Some(PartOfSpeech::Verb),
-            ..Default::default()
-        });
+        lex.add_word(
+            WordBuilder::new()
+                .romanization("nifutu".to_string())
+                .pronunciation("ˈni.ɸu.tu".to_string())
+                .translation("sun".to_string())
+                .part_of_speech(PartOfSpeech::Noun)
+                .build(),
+        );
+        lex.add_word(
+            WordBuilder::new()
+                .romanization("xahlauraqi".to_string())
+                .pronunciation("ˈxa.ɬa.u.ɹa.qi".to_string())
+                .translation("story".to_string())
+                .part_of_speech(PartOfSpeech::Noun)
+                .build(),
+        );
+        lex.add_word(
+            WordBuilder::new()
+                .romanization("pfunutsaaxi".to_string())
+                .pronunciation("ˈpɸu.nu.tsaː.xi".to_string())
+                .translation("flow".to_string())
+                .part_of_speech(PartOfSpeech::Verb)
+                .build(),
+        );
         lex
     }
 
@@ -211,10 +215,10 @@ mod tests {
                 </word>
                 "#,
                 id.to_string(),
-                &word.romanization,
-                &word.pronunciation,
-                &word.translation,
-                word.part_of_speech.as_ref().unwrap().name()
+                &word.romanization(),
+                &word.pronunciation(),
+                &word.translation(),
+                word.part_of_speech().as_ref().unwrap().name()
             )
             .as_str();
         }

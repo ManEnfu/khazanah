@@ -12,17 +12,17 @@ use std::{fmt::Debug, io::Write};
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Word {
     /// The id of the word.
-    pub(crate) id: Option<Uuid>,
-    /// Romanization of the word.
-    pub(crate) romanization: String,
-    /// Translation of the word.
-    pub(crate) translation: String,
-    /// Pronunciation of word in IPA.
-    pub(crate) pronunciation: String,
+    id: Option<Uuid>,
+    /// The romanization of the word.
+    romanization: String,
+    /// The translation of the word.
+    translation: String,
+    /// The pronunciation of word in IPA.
+    pronunciation: String,
     /// Which part of speech this word belongs to.
-    pub(crate) part_of_speech: Option<PartOfSpeech>,
-    /// X-SAMPA pronunciation of the word, if exists.
-    pub(crate) xsampa_pronunciation: Option<String>,
+    part_of_speech: Option<PartOfSpeech>,
+    /// The X-SAMPA pronunciation of the word, if exists.
+    xsampa_pronunciation: Option<String>,
 }
 
 impl Word {
@@ -42,6 +42,13 @@ impl Word {
     /// Gets the id of the word.
     pub fn id(&self) -> Option<Uuid> {
         self.id
+    }
+
+    /// Generates new id for the word, and then returns it.
+    pub fn generate_id(&mut self) -> Uuid {
+        let id = Uuid::new_v4();
+        self.id = Some(id);
+        id
     }
 
     /// Gets the romanization of the word.
@@ -212,6 +219,47 @@ impl WriteXml for Word {
         w.write_tag_end("word")?;
 
         Ok(())
+    }
+}
+
+/// A builder struct of a word.
+#[derive(Debug, Default)]
+pub struct WordBuilder {
+    inner: Word,
+}
+
+impl WordBuilder {
+    pub fn new() -> Self {
+        Self { inner: Word::new() }
+    }
+
+    pub fn romanization(mut self, value: String) -> Self {
+        self.inner.set_romanization(value);
+        self
+    }
+
+    pub fn translation(mut self, value: String) -> Self {
+        self.inner.set_translation(value);
+        self
+    }
+
+    pub fn pronunciation(mut self, value: String) -> Self {
+        self.inner.set_pronunciation(value);
+        self
+    }
+
+    pub fn xsampa_pronunciation(mut self, value: String) -> Self {
+        self.inner.set_xsampa_pronunciation(Some(value));
+        self
+    }
+
+    pub fn part_of_speech(mut self, value: PartOfSpeech) -> Self {
+        self.inner.set_part_of_speech(Some(value));
+        self
+    }
+
+    pub fn build(self) -> Word {
+        self.inner
     }
 }
 
