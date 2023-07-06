@@ -99,8 +99,11 @@ impl Inventory {
         let mut map = BiHashMap::new();
         for phoneme in self.iter_phonemes() {
             map.insert(
-                phoneme.romanization().to_string(),
-                phoneme.symbol().to_string(),
+                phoneme
+                    .romanization()
+                    .unwrap_or(phoneme.sound())
+                    .to_string(),
+                phoneme.sound().to_string(),
             );
         }
         self.romanization_pronunciation_map = Some(map);
@@ -109,9 +112,7 @@ impl Inventory {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
-    use crate::{ipa, phonology::PhonemeBuilder};
+    use crate::phonology::PhonemeBuilder;
 
     use super::*;
 
@@ -119,93 +120,51 @@ mod tests {
         let mut inv = Inventory::new();
         inv.add_phoneme(
             PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("ɬ").unwrap())
+                .sound("ɬ".to_string())
                 .romanization("hl".to_string())
                 .build(),
         );
+        inv.add_phoneme(PhonemeBuilder::new().sound("t".to_string()).build());
+        inv.add_phoneme(PhonemeBuilder::new().sound("h".to_string()).build());
         inv.add_phoneme(
             PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("t").unwrap())
-                .romanization("t".to_string())
-                .build(),
-        );
-        inv.add_phoneme(
-            PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("h").unwrap())
-                .romanization("h".to_string())
-                .build(),
-        );
-        inv.add_phoneme(
-            PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("ɹ").unwrap())
+                .sound("ɹ".to_string())
                 .romanization("r".to_string())
                 .build(),
         );
+        inv.add_phoneme(PhonemeBuilder::new().sound("s".to_string()).build());
+        inv.add_phoneme(PhonemeBuilder::new().sound("m".to_string()).build());
         inv.add_phoneme(
             PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("s").unwrap())
-                .romanization("s".to_string())
-                .build(),
-        );
-        inv.add_phoneme(
-            PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("m").unwrap())
-                .romanization("m".to_string())
-                .build(),
-        );
-        inv.add_phoneme(
-            PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("t").unwrap())
-                .modifiers(vec![ipa::Ipa::Diacritic(ipa::Diacritic::Aspirated)])
+                .sound("tʰ".to_string())
                 .romanization("th".to_string())
                 .build(),
         );
         inv.add_phoneme(
             PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("t͡s").unwrap())
+                .sound("t͡s".to_string())
                 .romanization("ts".to_string())
                 .build(),
         );
+        inv.add_phoneme(PhonemeBuilder::new().sound("a".to_string()).build());
         inv.add_phoneme(
             PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("a").unwrap())
-                .romanization("a".to_string())
-                .build(),
-        );
-        inv.add_phoneme(
-            PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("a").unwrap())
-                .modifiers(vec![ipa::Ipa::Prosody(ipa::Prosody::Long)])
+                .sound("aː".to_string())
                 .romanization("aa".to_string())
                 .build(),
         );
         inv.add_phoneme(
             PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("ɪ").unwrap())
+                .sound("ɪ".to_string())
                 .romanization("i".to_string())
                 .build(),
         );
+        inv.add_phoneme(PhonemeBuilder::new().sound("u".to_string()).build());
+        inv.add_phoneme(PhonemeBuilder::new().sound("e".to_string()).build());
+        inv.add_phoneme(PhonemeBuilder::new().sound("o".to_string()).build());
         inv.add_phoneme(
             PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("u").unwrap())
-                .romanization("u".to_string())
-                .build(),
-        );
-        inv.add_phoneme(
-            PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("e").unwrap())
-                .romanization("e".to_string())
-                .build(),
-        );
-        inv.add_phoneme(
-            PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("o").unwrap())
-                .romanization("o".to_string())
-                .build(),
-        );
-        inv.add_phoneme(
-            PhonemeBuilder::new()
-                .base(ipa::Ipa::from_str("ə").unwrap())
+                .sound("ə".to_string())
                 .romanization("ë".to_string())
                 .build(),
         );

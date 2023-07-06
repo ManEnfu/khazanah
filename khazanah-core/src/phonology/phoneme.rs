@@ -1,58 +1,48 @@
+use std::io::{BufRead, Write};
+
 use uuid::Uuid;
 
-use crate::ipa;
+use crate::{
+    ipa,
+    xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter},
+};
+
+use super::Error;
 
 /// A Phoneme.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Phoneme {
     /// The id of the phoneme.
     id: Option<Uuid>,
-    /// The base IPA symbol of the phoneme.
-    base: ipa::Ipa,
-    /// The modifiers to apply to the phoneme.
-    modifiers: Vec<ipa::Ipa>,
+    /// The IPA sound of the phoneme.
+    sound: String,
     /// The romanization of the phoneme.
-    romanization: String,
-
-    /// The symbol of the phoneme.
-    symbol: String,
+    romanization: Option<String>,
 }
 
 impl Phoneme {
     /// Creates a new phoneme.
-    pub fn new(base: ipa::Ipa) -> Self {
-        Self {
-            id: None,
-            base,
-            modifiers: Vec::new(),
-            romanization: String::default(),
-
-            symbol: generate_symbol(base, &[]),
-        }
-    }
-
-    // Creates a new phoneme with specified modifiers.
-    pub fn new_with_modifiers(base: ipa::Ipa, modifiers: &[ipa::Ipa]) -> Self {
-        Self {
-            id: None,
-            base,
-            modifiers: modifiers.into(),
-            romanization: String::default(),
-
-            symbol: generate_symbol(base, modifiers),
-        }
+    pub fn new() -> Self {
+        Self::default()
     }
 
     // Creates a new phoneme with specified id and modifiers.
-    pub fn new_with_id(id: Uuid, base: ipa::Ipa, modifiers: &[ipa::Ipa]) -> Self {
+    pub fn new_with_id(id: Uuid) -> Self {
         Self {
             id: Some(id),
-            base,
-            modifiers: modifiers.into(),
-            romanization: String::default(),
-
-            symbol: generate_symbol(base, modifiers),
+            ..Default::default()
         }
+    }
+
+    pub fn from_ipa(ipa: ipa::Ipa) -> Self {
+        Self {
+            sound: ipa.symbol().unwrap_or_default().to_string(),
+            ..Default::default()
+        }
+    }
+
+    pub fn builder() -> PhonemeBuilder {
+        PhonemeBuilder::new()
     }
 
     /// Gets the id of the phoneme.
@@ -67,54 +57,136 @@ impl Phoneme {
         id
     }
 
-    /// Gets the base of the phoneme.
-    pub fn base(&self) -> ipa::Ipa {
-        self.base
+    /// Gets the sound of the phoneme.
+    pub fn sound(&self) -> &str {
+        &self.sound
     }
 
-    /// Sets the base of the phoneme.
-    pub fn set_base(&mut self, value: ipa::Ipa) {
-        self.base = value;
-        self.symbol = generate_symbol(self.base, &self.modifiers);
+    /// Sets the sound of the phoneme.
+    pub fn set_sound(&mut self, value: String) {
+        self.sound = value;
     }
 
     /// Gets the romanization of the phoneme.
-    pub fn romanization(&self) -> &str {
-        &self.romanization
+    pub fn romanization(&self) -> Option<&str> {
+        self.romanization.as_deref()
     }
 
     /// Sets the romanization of the phoneme.
-    pub fn set_romanization(&mut self, value: String) {
+    pub fn set_romanization(&mut self, value: Option<String>) {
         self.romanization = value;
-        self.symbol = generate_symbol(self.base, &self.modifiers);
     }
 
-    /// Gets the modifiers of the phoneme.
-    pub fn modifiers(&self) -> &[ipa::Ipa] {
-        &self.modifiers
-    }
-
-    /// Sets the modifiers of the phoneme.
-    pub fn set_modifiers(&mut self, value: Vec<ipa::Ipa>) {
-        self.modifiers = value;
-        self.symbol = generate_symbol(self.base, &self.modifiers);
-    }
-
-    /// Gets the symbol of the phoneme.
-    pub fn symbol(&self) -> &str {
-        &self.symbol
+    /// Gets the base of the phoneme.
+    pub fn base(&self) -> Option<ipa::Ipa> {
+        let ipas = ipa::parse_str(&self.sound);
+        ipas.get(0).copied()
     }
 }
 
-fn generate_symbol(base: ipa::Ipa, modifiers: &[ipa::Ipa]) -> String {
-    modifiers
-        .iter()
-        .fold(base.symbol().unwrap_or_default().to_string(), |acc, x| {
-            acc + x.symbol().unwrap_or_default()
-        })
+// fn generate_symbol(base: ipa::Ipa, modifiers: &[ipa::Ipa]) -> String {
+//     modifiers
+//         .iter()
+//         .fold(base.symbol().unwrap_or_default().to_string(), |acc, x| {
+//             acc + x.symbol().unwrap_or_default()
+//         })
+// }
+
+impl ReadXml for Phoneme {
+    type Error = Error;
+
+    type ReaderState = ();
+
+    const TAG: &'static str = "phoneme";
+
+    fn process_tag_start<R: BufRead>(
+        &mut self,
+        _reader: &mut XmlReader<R>,
+        _state: &mut Self::ReaderState,
+        name: String,
+        attrs: Vec<(String, String)>,
+    ) -> Result<(), XmlError<Self::Error>> {
+        match name.as_str() {
+            "phoneme" => {
+                let id = attrs
+                    .iter()
+                    .find(|&x| x.0 == "id")
+                    .map(|x| Uuid::parse_str(&x.1))
+                    .unwrap_or_else(|| Ok(Uuid::new_v4()))
+                    .map_err(|e| XmlError::Other(Error::Id(e)))?;
+                self.id = Some(id);
+            }
+            "sound" => self.sound.clear(),
+            "romanization" => {
+                self.romanization = Some(String::default());
+            }
+            _ => return Err(XmlError::InvalidTag(name)),
+        }
+        Ok(())
+    }
+
+    fn process_text<R: BufRead>(
+        &mut self,
+        reader: &mut XmlReader<R>,
+        _state: &mut Self::ReaderState,
+        text: String,
+    ) -> Result<(), XmlError<Self::Error>> {
+        let tag = reader.context.last().map(|s| s.as_str());
+
+        match tag {
+            Some("sound") => {
+                self.sound += &text;
+            }
+            Some("romanization") => {
+                if let Some(rom) = self.romanization.as_mut() {
+                    *rom += &text;
+                }
+            }
+            _ => {
+                return Err(XmlError::InvalidTag(tag.unwrap_or_default().to_string()));
+            }
+        }
+
+        Ok(())
+    }
+
+    fn process_tag_end<R: BufRead>(
+        &mut self,
+        _reader: &mut XmlReader<R>,
+        _state: &mut Self::ReaderState,
+        _name: String,
+    ) -> Result<(), XmlError<Self::Error>> {
+        Ok(())
+    }
+}
+
+impl WriteXml for Phoneme {
+    type Error = Error;
+
+    fn serialize_xml<W: Write>(&self, w: &mut XmlWriter<W>) -> Result<(), XmlError<Self::Error>> {
+        w.write_tag_start_with_attributes(
+            "phoneme",
+            [("id", self.id.unwrap_or_default().to_string().as_str())],
+        )?;
+
+        w.write_tag_start("sound")?;
+        w.write_text(&self.sound)?;
+        w.write_tag_end("sound")?;
+
+        if let Some(rom) = self.romanization.as_ref() {
+            w.write_tag_start("romanization")?;
+            w.write_text(rom)?;
+            w.write_tag_end("romanization")?;
+        }
+
+        w.write_tag_end("phoneme")?;
+
+        Ok(())
+    }
 }
 
 /// A builder struct of a phoneme.
+#[derive(Debug, Default)]
 pub struct PhonemeBuilder {
     inner: Phoneme,
 }
@@ -122,26 +194,17 @@ pub struct PhonemeBuilder {
 impl PhonemeBuilder {
     pub fn new() -> Self {
         Self {
-            inner: Phoneme::new(ipa::Ipa::Vowel(
-                ipa::VowelHeight::Open,
-                ipa::VowelBackness::Front,
-                ipa::VowelRounding::Unrounded,
-            )),
+            inner: Phoneme::default(),
         }
     }
 
-    pub fn base(mut self, value: ipa::Ipa) -> Self {
-        self.inner.set_base(value);
+    pub fn sound(mut self, value: String) -> Self {
+        self.inner.set_sound(value);
         self
     }
 
     pub fn romanization(mut self, value: String) -> Self {
-        self.inner.set_romanization(value);
-        self
-    }
-
-    pub fn modifiers(mut self, value: Vec<ipa::Ipa>) -> Self {
-        self.inner.set_modifiers(value);
+        self.inner.set_romanization(Some(value));
         self
     }
 
@@ -150,8 +213,41 @@ impl PhonemeBuilder {
     }
 }
 
-impl Default for PhonemeBuilder {
-    fn default() -> Self {
-        Self::new()
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_phoneme() -> Phoneme {
+        let mut ret = PhonemeBuilder::new()
+            .sound("aː".to_string())
+            .romanization("aa".to_string())
+            .build();
+        ret.generate_id();
+        ret
+    }
+
+    fn test_xml(id: Uuid) -> String {
+        format!(
+            r#"
+            <phoneme id="{id}">
+                <sound>aː</sound>
+                <romanization>aa</romanization>
+            </phoneme>
+            "#,
+        )
+    }
+
+    #[test]
+    fn read_xml() {
+        let phoneme = test_phoneme();
+        let xml = test_xml(phoneme.id().unwrap());
+        assert_eq!(Phoneme::load_xml_str(&xml).unwrap(), phoneme);
+    }
+
+    #[test]
+    fn write_xml() {
+        let phoneme = test_phoneme();
+        let xml = phoneme.save_xml_string().unwrap();
+        assert_eq!(Phoneme::load_xml_str(&xml).unwrap(), phoneme);
     }
 }

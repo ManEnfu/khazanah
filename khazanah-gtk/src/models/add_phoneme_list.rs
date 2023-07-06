@@ -30,7 +30,7 @@ mod imp {
             self.list.replace(
                 IPA_BASE_PHONEMES
                     .iter()
-                    .map(|ip| Phoneme::new(*ip))
+                    .map(|ip| Phoneme::from_ipa(*ip))
                     .map(models::AddPhonemeObject::new)
                     .collect(),
             );
