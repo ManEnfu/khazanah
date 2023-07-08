@@ -323,7 +323,7 @@ impl IpaChart {
                     let v3 = title3.values[s as usize];
 
                     let ipa_sym = f(v1, v2, v3);
-                    let sym = ipa_sym.to_str();
+                    let sym = ipa_sym.symbol();
                     let widget = gtk::Button::builder()
                         .sensitive(sym.is_some())
                         .label(sym.unwrap_or_default())

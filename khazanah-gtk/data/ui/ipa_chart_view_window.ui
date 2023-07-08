@@ -19,200 +19,273 @@
 
             <child>
               <object class="AdwHeaderBar">
+                <property name="centering-policy">strict</property>
+                <property name="title-widget">
+                  <object class="AdwClamp">
+                    <property name="child">
+                      <object class="GtkSearchEntry" id="search_entry">
+                        <property name="hexpand">True</property>
+                        <property name="placeholder-text" translatable="yes">Search by name or symbol</property>
+                        <signal name="search-started"
+                                handler="handle_search_entry_started"
+                                swapped="true" />
+                        <signal name="search-changed"
+                                handler="handle_search_entry_changed"
+                                swapped="true" />
+                        <signal name="stop-search"
+                                handler="handle_search_entry_stopped"
+                                swapped="true" />
+                      </object>
+                    </property>
+                  </object>
+                </property>
               </object>
             </child>
             
             <child>
-              <object class="GtkScrolledWindow">
-                <property name="vexpand">True</property>
-                <property name="hscrollbar-policy">never</property>
-                <property name="child">
-                  <object class="GtkBox">
-                    <property name="orientation">vertical</property>
-                    <property name="margin-top">24</property>
-                    <property name="margin-bottom">24</property>
-                    <property name="spacing">12</property>
+              <object class="GtkStack" id="stack">
+                <property name="visible-child">charts</property>
+                <property name="transition-type">crossfade</property>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">charts</property>
+                    <property name="child">
+                      <object class="GtkScrolledWindow" id="charts">
+                        <property name="vexpand">True</property>
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="child">
+                          <object class="GtkBox">
+                            <property name="orientation">vertical</property>
+                            <property name="margin-top">24</property>
+                            <property name="margin-bottom">24</property>
+                            <property name="spacing">12</property>
 
-                    <child>
-                      <object class="AdwClamp">
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        <property name="child">
-                          <object class="GtkLabel">
-                            <property name="label">Vowels</property>
-                            <property name="halign">start</property>
-                            <style>
-                              <class name="heading"/>
-                            </style>
-                          </object>
-                        </property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="AdwClamp">
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        <property name="child">
-                          <object class="KhzIpaChart" id="vowels_chart">
-                            <property name="margin-bottom">12</property>
-                            <signal name="symbol-selected"
-                                    handler="handle_symbol_selected"
-                                    swapped="true"/>
-                          </object>
-                        </property>
-                      </object>
-                    </child>
-
-                    <child>
-                      <object class="AdwClamp">
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        <property name="child">
-                          <object class="GtkLabel">
-                            <property name="label">Pulmonic Consonants</property>
-                            <property name="halign">start</property>
-                            <style>
-                              <class name="heading"/>
-                            </style>
-                          </object>
-                        </property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkScrolledWindow">
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        <property name="hexpand">True</property>
-                        <property name="vscrollbar-policy">never</property>
-                        <property name="child">
-                          <object class="AdwClamp">
-                            <property name="child">
-                              <object class="KhzIpaChart" id="pulmonic_consonants_chart">
-                                <property name="margin-bottom">12</property>
-                                <signal name="symbol-selected"
-                                        handler="handle_symbol_selected"
-                                        swapped="true"/>
+                            <child>
+                              <object class="AdwClamp">
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+                                <property name="child">
+                                  <object class="GtkLabel">
+                                    <property name="label">Vowels</property>
+                                    <property name="halign">start</property>
+                                    <style>
+                                      <class name="heading"/>
+                                    </style>
+                                  </object>
+                                </property>
                               </object>
-                            </property>
-                          </object>
-                        </property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkScrolledWindow">
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        <property name="hexpand">True</property>
-                        <property name="vscrollbar-policy">never</property>
-                        <property name="child">
-                          <object class="AdwClamp">
-                            <property name="child">
-                              <object class="KhzIpaChart" id="coarticulated_consonants_chart">
-                                <property name="margin-bottom">12</property>
-                                <signal name="symbol-selected"
-                                        handler="handle_symbol_selected"
-                                        swapped="true"/>
+                            </child>
+                            <child>
+                              <object class="AdwClamp">
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+                                <property name="child">
+                                  <object class="KhzIpaChart" id="vowels_chart">
+                                    <property name="margin-bottom">12</property>
+                                    <signal name="symbol-selected"
+                                            handler="handle_symbol_selected"
+                                            swapped="true"/>
+                                  </object>
+                                </property>
                               </object>
-                            </property>
-                          </object>
-                        </property>
-                      </object>
-                    </child>
+                            </child>
 
-                    <child>
-                      <object class="AdwClamp">
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        <property name="child">
-                          <object class="GtkLabel">
-                            <property name="label">Ejective Consonants</property>
-                            <property name="halign">start</property>
-                            <style>
-                              <class name="heading"/>
-                            </style>
-                          </object>
-                        </property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="AdwClamp">
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        <property name="child">
-                          <object class="KhzIpaChart" id="ejective_consonants_chart">
-                            <property name="margin-bottom">12</property>
-                            <signal name="symbol-selected"
-                                    handler="handle_symbol_selected"
-                                    swapped="true"/>
-                          </object>
-                        </property>
-                      </object>
-                    </child>
-                    
-                    <child>
-                      <object class="AdwClamp">
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        <property name="child">
-                          <object class="GtkLabel">
-                            <property name="label">Implosive Consonants</property>
-                            <property name="halign">start</property>
-                            <style>
-                              <class name="heading"/>
-                            </style>
-                          </object>
-                        </property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="AdwClamp">
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        <property name="child">
-                          <object class="KhzIpaChart" id="implosive_consonants_chart">
-                            <property name="margin-bottom">12</property>
-                            <signal name="symbol-selected"
-                                    handler="handle_symbol_selected"
-                                    swapped="true"/>
-                          </object>
-                        </property>
-                      </object>
-                    </child>
+                            <child>
+                              <object class="AdwClamp">
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+                                <property name="child">
+                                  <object class="GtkLabel">
+                                    <property name="label">Pulmonic Consonants</property>
+                                    <property name="halign">start</property>
+                                    <style>
+                                      <class name="heading"/>
+                                    </style>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkScrolledWindow">
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+                                <property name="hexpand">True</property>
+                                <property name="vscrollbar-policy">never</property>
+                                <property name="child">
+                                  <object class="AdwClamp">
+                                    <property name="child">
+                                      <object class="KhzIpaChart" id="pulmonic_consonants_chart">
+                                        <property name="margin-bottom">12</property>
+                                        <signal name="symbol-selected"
+                                                handler="handle_symbol_selected"
+                                                swapped="true"/>
+                                      </object>
+                                    </property>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkScrolledWindow">
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+                                <property name="hexpand">True</property>
+                                <property name="vscrollbar-policy">never</property>
+                                <property name="child">
+                                  <object class="AdwClamp">
+                                    <property name="child">
+                                      <object class="KhzIpaChart" id="coarticulated_consonants_chart">
+                                        <property name="margin-bottom">12</property>
+                                        <signal name="symbol-selected"
+                                                handler="handle_symbol_selected"
+                                                swapped="true"/>
+                                      </object>
+                                    </property>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
 
-                    <child>
-                      <object class="AdwClamp">
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        <property name="child">
-                          <object class="GtkLabel">
-                            <property name="label">Click Consonants</property>
-                            <property name="halign">start</property>
-                            <style>
-                              <class name="heading"/>
-                            </style>
-                          </object>
-                        </property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="AdwClamp">
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        <property name="child">
-                          <object class="KhzIpaChart" id="click_consonants_chart">
-                            <property name="margin-bottom">12</property>
-                            <signal name="symbol-selected"
-                                    handler="handle_symbol_selected"
-                                    swapped="true"/>
-                          </object>
-                        </property>
-                      </object>
-                    </child>
+                            <child>
+                              <object class="AdwClamp">
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+                                <property name="child">
+                                  <object class="GtkLabel">
+                                    <property name="label">Ejective Consonants</property>
+                                    <property name="halign">start</property>
+                                    <style>
+                                      <class name="heading"/>
+                                    </style>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="AdwClamp">
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+                                <property name="child">
+                                  <object class="KhzIpaChart" id="ejective_consonants_chart">
+                                    <property name="margin-bottom">12</property>
+                                    <signal name="symbol-selected"
+                                            handler="handle_symbol_selected"
+                                            swapped="true"/>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="AdwClamp">
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+                                <property name="child">
+                                  <object class="GtkLabel">
+                                    <property name="label">Implosive Consonants</property>
+                                    <property name="halign">start</property>
+                                    <style>
+                                      <class name="heading"/>
+                                    </style>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwClamp">
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+                                <property name="child">
+                                  <object class="KhzIpaChart" id="implosive_consonants_chart">
+                                    <property name="margin-bottom">12</property>
+                                    <signal name="symbol-selected"
+                                            handler="handle_symbol_selected"
+                                            swapped="true"/>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="AdwClamp">
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+                                <property name="child">
+                                  <object class="GtkLabel">
+                                    <property name="label">Click Consonants</property>
+                                    <property name="halign">start</property>
+                                    <style>
+                                      <class name="heading"/>
+                                    </style>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwClamp">
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+                                <property name="child">
+                                  <object class="KhzIpaChart" id="click_consonants_chart">
+                                    <property name="margin-bottom">12</property>
+                                    <signal name="symbol-selected"
+                                            handler="handle_symbol_selected"
+                                            swapped="true"/>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
 
 
+                          </object>
+                        </property>
+                      </object> <!-- GtkScrolledWindow -->
+                    </property>
                   </object>
-                </property>
-              </object> <!-- GtkScrolledWindow -->
+                </child>
+
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">list</property>
+                    <property name="child">
+                      <object class="AdwClamp">
+                        <property name="child">
+                          <object class="GtkScrolledWindow">
+                            <property name="vexpand">True</property>
+                            <property name="hscrollbar-policy">never</property>
+                            <property name="child">
+                              <object class="GtkListView" id="list_view">
+                                <property name="single-click-activate">true</property>
+                                <signal name="activate"
+                                        handler="handle_list_row_activated"
+                                        swapped="true"/>
+                                <style>
+                                  <class name="navigation-sidebar"/>
+                                </style>
+                              </object>
+                            </property>
+                          </object>
+                        </property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">empty</property>
+                    <property name="child">
+                      <object class="AdwStatusPage" id="search_result_empty">
+                        <property name="icon-name">system-search-symbolic</property>
+                        <property name="title">No Results Found</property>
+                        <property name="description">Try a different search.</property>
+                        <property name="vexpand">true</property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+              </object> <!-- GtkStack -->
             </child>
           </object>
         </child>

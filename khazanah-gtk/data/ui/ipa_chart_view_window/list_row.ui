@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<interface>
+  <requires lib="gtk" version="4.6"/>
+  <requires lib="Adw" version="1.2"/>
+
+  <template class="KhzIpaChartViewWindowListRow" parent="AdwBin">
+    <child>
+      <object class="GtkBox">
+        <property name="spacing">6</property>
+
+        <child>
+          <object class="GtkLabel" id="symbol_label">
+            <property name="width-request">18</property>
+            <property name="halign">end</property>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkLabel" id="name_label">
+            <style>
+              <class name="dim-label"/>
+            </style>
+            <property name="ellipsize">end</property>
+          </object>
+        </child>
+
+      </object>
+    </child>
+  </template>
+</interface>

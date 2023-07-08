@@ -27,6 +27,8 @@
 
     <file compressed="true" preprocess="xml-stripblanks">ui/confirm_save_dialog.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/xsampa_view_window.ui</file>
+
     <file compressed="true" preprocess="xml-stripblanks">ui/ipa_chart_view_window.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/ipa_chart_view_window/list_row.ui</file>
   </gresource>
 </gresources>
