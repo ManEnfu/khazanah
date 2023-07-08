@@ -164,7 +164,11 @@ mod imp {
         }
 
         pub fn get_id(&self) -> Uuid {
-            self.query(|word| word.id().unwrap_or_default())
+            if let Some(Inner::QueryFromProject { id, .. }) = self.inner.borrow().as_ref() {
+                *id
+            } else {
+                self.query(|word| word.id().unwrap_or_default())
+            }
         }
     }
 
