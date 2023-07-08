@@ -422,30 +422,11 @@ pub enum Ipa {
 
 impl Display for Ipa {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Ipa::Consonant(v, p, m) => write!(f, "{} {} {}", v, p, m),
-            Ipa::ImplosiveConsonant(v, p) => write!(f, "{} {} implosive", v, p),
-            Ipa::EjectiveConsonant(p, m) => write!(f, "{} ejective {}", p, m),
-            Ipa::ClickConsonant(p, m) => write!(f, "{} {} click", m, p),
-            Ipa::Vowel(h, b, r) => write!(f, "{} {} {} vowel", h, b, r),
-            Ipa::Prosody(p) => write!(f, "{}", p),
-            Ipa::Tone(t) => write!(f, "{}", t),
-            Ipa::Delimiter(d) => write!(f, "{}", d),
-            Ipa::Diacritic(d) => write!(f, "{}", d),
-        }
+        write!(f, "{} ({})", self.name(), self.symbol().unwrap_or_default())
     }
 }
 
 impl Ipa {
-    /// Parse a string to an IPA symbol.
-    pub fn parse_str(s: &str) -> Option<Ipa> {
-        IPA_CHAR_MAP.get_by_left(s).copied()
-    }
-    /// Convert an IPA symbol to string.
-    pub fn to_str(&self) -> Option<&'static str> {
-        IPA_CHAR_MAP.get_by_right(self).copied()
-    }
-
     pub fn from_symbol(s: &str) -> Option<Ipa> {
         IPA_CHAR_MAP.get_by_left(s).copied()
     }
@@ -455,7 +436,33 @@ impl Ipa {
     }
 
     pub fn name(&self) -> String {
-        todo!()
+        match self {
+            Ipa::Consonant(v, p, m) => format!("{} {} {}", v, p, m),
+            Ipa::ImplosiveConsonant(v, p) => format!("{} {} implosive", v, p),
+            Ipa::EjectiveConsonant(p, m) => format!("{} ejective {}", p, m),
+            Ipa::ClickConsonant(p, m) => format!("{} {} click", m, p),
+            Ipa::Vowel(h, b, r) => format!("{} {} {} vowel", h, b, r),
+            Ipa::Prosody(p) => format!("{}", p),
+            Ipa::Tone(t) => format!("{}", t),
+            Ipa::Delimiter(d) => format!("{}", d),
+            Ipa::Diacritic(d) => format!("{}", d),
+        }
+    }
+
+    pub fn symbol_with_placeholder(&self) -> String {
+        if let Some(v) = self.symbol() {
+            if let Ipa::Diacritic(_) = self {
+                format!("◌{v}")
+            } else {
+                v.to_string()
+            }
+        } else {
+            "?".to_string()
+        }
+    }
+
+    pub fn all_valids() -> impl Iterator<Item = Self> {
+        IPA_CHAR_MAP.right_values().copied()
     }
 }
 

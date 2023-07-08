@@ -23,5 +23,5 @@ pub fn parse_str(s: &str) -> Vec<Ipa> {
 
 /// Collect vector of `Ipa` into a string.
 pub fn collect_to_str(v: &[Ipa]) -> String {
-    String::from_iter(v.iter().map(|c| c.to_str().unwrap_or_default()))
+    String::from_iter(v.iter().map(|c| c.symbol().unwrap_or_default()))
 }
