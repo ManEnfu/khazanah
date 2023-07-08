@@ -29,6 +29,8 @@ mod imp {
             get = Self::get_name)]
         #[property(name = "sound", type = String,
             get = Self::get_sound, set = Self::set_sound)]
+        #[property(name = "base-symbol", type = String,
+            get = Self::get_base_symbol)]
         pub inner: RefCell<Option<Inner>>,
     }
 
@@ -76,6 +78,15 @@ mod imp {
 
         pub fn get_base(&self) -> Option<Ipa> {
             self.query(|phoneme| phoneme.base())
+        }
+
+        fn get_base_symbol(&self) -> String {
+            self.query(|phoneme| {
+                phoneme
+                    .base()
+                    .map(|x| x.symbol_with_placeholder())
+                    .unwrap_or_default()
+            })
         }
     }
 

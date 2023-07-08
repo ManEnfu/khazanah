@@ -91,7 +91,7 @@ impl ListRow {
 
         bindings.push(
             phoneme_object
-                .bind_property("sound", &*imp.symbol_label, "label")
+                .bind_property("base-symbol", &*imp.symbol_label, "label")
                 .sync_create()
                 .build(),
         );
