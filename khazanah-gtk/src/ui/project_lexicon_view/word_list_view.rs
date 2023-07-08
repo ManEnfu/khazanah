@@ -334,7 +334,7 @@ impl ProjectLexiconWordListView {
             self.imp().search_bar.set_search_mode(false);
 
             log::debug!("Added word of id {}", id);
-            let word_object = WordObject::new(self.project_model(), id);
+            let word_object = WordObject::query_project(self.project_model(), id);
 
             self.word_list_model()
                 .expect("word list model is not initialized")
@@ -540,7 +540,7 @@ impl ui::View for ProjectLexiconWordListView {
                     project
                         .lexicon()
                         .ids()
-                        .map(|i| WordObject::new(self.project_model(), *i)),
+                        .map(|i| WordObject::query_project(self.project_model(), *i)),
                 );
             }
 

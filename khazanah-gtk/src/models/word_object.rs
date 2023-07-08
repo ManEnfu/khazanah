@@ -8,11 +8,20 @@ use crate::models;
 
 #[doc(hidden)]
 mod imp {
-    use std::cell::{Cell, RefCell};
+    use std::cell::RefCell;
 
     use uuid::Uuid;
 
     use super::*;
+
+    #[derive(Debug)]
+    pub enum Inner {
+        Owned(Word),
+        QueryFromProject {
+            project_model: models::ProjectModel,
+            id: Uuid,
+        },
+    }
 
     #[derive(Debug, Default, glib::Properties)]
     #[properties(wrapper_types = super::WordObject)]
@@ -31,68 +40,70 @@ mod imp {
             get = Self::get_use_xsampa, set = Self::set_use_xsampa)]
         #[property(name = "xsampa-pronunciation", type = String,
             get = Self::get_xsampa_pronunciation, set = Self::set_xsampa_pronunciation)]
-        #[property(get, set, construct_only)]
-        pub project_model: RefCell<models::ProjectModel>,
-
-        pub id: Cell<Uuid>,
+        pub inner: RefCell<Option<Inner>>,
     }
 
     impl WordObject {
-        fn get_word_property<T, F>(&self, f: F) -> T
+        fn query<T, F>(&self, f: F) -> T
         where
             T: Default,
             F: Fn(&Word) -> T,
         {
-            self.project_model
-                .borrow()
-                .query(|project| {
-                    if let Some(word) = project.lexicon().word_by_id(self.id.get()) {
-                        f(word)
-                    } else {
-                        Default::default()
-                    }
-                })
-                .unwrap_or_default()
+            match self.inner.borrow().as_ref() {
+                Some(Inner::Owned(word)) => f(word),
+                Some(Inner::QueryFromProject { project_model, id }) => project_model
+                    .query(|project| project.lexicon().word_by_id(*id).map(&f))
+                    .flatten()
+                    .unwrap_or_default(),
+                None => T::default(),
+            }
         }
 
-        fn set_word_property<F, T>(&self, value: T, f: F)
+        fn update<F>(&self, f: F)
         where
-            F: Fn(&mut Word, T),
-            T: Clone,
+            F: Fn(&mut Word),
         {
-            self.project_model.borrow().update(|project| {
-                if let Some(word) = project.lexicon_mut().word_by_id_mut(self.id.get()) {
-                    f(word, value.clone());
+            match self.inner.borrow_mut().as_mut() {
+                Some(Inner::Owned(word)) => f(word),
+                Some(Inner::QueryFromProject { project_model, id }) => {
+                    project_model
+                        .update(|project| project.lexicon_mut().word_by_id_mut(*id).map(&f));
                 }
-            });
+                None => {}
+            }
+            // self.inner.borrow().update(|project| {
+            //     if let Some(word) = project.lexicon_mut().word_by_id_mut(self.id.get()) {
+            //         f(word, value.clone());
+            //     }
+            // });
         }
 
         fn get_romanization(&self) -> String {
-            self.get_word_property(|word| word.romanization().to_string())
+            self.query(|word| word.romanization().to_string())
         }
 
         fn set_romanization(&self, value: String) {
-            self.set_word_property(value, |word, value| word.set_romanization(value));
+            self.update(|word| word.set_romanization(value.clone()));
         }
 
         fn get_translation(&self) -> String {
-            self.get_word_property(|word| word.translation().to_string())
+            self.query(|word| word.translation().to_string())
         }
 
         fn set_translation(&self, value: String) {
-            self.set_word_property(value, |word, value| word.set_translation(value));
+            self.update(|word| word.set_translation(value.clone()));
         }
 
         fn get_pronunciation(&self) -> String {
-            self.get_word_property(|word| word.pronunciation().to_string())
+            self.query(|word| word.pronunciation().to_string())
         }
 
         fn set_pronunciation(&self, value: String) {
-            self.set_word_property(value, |word, value| word.set_pronunciation(value));
+            self.update(|word| word.set_pronunciation(value.clone()));
         }
 
         fn get_pos(&self) -> u32 {
-            self.get_word_property(|word| {
+            self.query(|word| {
                 ALL_PARTS_OF_SPEECH
                     .iter()
                     .position(|&x| x == word.part_of_speech())
@@ -101,7 +112,7 @@ mod imp {
         }
 
         fn set_pos(&self, value: u32) {
-            self.set_word_property(value, |word, value| {
+            self.update(|word| {
                 word.set_part_of_speech(
                     ALL_PARTS_OF_SPEECH
                         .get(value as usize)
@@ -113,7 +124,7 @@ mod imp {
         }
 
         fn get_pos_label(&self) -> String {
-            self.get_word_property(|word| {
+            self.query(|word| {
                 word.part_of_speech()
                     .map(|s| s.label().to_string())
                     .unwrap_or_default()
@@ -121,26 +132,24 @@ mod imp {
         }
 
         fn get_xsampa_pronunciation(&self) -> String {
-            self.get_word_property(|word| {
-                word.xsampa_pronunciation().unwrap_or_default().to_string()
-            })
+            self.query(|word| word.xsampa_pronunciation().unwrap_or_default().to_string())
         }
 
         fn set_xsampa_pronunciation(&self, value: String) {
-            self.set_word_property(value, |word, value| {
+            self.update(|word| {
                 if word.xsampa_pronunciation().is_some() {
-                    word.set_xsampa_pronunciation(Some(value));
+                    word.set_xsampa_pronunciation(Some(value.clone()));
                 }
             });
             self.obj().notify_pronunciation();
         }
 
         fn get_use_xsampa(&self) -> bool {
-            self.get_word_property(|word| word.xsampa_pronunciation().is_some())
+            self.query(|word| word.xsampa_pronunciation().is_some())
         }
 
         fn set_use_xsampa(&self, value: bool) {
-            self.set_word_property(value, |word, value| {
+            self.update(|word| {
                 if value {
                     if word.xsampa_pronunciation().is_none() {
                         word.set_xsampa_pronunciation(Some("".to_string()));
@@ -152,6 +161,10 @@ mod imp {
             let obj = self.obj();
             obj.notify_xsampa_pronunciation();
             obj.notify_pronunciation();
+        }
+
+        pub fn get_id(&self) -> Uuid {
+            self.query(|word| word.id().unwrap_or_default())
         }
     }
 
@@ -183,16 +196,16 @@ glib::wrapper! {
 
 impl WordObject {
     /// Creates a new word object.
-    pub fn new(project_model: models::ProjectModel, id: Uuid) -> Self {
-        let obj: Self = glib::Object::builder()
-            .property("project-model", project_model)
-            .build();
-        obj.imp().id.set(id);
+    pub fn query_project(project_model: models::ProjectModel, id: Uuid) -> Self {
+        let obj = glib::Object::builder::<Self>().build();
+        obj.imp()
+            .inner
+            .replace(Some(imp::Inner::QueryFromProject { project_model, id }));
         obj
     }
 
     /// Returs the id of the object.
     pub fn id(&self) -> Uuid {
-        self.imp().id.get()
+        self.imp().get_id()
     }
 }
