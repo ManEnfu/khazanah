@@ -6,7 +6,7 @@ use std::{
     io::{BufRead, BufReader, Cursor, Write},
     path::Path,
     str::Utf8Error,
-    string::FromUtf8Error,
+    string::FromUtf8Error, todo,
 };
 
 use quick_xml::{
@@ -41,6 +41,38 @@ pub enum XmlError<E> {
     /// Other, domain specific error.
     #[error(transparent)]
     Other(E),
+}
+
+impl<E> XmlError<E> {
+    pub fn map_other<F, U>(self, f: F) -> XmlError<U> 
+    where
+        F: Fn(E) -> U
+    {
+        match self {
+            XmlError::Fs(e) => XmlError::Fs(e),
+            XmlError::Qxml(e) => XmlError::Qxml(e),
+            XmlError::Qattr(e) => XmlError::Qattr(e),
+            XmlError::Utf8(e) => XmlError::Utf8(e),
+            XmlError::FromUtf8(e) => XmlError::FromUtf8(e),
+            XmlError::InvalidTag(e) => XmlError::InvalidTag(e),
+            XmlError::Other(e) => XmlError::Other(f(e)),
+        }
+    }
+
+    pub fn map_into<U>(self) -> XmlError<U>
+    where
+        U: From<E>
+    {
+        match self {
+            XmlError::Fs(e) => XmlError::Fs(e),
+            XmlError::Qxml(e) => XmlError::Qxml(e),
+            XmlError::Qattr(e) => XmlError::Qattr(e),
+            XmlError::Utf8(e) => XmlError::Utf8(e),
+            XmlError::FromUtf8(e) => XmlError::FromUtf8(e),
+            XmlError::InvalidTag(e) => XmlError::InvalidTag(e),
+            XmlError::Other(e) => XmlError::Other(e.into()),
+        }
+    }
 }
 
 /// Processor for `XmlReader`.
