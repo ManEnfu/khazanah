@@ -22,7 +22,7 @@ use zip::{result::ZipError, write::FileOptions, ZipArchive, ZipWriter};
 
 use crate::{
     xml::{ReadXml, WriteXml},
-    Lexicon,
+    Dictionary,
 };
 
 mod error;
@@ -40,7 +40,7 @@ pub struct Project {
     /// The metadata of the project.
     pub(crate) meta: Meta,
     /// The lexicon of the project.
-    pub(crate) lexicon: Lexicon,
+    pub(crate) lexicon: Dictionary,
 }
 
 impl Project {
@@ -59,11 +59,11 @@ impl Project {
         &mut self.meta
     }
 
-    pub fn lexicon(&self) -> &Lexicon {
+    pub fn lexicon(&self) -> &Dictionary {
         &self.lexicon
     }
 
-    pub fn lexicon_mut(&mut self) -> &mut Lexicon {
+    pub fn lexicon_mut(&mut self) -> &mut Dictionary {
         &mut self.lexicon
     }
 
@@ -91,8 +91,8 @@ impl Project {
 
         // Load lexicon
         let lexicon = match archive.by_name("lexicon.xml") {
-            Ok(f) => Lexicon::read_xml(BufReader::new(f))?.0,
-            Err(ZipError::FileNotFound) => Lexicon::new(),
+            Ok(f) => Dictionary::read_xml(BufReader::new(f))?.0,
+            Err(ZipError::FileNotFound) => Dictionary::new(),
             Err(e) => return Err(Error::Zip(e)),
         };
 

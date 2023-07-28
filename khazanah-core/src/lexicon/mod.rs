@@ -21,11 +21,11 @@ mod word;
 
 /// A lexicon. Stores dictionary of words.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct Lexicon {
+pub struct Dictionary {
     words: HashMap<Uuid, Word>,
 }
 
-impl Lexicon {
+impl Dictionary {
     /// Creates a new `Lexicon`.
     pub fn new() -> Self {
         Self::default()
@@ -93,7 +93,7 @@ impl Lexicon {
     }
 }
 
-impl ReadXml for Lexicon {
+impl ReadXml for Dictionary {
     type Error = Error;
 
     type ReaderState = ();
@@ -146,7 +146,7 @@ impl ReadXml for Lexicon {
     }
 }
 
-impl WriteXml for Lexicon {
+impl WriteXml for Dictionary {
     type Error = Error;
 
     fn serialize_xml<W: Write>(
@@ -169,8 +169,8 @@ impl WriteXml for Lexicon {
 mod tests {
     use super::*;
 
-    fn test_lex() -> Lexicon {
-        let mut lex = Lexicon::new();
+    fn test_lex() -> Dictionary {
+        let mut lex = Dictionary::new();
         lex.add_word(
             WordBuilder::new()
                 .romanization("nifutu".to_string())
@@ -198,7 +198,7 @@ mod tests {
         lex
     }
 
-    fn test_xml(lex: &Lexicon) -> String {
+    fn test_xml(lex: &Dictionary) -> String {
         let mut xml = r#"
             <?xml version="1.0" encoding="UTF-8"?>
             <lexicon>
@@ -235,13 +235,13 @@ mod tests {
     fn read_xml() {
         let lex = test_lex();
         let xml = test_xml(&lex);
-        assert_eq!(Lexicon::load_xml_str(&xml).unwrap(), lex);
+        assert_eq!(Dictionary::load_xml_str(&xml).unwrap(), lex);
     }
 
     #[test]
     fn write_xml() {
         let lex = test_lex();
         let xml = lex.save_xml_string().unwrap();
-        assert_eq!(Lexicon::load_xml_str(&xml).unwrap(), lex);
+        assert_eq!(Dictionary::load_xml_str(&xml).unwrap(), lex);
     }
 }

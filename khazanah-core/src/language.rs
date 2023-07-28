@@ -1,4 +1,4 @@
-use crate::{Lexicon as Dictionary, phonology::Inventory};
+use crate::{Dictionary, phonology::Inventory};
 use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
 pub use error::Error;
 
