@@ -10,23 +10,21 @@
 //! |-lexicon.xml
 //! ```
 
-pub use error::Error;
-pub use meta::Meta;
+pub use error::{ArchiveError, Error};
 
 use std::{
     fs::File,
     io::{BufReader, Read, Seek, Write},
     path::Path,
 };
-use zip::{result::ZipError, write::FileOptions, ZipArchive, ZipWriter};
+use zip::{write::FileOptions, ZipArchive, ZipWriter};
 
 use crate::{
-    xml::{ReadXml, WriteXml},
-    Dictionary,
+    xml::{self, ReadXml, WriteXml},
+    Language,
 };
 
 mod error;
-pub mod meta;
 
 // The MIME type of a project file.
 pub const PROJECT_MIME_TYPE: &str = "application/khz";
@@ -37,10 +35,7 @@ pub const PROJECT_FILE_EXT: &str = "khz";
 /// A project.
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct Project {
-    /// The metadata of the project.
-    pub(crate) meta: Meta,
-    /// The lexicon of the project.
-    pub(crate) lexicon: Dictionary,
+    language: Language,
 }
 
 impl Project {
@@ -49,26 +44,16 @@ impl Project {
         Self::default()
     }
 
-    /// Get a reference to the metadata.
-    pub fn meta(&self) -> &Meta {
-        &self.meta
+    pub fn language(&self) -> &Language {
+        &self.language
     }
 
-    /// Get a mutable reference to the metadata.
-    pub fn meta_mut(&mut self) -> &mut Meta {
-        &mut self.meta
-    }
-
-    pub fn lexicon(&self) -> &Dictionary {
-        &self.lexicon
-    }
-
-    pub fn lexicon_mut(&mut self) -> &mut Dictionary {
-        &mut self.lexicon
+    pub fn language_mut(&mut self) -> &mut Language {
+        &mut self.language
     }
 
     /// Loads project from ZIP archive.
-    pub fn load<R: Read + Seek>(reader: R) -> Result<Self, Error> {
+    pub fn load<R: Read + Seek>(reader: R) -> Result<Self, ArchiveError> {
         // Initialize ZIP Archive
         let mut archive = ZipArchive::new(reader)?;
 
@@ -78,36 +63,25 @@ impl Project {
             let mut mimetype = String::new();
             mimetype_file.read_to_string(&mut mimetype)?;
             if mimetype.trim() != PROJECT_MIME_TYPE {
-                return Err(Error::WrongMimeType);
+                return Err(ArchiveError::WrongMimeType);
             }
         }
 
-        // Load metadata
-        let meta = match archive.by_name("meta.xml") {
-            Ok(f) => Meta::read_xml(BufReader::new(f))?.0,
-            Err(ZipError::FileNotFound) => Meta::new(),
-            Err(e) => return Err(Error::Zip(e)),
-        };
+        // Loas XML file
+        let proj = Self::read_xml(BufReader::new(archive.by_name("khazanah.xml")?))?.0;
 
-        // Load lexicon
-        let lexicon = match archive.by_name("lexicon.xml") {
-            Ok(f) => Dictionary::read_xml(BufReader::new(f))?.0,
-            Err(ZipError::FileNotFound) => Dictionary::new(),
-            Err(e) => return Err(Error::Zip(e)),
-        };
-
-        Ok(Self { meta, lexicon })
+        Ok(proj)
     }
 
     /// Loads project from ZIP file in filesystem.
-    pub fn load_file<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
+    pub fn load_file<P: AsRef<Path>>(path: P) -> Result<Self, ArchiveError> {
         let file = File::open(&path)?;
         let proj = Self::load(file)?;
         Ok(proj)
     }
 
     /// Saves project to ZIP archive.
-    pub fn save<W: Write + Seek>(&self, writer: W) -> Result<W, Error> {
+    pub fn save<W: Write + Seek>(&self, writer: W) -> Result<W, ArchiveError> {
         let mut archive = ZipWriter::new(writer);
 
         let options = FileOptions::default();
@@ -116,21 +90,85 @@ impl Project {
         archive.start_file("mimetype", options)?;
         archive.write_all(PROJECT_MIME_TYPE.as_bytes())?;
 
-        // Save metadata
-        archive.start_file("meta.xml", options)?;
-        archive = self.meta.write_xml(archive)?;
-
-        // Save lexicon
-        archive.start_file("lexicon.xml", options)?;
-        archive = self.lexicon.write_xml(archive)?;
+        // Save XML file
+        archive.start_file("khazanah.xml", options)?;
+        archive = self.write_xml(archive)?;
 
         Ok(archive.finish()?)
     }
 
     /// Saves project to ZIP archive in filesystem.
-    pub fn save_file<P: AsRef<Path>>(&mut self, path: P) -> Result<(), Error> {
+    pub fn save_file<P: AsRef<Path>>(&mut self, path: P) -> Result<(), ArchiveError> {
         let file = File::create(&path)?;
         self.save(file)?;
+        Ok(())
+    }
+}
+
+impl ReadXml for Project {
+    type Error = Error;
+
+    type ReaderState = ();
+
+    const TAG: &'static str = "khazanah";
+
+    fn process_tag_start<R: std::io::BufRead>(
+        &mut self,
+        reader: &mut xml::XmlReader<R>,
+        _state: &mut Self::ReaderState,
+        name: String,
+        attrs: Vec<(String, String)>,
+    ) -> Result<(), xml::XmlError<Self::Error>> {
+        let l = reader.context.len();
+        let ptag = match l {
+            2.. => reader.context.get(l - 2).map(|s| s.as_str()),
+            _ => None,
+        };
+
+        match (ptag, name.as_str()) {
+            (_, "khazanah") => {}
+            (Some("khazanah"), "language") => {
+                self.language = Language::deserialize_xml(reader, Some((name, attrs)))
+                    .map_err(|xe| xe.map_into())?;
+            }
+            _ => return Err(xml::XmlError::InvalidTag(name)),
+        }
+
+        Ok(())
+    }
+
+    fn process_text<R: std::io::BufRead>(
+        &mut self,
+        _reader: &mut xml::XmlReader<R>,
+        _state: &mut Self::ReaderState,
+        _text: String,
+    ) -> Result<(), xml::XmlError<Self::Error>> {
+        Ok(())
+    }
+
+    fn process_tag_end<R: std::io::BufRead>(
+        &mut self,
+        _reader: &mut xml::XmlReader<R>,
+        _state: &mut Self::ReaderState,
+        _name: String,
+    ) -> Result<(), xml::XmlError<Self::Error>> {
+        Ok(())
+    }
+}
+
+impl WriteXml for Project {
+    type Error = Error;
+
+    fn serialize_xml<W: Write>(
+        &self,
+        writer: &mut xml::XmlWriter<W>,
+    ) -> Result<(), xml::XmlError<Self::Error>> {
+        writer.write_tag_start_with_attributes("khazanah", [("version", "1")])?;
+        self.language
+            .serialize_xml(writer)
+            .map_err(|xe| xe.map_into())?;
+        writer.write_tag_end("khazanah")?;
+
         Ok(())
     }
 }

@@ -52,7 +52,7 @@ mod imp {
             match self.inner.borrow().as_ref() {
                 Some(Inner::Owned(word)) => f(word),
                 Some(Inner::QueryFromProject { project_model, id }) => project_model
-                    .query(|project| project.lexicon().word_by_id(*id).map(&f))
+                    .query(|project| project.language().dictionary().word_by_id(*id).map(&f))
                     .flatten()
                     .unwrap_or_default(),
                 None => T::default(),
@@ -66,16 +66,16 @@ mod imp {
             match self.inner.borrow_mut().as_mut() {
                 Some(Inner::Owned(word)) => f(word),
                 Some(Inner::QueryFromProject { project_model, id }) => {
-                    project_model
-                        .update(|project| project.lexicon_mut().word_by_id_mut(*id).map(&f));
+                    project_model.update(|project| {
+                        project
+                            .language_mut()
+                            .dictionary_mut()
+                            .word_by_id_mut(*id)
+                            .map(&f)
+                    });
                 }
                 None => {}
             }
-            // self.inner.borrow().update(|project| {
-            //     if let Some(word) = project.lexicon_mut().word_by_id_mut(self.id.get()) {
-            //         f(word, value.clone());
-            //     }
-            // });
         }
 
         fn get_romanization(&self) -> String {

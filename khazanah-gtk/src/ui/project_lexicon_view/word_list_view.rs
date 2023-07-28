@@ -326,10 +326,12 @@ impl ProjectLexiconWordListView {
 
     /// Adds a new word to the model.
     pub fn add_word(&self) {
-        if let Some(id) = self
-            .project_model()
-            .update(|project| project.lexicon_mut().add_word(Word::new()))
-        {
+        if let Some(id) = self.project_model().update(|project| {
+            project
+                .language_mut()
+                .dictionary_mut()
+                .add_word(Word::new())
+        }) {
             // Exits search mode first.
             self.imp().search_bar.set_search_mode(false);
 
@@ -351,10 +353,12 @@ impl ProjectLexiconWordListView {
 
     /// Deletes a word by its id.
     pub fn delete_word_by_id(&self, id: Uuid) {
-        if let Some(true) = self
-            .project_model()
-            .update(|project| project.lexicon_mut().delete_word_by_id(id))
-        {
+        if let Some(true) = self.project_model().update(|project| {
+            project
+                .language_mut()
+                .dictionary_mut()
+                .delete_word_by_id(id)
+        }) {
             log::debug!("Deleted word of id {}", id);
 
             let word_list_model = self
@@ -538,7 +542,8 @@ impl ui::View for ProjectLexiconWordListView {
             if let Some(project) = self.project_model().project().as_ref() {
                 word_list_model.extend(
                     project
-                        .lexicon()
+                        .language()
+                        .dictionary()
                         .ids()
                         .map(|i| WordObject::query_project(self.project_model(), *i)),
                 );

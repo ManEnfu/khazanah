@@ -6,7 +6,7 @@ use std::{
     io::{BufRead, BufReader, Cursor, Write},
     path::Path,
     str::Utf8Error,
-    string::FromUtf8Error, todo,
+    string::FromUtf8Error,
 };
 
 use quick_xml::{
@@ -44,9 +44,9 @@ pub enum XmlError<E> {
 }
 
 impl<E> XmlError<E> {
-    pub fn map_other<F, U>(self, f: F) -> XmlError<U> 
+    pub fn map_other<F, U>(self, f: F) -> XmlError<U>
     where
-        F: Fn(E) -> U
+        F: Fn(E) -> U,
     {
         match self {
             XmlError::Fs(e) => XmlError::Fs(e),
@@ -61,7 +61,7 @@ impl<E> XmlError<E> {
 
     pub fn map_into<U>(self) -> XmlError<U>
     where
-        U: From<E>
+        U: From<E>,
     {
         match self {
             XmlError::Fs(e) => XmlError::Fs(e),

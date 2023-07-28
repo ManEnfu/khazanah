@@ -136,7 +136,7 @@ impl ReadXml for Inventory {
         };
 
         match (ptag, name.as_str()) {
-            (None, "inventory") => {}
+            (_, "inventory") => {}
             (Some("inventory"), "phoneme") => {
                 let phoneme = Phoneme::deserialize_xml(reader, Some((name, attrs)))?;
                 self.add_phoneme(phoneme);

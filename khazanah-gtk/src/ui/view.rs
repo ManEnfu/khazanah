@@ -58,8 +58,8 @@ impl Display for MainView {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Overview => write!(f, "Overview"),
-            Self::Phonology => write!(f, "Phonology"),
-            Self::Lexicon => write!(f, "Lexicon"),
+            Self::Phonology => write!(f, "Inventory"),
+            Self::Lexicon => write!(f, "Dictionary"),
             Self::Unknown => write!(f, "Unknown"),
         }
     }

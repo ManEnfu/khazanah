@@ -39,7 +39,7 @@ mod imp {
                 .borrow()
                 .as_ref()
                 .map(|project| {
-                    let s = &project.meta().name;
+                    let s = &project.language().meta().name;
                     if s.is_empty() {
                         "New Project".to_string()
                     } else {
@@ -134,7 +134,7 @@ impl ProjectModel {
     }
 
     /// Loads project from a file.
-    pub fn load_file<P: AsRef<Path>>(&self, path: P) -> Result<(), project::Error> {
+    pub fn load_file<P: AsRef<Path>>(&self, path: P) -> Result<(), project::ArchiveError> {
         let project = Project::load_file(&path)?;
         self.set_project(Some(project));
         self.set_path(path.as_ref().to_string_lossy().to_string());
@@ -145,13 +145,13 @@ impl ProjectModel {
     }
 
     /// Saves the project to a file.
-    pub fn save_file<P: AsRef<Path>>(&self, path: P) -> Result<(), project::Error> {
+    pub fn save_file<P: AsRef<Path>>(&self, path: P) -> Result<(), project::ArchiveError> {
         let result = match self.project_mut().as_mut() {
             Some(project) => {
                 project.save_file(&path)?;
                 Ok(())
             }
-            None => Err(project::Error::WrongMimeType),
+            None => Err(project::ArchiveError::WrongMimeType),
         };
         if result.is_ok() {
             self.set_dirty(false);

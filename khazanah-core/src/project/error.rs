@@ -1,26 +1,28 @@
 use zip::result::ZipError;
 
-use crate::lexicon;
-
-use super::meta;
+use crate::language;
 
 use crate::xml::XmlError;
 
 /// Error type for `Project`.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// Error at language domain.
+    #[error("Language error: {0}")]
+    Language(#[from] language::Error),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum ArchiveError {
     /// Filesystem error.
     #[error("Filesystem error: {0}")]
     Fs(#[from] std::io::Error),
     /// Error at ZIP operation.
     #[error("Error at ZIP operation: {0}")]
     Zip(#[from] ZipError),
-    /// Error at meta operation.
-    #[error("Meta: {0}")]
-    Meta(#[from] XmlError<meta::Error>),
-    /// Error at lexicon operation.
-    #[error("Lexicon: {0}")]
-    Lexicon(#[from] XmlError<lexicon::Error>),
+    /// Error at Xml parsing.
+    #[error("Error at XML parsing: {0}")]
+    Xml(#[from] XmlError<Error>),
     /// Wrong MIME type.
     #[error("This file has wrong MIME type")]
     WrongMimeType,

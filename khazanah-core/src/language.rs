@@ -1,12 +1,16 @@
-use crate::{Dictionary, phonology::Inventory};
 use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
+use crate::{phonology::Inventory, Dictionary};
+
 pub use error::Error;
+pub use meta::Meta;
 
 mod error;
+mod meta;
 
 /// A language.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Language {
+    meta: Meta,
     phonemic_inventory: Inventory,
     dictionary: Dictionary,
 }
@@ -15,6 +19,14 @@ impl Language {
     /// Creates a new language.
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn meta(&self) -> &Meta {
+        &self.meta
+    }
+
+    pub fn meta_mut(&mut self) -> &mut Meta {
+        &mut self.meta
     }
 
     pub fn phonemic_inventory(&self) -> &Inventory {
@@ -55,12 +67,16 @@ impl ReadXml for Language {
         };
 
         match (ptag, name.as_str()) {
-            (None, "phonology") => {}
+            (_, "language") => {}
+            (Some("language"), "meta") => {
+                self.meta = Meta::deserialize_xml(reader, Some((name, attrs)))?;
+            }
+            (Some("language"), "phonology") => {}
             (Some("phonology"), "inventory") => {
                 self.phonemic_inventory = Inventory::deserialize_xml(reader, Some((name, attrs)))
                     .map_err(|xe| xe.map_into())?;
             }
-            (None, "lexicon") => {}
+            (Some("language"), "lexicon") => {}
             (Some("lexicon"), "dictionary") => {
                 self.dictionary = Dictionary::deserialize_xml(reader, Some((name, attrs)))
                     .map_err(|xe| xe.map_into())?;
@@ -88,7 +104,6 @@ impl ReadXml for Language {
     ) -> Result<(), XmlError<Self::Error>> {
         Ok(())
     }
-    
 }
 
 impl WriteXml for Language {
@@ -100,18 +115,22 @@ impl WriteXml for Language {
     ) -> Result<(), XmlError<Self::Error>> {
         writer.write_tag_start("language")?;
 
+        self.meta.serialize_xml(writer)?;
+
         writer.write_tag_start("phonology")?;
-        self.phonemic_inventory.serialize_xml(writer)
+        self.phonemic_inventory
+            .serialize_xml(writer)
             .map_err(|xe| xe.map_into())?;
         writer.write_tag_end("phonology")?;
 
         writer.write_tag_start("lexicon")?;
-        self.dictionary.serialize_xml(writer)
+        self.dictionary
+            .serialize_xml(writer)
             .map_err(|xe| xe.map_into())?;
         writer.write_tag_end("lexicon")?;
 
         writer.write_tag_end("language")?;
-        
+
         Ok(())
     }
 }

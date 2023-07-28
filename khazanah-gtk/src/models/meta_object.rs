@@ -29,52 +29,52 @@ mod imp {
         fn get_name(&self) -> String {
             self.project_model
                 .borrow()
-                .query(|project| project.meta().name.to_owned())
+                .query(|project| project.language().meta().name.to_owned())
                 .unwrap_or_default()
         }
 
         fn set_name(&self, value: String) {
             self.project_model.borrow_mut().update(|project| {
-                project.meta_mut().name = value.clone();
+                project.language_mut().meta_mut().name = value.clone();
             });
         }
 
         fn get_local_lang(&self) -> String {
             self.project_model
                 .borrow()
-                .query(|project| project.meta().local_lang.to_owned())
+                .query(|project| project.language().meta().local_lang.to_owned())
                 .unwrap_or_default()
         }
 
         fn set_local_lang(&self, value: String) {
             self.project_model.borrow_mut().update(|project| {
-                project.meta_mut().local_lang = value.clone();
+                project.language_mut().meta_mut().local_lang = value.clone();
             });
         }
 
         fn get_author(&self) -> String {
             self.project_model
                 .borrow()
-                .query(|project| project.meta().author.to_owned())
+                .query(|project| project.language().meta().author.to_owned())
                 .unwrap_or_default()
         }
 
         fn set_author(&self, value: String) {
             self.project_model.borrow_mut().update(|project| {
-                project.meta_mut().author = value.clone();
+                project.language_mut().meta_mut().author = value.clone();
             });
         }
 
         fn get_description(&self) -> String {
             self.project_model
                 .borrow()
-                .query(|project| project.meta().description.to_owned())
+                .query(|project| project.language().meta().description.to_owned())
                 .unwrap_or_default()
         }
 
         fn set_description(&self, value: String) {
             self.project_model.borrow_mut().update(|project| {
-                project.meta_mut().description = value.clone();
+                project.language_mut().meta_mut().description = value.clone();
             });
         }
     }

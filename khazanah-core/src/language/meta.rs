@@ -1,16 +1,10 @@
 use std::io::{BufRead, Write};
 
+use super::Error;
 use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
 
-/// Error type that can be emitted by reading a `Meta` file.
-#[derive(Clone, Debug, thiserror::Error)]
-pub enum Error {
-    #[error("<word> tag doesn't have attribute `id`")]
-    NoId,
-}
-
-/// Metadata for a project.
-#[derive(Debug, Default, PartialEq, Eq)]
+/// Metadata for a language.
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Meta {
     /// Name of the project, as well as the language family.
     pub name: String,
@@ -52,18 +46,18 @@ impl ReadXml for Meta {
 
         match (ptag, tag) {
             // Root tag;
-            (None, Some("project")) => {}
+            (_, Some(Self::TAG)) => {}
             // Clear meta properties
-            (Some("project"), Some("name")) => {
+            (Some(Self::TAG), Some("name")) => {
                 self.name.clear();
             }
-            (Some("project"), Some("local-lang")) => {
+            (Some(Self::TAG), Some("local-lang")) => {
                 self.local_lang.clear();
             }
-            (Some("project"), Some("author")) => {
+            (Some(Self::TAG), Some("author")) => {
                 self.author.clear();
             }
-            (Some("project"), Some("description")) => {
+            (Some(Self::TAG), Some("description")) => {
                 self.description.clear();
             }
             // Invalid tag
@@ -104,7 +98,7 @@ impl WriteXml for Meta {
     type Error = Error;
 
     fn serialize_xml<W: Write>(&self, w: &mut XmlWriter<W>) -> Result<(), XmlError<Self::Error>> {
-        w.write_tag_start("project")?;
+        w.write_tag_start("meta")?;
 
         w.write_tag_start("name")?;
         w.write_text(&self.name)?;
@@ -122,7 +116,7 @@ impl WriteXml for Meta {
         w.write_text(&self.description)?;
         w.write_tag_end("description")?;
 
-        w.write_tag_end("project")?;
+        w.write_tag_end("meta")?;
 
         Ok(())
     }
@@ -144,12 +138,12 @@ mod tests {
     fn test_xml() -> String {
         r#"
             <?xml version="1.0" encoding="UTF8"?>
-            <project>
+            <meta>
                 <name>Test Language</name>
                 <local-lang>English</local-lang>
                 <author>ManEnfu</author>
                 <description>This is a language.</description>
-            </project>
+            </meta>
         "#
         .to_string()
     }
