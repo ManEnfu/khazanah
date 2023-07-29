@@ -84,14 +84,6 @@ impl Phoneme {
     }
 }
 
-// fn generate_symbol(base: ipa::Ipa, modifiers: &[ipa::Ipa]) -> String {
-//     modifiers
-//         .iter()
-//         .fold(base.symbol().unwrap_or_default().to_string(), |acc, x| {
-//             acc + x.symbol().unwrap_or_default()
-//         })
-// }
-
 impl ReadXml for Phoneme {
     type Error = Error;
 
@@ -107,7 +99,7 @@ impl ReadXml for Phoneme {
         attrs: Vec<(String, String)>,
     ) -> Result<(), XmlError<Self::Error>> {
         match name.as_str() {
-            "phoneme" => {
+            Self::TAG => {
                 let id = attrs
                     .iter()
                     .find(|&x| x.0 == "id")

@@ -67,16 +67,16 @@ impl ReadXml for Language {
         };
 
         match (ptag, name.as_str()) {
-            (_, "language") => {}
-            (Some("language"), "meta") => {
+            (_, Self::TAG) => {}
+            (Some(Self::TAG), "meta") => {
                 self.meta = Meta::deserialize_xml(reader, Some((name, attrs)))?;
             }
-            (Some("language"), "phonology") => {}
+            (Some(Self::TAG), "phonology") => {}
             (Some("phonology"), "inventory") => {
                 self.phonemic_inventory = Inventory::deserialize_xml(reader, Some((name, attrs)))
                     .map_err(|xe| xe.map_into())?;
             }
-            (Some("language"), "lexicon") => {}
+            (Some(Self::TAG), "lexicon") => {}
             (Some("lexicon"), "dictionary") => {
                 self.dictionary = Dictionary::deserialize_xml(reader, Some((name, attrs)))
                     .map_err(|xe| xe.map_into())?;

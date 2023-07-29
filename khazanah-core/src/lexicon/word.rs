@@ -124,7 +124,7 @@ impl ReadXml for Word {
         let tag = reader.context.last().map(|s| s.as_str());
 
         match tag {
-            Some("word") => {
+            Some(Self::TAG) => {
                 let id = attrs
                     .iter()
                     .find(|&x| x.0 == "id")

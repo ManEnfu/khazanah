@@ -107,9 +107,9 @@ impl ReadXml for Dictionary {
 
         match (ptag, tag) {
             // Root tag;
-            (_, Some("dictionary")) => {}
+            (_, Some(Self::TAG)) => {}
             // Insert new word
-            (Some("dictionary"), Some("word")) => {
+            (Some(Self::TAG), Some(Word::TAG)) => {
                 let word = Word::deserialize_xml(reader, Some((name, attrs)))?;
                 self.add_word(word);
             }
