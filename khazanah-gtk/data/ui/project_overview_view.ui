@@ -21,7 +21,7 @@
                 <property name="spacing">12</property>
                 <child>
                   <object class="GtkLabel">
-                    <property name="label">Language Family</property>
+                    <property name="label">Language</property>
                     <property name="halign">start</property>
                     <style>
                       <class name="heading"/>
@@ -35,8 +35,8 @@
                       <class name="boxed-list"/>
                     </style>
                     <child>
-                      <object class="AdwEntryRow" id="lang_family_name_entry">
-                        <property name="title">Language Family Name</property>
+                      <object class="AdwEntryRow" id="lang_name_entry">
+                        <property name="title">Language Name</property>
                       </object>
                     </child>
                     <child>

@@ -23,16 +23,16 @@ pub trait View {
 #[repr(u32)]
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum MainView {
-    Overview = 0,
-    Phonology = 1,
-    Lexicon = 2,
+    Language = 0,
+    Inventory = 1,
+    Dictionary = 2,
 
     #[default]
     Unknown = u32::MAX,
 }
 
 impl MainView {
-    pub const ALL: &[Self] = &[Self::Overview, Self::Phonology, Self::Lexicon];
+    pub const ALL: &[Self] = &[Self::Language, Self::Inventory, Self::Dictionary];
 }
 
 impl From<u32> for MainView {
@@ -57,9 +57,9 @@ impl From<MainView> for u32 {
 impl Display for MainView {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Overview => write!(f, "Overview"),
-            Self::Phonology => write!(f, "Inventory"),
-            Self::Lexicon => write!(f, "Dictionary"),
+            Self::Language => write!(f, "Language"),
+            Self::Inventory => write!(f, "Inventory"),
+            Self::Dictionary => write!(f, "Dictionary"),
             Self::Unknown => write!(f, "Unknown"),
         }
     }

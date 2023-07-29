@@ -334,7 +334,7 @@ impl ApplicationWindow {
             // self.update_title();
             self.load_all_views();
 
-            self.switch_view(MainView::Overview);
+            self.switch_view(MainView::Language);
         }
     }
 
@@ -482,9 +482,9 @@ impl ApplicationWindow {
         let main_stack = imp.main_stack.get();
 
         match view {
-            MainView::Overview => main_stack.set_visible_child(&*imp.project_overview_view),
-            MainView::Phonology => main_stack.set_visible_child(&*imp.project_phonology_view),
-            MainView::Lexicon => main_stack.set_visible_child(&*imp.project_lexicon_view),
+            MainView::Language => main_stack.set_visible_child(&*imp.project_overview_view),
+            MainView::Inventory => main_stack.set_visible_child(&*imp.project_phonology_view),
+            MainView::Dictionary => main_stack.set_visible_child(&*imp.project_lexicon_view),
             _ => log::warn!("Attempting to switch to unknown view."),
         }
 
@@ -498,9 +498,9 @@ impl ApplicationWindow {
         let imp = self.imp();
 
         match view {
-            MainView::Overview => imp.project_overview_view.load_state(),
-            MainView::Phonology => imp.project_phonology_view.load_state(),
-            MainView::Lexicon => imp.project_lexicon_view.load_state(),
+            MainView::Language => imp.project_overview_view.load_state(),
+            MainView::Inventory => imp.project_phonology_view.load_state(),
+            MainView::Dictionary => imp.project_lexicon_view.load_state(),
             _ => log::warn!("Attempting to load unknown view."),
         }
     }
@@ -517,9 +517,9 @@ impl ApplicationWindow {
         let imp = self.imp();
 
         match view {
-            MainView::Overview => imp.project_overview_view.commit_state(),
-            MainView::Phonology => imp.project_phonology_view.commit_state(),
-            MainView::Lexicon => imp.project_lexicon_view.commit_state(),
+            MainView::Language => imp.project_overview_view.commit_state(),
+            MainView::Inventory => imp.project_phonology_view.commit_state(),
+            MainView::Dictionary => imp.project_lexicon_view.commit_state(),
             MainView::Unknown => {} // _ => log::warn!("Attempting to commit unknown view."),
         }
     }
@@ -536,9 +536,9 @@ impl ApplicationWindow {
         let imp = self.imp();
 
         match view {
-            MainView::Overview => imp.project_overview_view.unload_state(),
-            MainView::Phonology => imp.project_phonology_view.unload_state(),
-            MainView::Lexicon => imp.project_lexicon_view.unload_state(),
+            MainView::Language => imp.project_overview_view.unload_state(),
+            MainView::Inventory => imp.project_phonology_view.unload_state(),
+            MainView::Dictionary => imp.project_lexicon_view.unload_state(),
             _ => log::warn!("Attempting to load unknown view."),
         }
     }

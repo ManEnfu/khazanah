@@ -18,7 +18,7 @@ mod imp {
     #[template(resource = "/com/github/manenfu/Khazanah/ui/project_overview_view.ui")]
     pub struct ProjectOverviewView {
         #[template_child]
-        pub lang_family_name_entry: TemplateChild<adw::EntryRow>,
+        pub lang_name_entry: TemplateChild<adw::EntryRow>,
         #[template_child]
         pub local_lang_entry: TemplateChild<adw::EntryRow>,
         #[template_child]
@@ -106,7 +106,7 @@ impl ui::View for ProjectOverviewView {
 
         bindings.push(
             meta_object
-                .bind_property("name", &imp.lang_family_name_entry.get(), "text")
+                .bind_property("name", &imp.lang_name_entry.get(), "text")
                 .sync_create()
                 .bidirectional()
                 .build(),
