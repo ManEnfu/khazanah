@@ -47,7 +47,7 @@
                 </child>
 
                 <child>
-                  <object class="KhzProjectOverviewView" id="project_overview_view">
+                  <object class="KhzLanguageView" id="language_view">
                     <property name="project-model"
                               bind-source="KhzApplicationWindow"
                               bind-property="project-model"
@@ -56,7 +56,7 @@
                 </child>
 
                 <child>
-                  <object class="KhzProjectPhonologyView" id="project_phonology_view">
+                  <object class="KhzInventoryView" id="inventory_view">
                     <property name="project-model"
                               bind-source="KhzApplicationWindow"
                               bind-property="project-model"
@@ -65,7 +65,7 @@
                 </child>
 
                 <child>
-                  <object class="KhzProjectLexiconView" id="project_lexicon_view">
+                  <object class="KhzDictionaryView" id="dictionary_view">
                     <property name="project-model"
                               bind-source="KhzApplicationWindow"
                               bind-property="project-model"

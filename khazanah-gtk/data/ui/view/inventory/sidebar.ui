@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="KhzInventoryViewSidebar" parent="AdwBin">
+    <child>
+      <object class="GtkStack" id="stack">
+        <property name="visible-child">empty</property>
+        <property name="transition-type">crossfade</property>
+
+        <child>
+          <object class="GtkStackPage">
+            <property name="name">empty</property>
+            <property name="child">
+              <object class="AdwStatusPage" id="empty">
+                <property name="icon-name">format-text-rich-symbolic</property>
+                <property name="title" translatable="yes">Empty Inventory</property>
+                <property name="description" translatable="yes">Get started by adding a new phoneme.</property>
+                <property name="vexpand">true</property>
+                <child>
+                  <object class="GtkButton">
+                    <property name="label" translatable="yes">Add Phoneme</property>
+                    <property name="action-name">inventory.add-phoneme</property>
+                    <property name="halign">center</property>
+                    <style>
+                      <class name="pill"/>
+                      <class name="suggested-action"/>
+                    </style>
+                  </object>
+                </child> 
+                <style>
+                  <class name="compact"/>
+                </style>
+              </object> <!-- AdwStatusPage -->
+            </property>
+          </object> <!-- GtkStackPage -->
+        </child>
+
+      </object>
+    </child>
+  </template>
+</interface>

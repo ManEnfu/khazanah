@@ -1,12 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <interface>
-  <requires lib="gtk" version="4.6"/>
-  <requires lib="Adw" version="1.2"/>
-
-  <!-- The view to edit lexicon word. -->
-  <template class="KhzProjectLexiconWordEditView" parent="AdwBin">
+  <template class="KhzDictionaryViewContent" parent="AdwBin">
     <child>
-      <object class="GtkScrolledWindow" id="word_edit_view">
+      <object class="GtkScrolledWindow">
         <property name="vexpand">True</property>
         <property name="child">
           <object class="AdwClamp">
@@ -20,7 +16,7 @@
                 <property name="spacing">12</property>
                 <child>
                   <object class="GtkLabel">
-                    <property name="label">Word</property>
+                    <property name="label" translatable="yes">Word</property>
                     <property name="halign">start</property>
                     <style>
                       <class name="heading"/>
@@ -35,15 +31,15 @@
                     </style>
                     <child>
                       <object class="AdwEntryRow" id="romanization_entry">
-                        <property name="title">Romanization</property>
+                        <property name="title" translatable="yes">Romanization</property>
                         <property name="sensitive"
-                                  bind-source="KhzProjectLexiconWordEditView"
+                                  bind-source="KhzDictionaryViewContent"
                                   bind-property="fields-sensitive"
                                   bind-flags="sync-create"/>
                         <child>
                           <object class="GtkButton">
                             <property name="icon-name">format-text-rich-symbolic</property>
-                            <property name="tooltip-text">Convert from pronunciation</property>
+                            <property name="tooltip-text" translatable="yes">Convert from pronunciation</property>
                             <property name="valign">center</property>
                             <style>
                               <class name="flat"/>
@@ -54,18 +50,18 @@
                     </child>
                     <child>
                       <object class="AdwEntryRow" id="translation_entry">
-                        <property name="title">Translation</property>
+                        <property name="title" translatable="yes">Translation</property>
                         <property name="sensitive"
-                                  bind-source="KhzProjectLexiconWordEditView"
+                                  bind-source="KhzDictionaryViewContent"
                                   bind-property="fields-sensitive"
                                   bind-flags="sync-create"/>
                       </object>
                     </child>
                     <child>
                       <object class="AdwEntryRow" id="pronunciation_entry">
-                        <property name="title">Pronunciation</property>
+                        <property name="title" translatable="yes">Pronunciation</property>
                         <property name="sensitive"
-                                  bind-source="KhzProjectLexiconWordEditView"
+                                  bind-source="KhzDictionaryViewContent"
                                   bind-property="fields-sensitive"
                                   bind-flags="sync-create"/>
                         <property name="editable"
@@ -75,7 +71,7 @@
                         <child>
                           <object class="GtkToggleButton" id="xsampa_toggle_button">
                             <property name="icon-name">format-text-plaintext-symbolic</property>
-                            <property name="tooltip-text">Convert from X-SAMPA</property>
+                            <property name="tooltip-text" translatable="yes">Convert from X-SAMPA</property>
                             <property name="valign">center</property>
                             <style>
                               <class name="flat"/>
@@ -86,9 +82,9 @@
                     </child>
                     <child>
                       <object class="AdwEntryRow" id="xsampa_entry">
-                        <property name="title">X-SAMPA Pronunciation</property>
+                        <property name="title" translatable="yes">X-SAMPA Pronunciation</property>
                         <property name="sensitive"
-                                  bind-source="KhzProjectLexiconWordEditView"
+                                  bind-source="KhzDictionaryViewContent"
                                   bind-property="fields-sensitive"
                                   bind-flags="sync-create"/>
                         <property name="visible"
@@ -99,9 +95,9 @@
                     </child>
                     <child>
                       <object class="AdwComboRow" id="pos_dropdown">
-                        <property name="title">Part of Speech</property>
+                        <property name="title" translatable="yes">Part of Speech</property>
                         <property name="sensitive"
-                                  bind-source="KhzProjectLexiconWordEditView"
+                                  bind-source="KhzDictionaryViewContent"
                                   bind-property="fields-sensitive"
                                   bind-flags="sync-create"/>
                         <property name="model">
@@ -122,5 +118,5 @@
         </property>
       </object> <!-- GtkScrolledWindow -->
     </child>
-  </template> <!-- KhzProjectLexiconWordEditView -->
+  </template> <!-- KhzDictionaryViewContent -->
 </interface>

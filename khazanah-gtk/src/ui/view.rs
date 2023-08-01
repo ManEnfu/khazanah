@@ -1,5 +1,13 @@
 use std::fmt::{Debug, Display};
 
+pub use dictionary::DictionaryView;
+pub use inventory::InventoryView;
+pub use language::LanguageView;
+
+mod dictionary;
+mod inventory;
+mod language;
+
 /// View that loads and commits its state to a model.
 pub trait View {
     /// Loads widget states from the project model.

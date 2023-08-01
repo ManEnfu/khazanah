@@ -33,11 +33,11 @@ mod imp {
         #[template_child]
         pub start_view: TemplateChild<ui::StartView>,
         #[template_child]
-        pub project_overview_view: TemplateChild<ui::ProjectOverviewView>,
+        pub language_view: TemplateChild<ui::LanguageView>,
         #[template_child]
-        pub project_lexicon_view: TemplateChild<ui::ProjectLexiconView>,
+        pub dictionary_view: TemplateChild<ui::DictionaryView>,
         #[template_child]
-        pub project_phonology_view: TemplateChild<ui::ProjectPhonologyView>,
+        pub inventory_view: TemplateChild<ui::InventoryView>,
 
         #[template_child]
         pub header_bar: TemplateChild<ui::HeaderBar>,
@@ -87,8 +87,8 @@ mod imp {
             obj.setup_bindings();
 
             let header_bar = &self.header_bar.get();
-            self.project_overview_view.connect_headerbar(header_bar);
-            self.project_lexicon_view.connect_headerbar(header_bar);
+            self.language_view.connect_headerbar(header_bar);
+            self.dictionary_view.connect_headerbar(header_bar);
         }
 
         fn properties() -> &'static [glib::ParamSpec] {
@@ -482,9 +482,9 @@ impl ApplicationWindow {
         let main_stack = imp.main_stack.get();
 
         match view {
-            MainView::Language => main_stack.set_visible_child(&*imp.project_overview_view),
-            MainView::Inventory => main_stack.set_visible_child(&*imp.project_phonology_view),
-            MainView::Dictionary => main_stack.set_visible_child(&*imp.project_lexicon_view),
+            MainView::Language => main_stack.set_visible_child(&*imp.language_view),
+            MainView::Inventory => main_stack.set_visible_child(&*imp.inventory_view),
+            MainView::Dictionary => main_stack.set_visible_child(&*imp.dictionary_view),
             _ => log::warn!("Attempting to switch to unknown view."),
         }
 
@@ -498,9 +498,9 @@ impl ApplicationWindow {
         let imp = self.imp();
 
         match view {
-            MainView::Language => imp.project_overview_view.load_state(),
-            MainView::Inventory => imp.project_phonology_view.load_state(),
-            MainView::Dictionary => imp.project_lexicon_view.load_state(),
+            MainView::Language => imp.language_view.load_state(),
+            MainView::Inventory => imp.inventory_view.load_state(),
+            MainView::Dictionary => imp.dictionary_view.load_state(),
             _ => log::warn!("Attempting to load unknown view."),
         }
     }
@@ -517,9 +517,9 @@ impl ApplicationWindow {
         let imp = self.imp();
 
         match view {
-            MainView::Language => imp.project_overview_view.commit_state(),
-            MainView::Inventory => imp.project_phonology_view.commit_state(),
-            MainView::Dictionary => imp.project_lexicon_view.commit_state(),
+            MainView::Language => imp.language_view.commit_state(),
+            MainView::Inventory => imp.inventory_view.commit_state(),
+            MainView::Dictionary => imp.dictionary_view.commit_state(),
             MainView::Unknown => {} // _ => log::warn!("Attempting to commit unknown view."),
         }
     }
@@ -536,9 +536,9 @@ impl ApplicationWindow {
         let imp = self.imp();
 
         match view {
-            MainView::Language => imp.project_overview_view.unload_state(),
-            MainView::Inventory => imp.project_phonology_view.unload_state(),
-            MainView::Dictionary => imp.project_lexicon_view.unload_state(),
+            MainView::Language => imp.language_view.unload_state(),
+            MainView::Inventory => imp.inventory_view.unload_state(),
+            MainView::Dictionary => imp.dictionary_view.unload_state(),
             _ => log::warn!("Attempting to load unknown view."),
         }
     }

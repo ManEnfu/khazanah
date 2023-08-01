@@ -1,32 +1,32 @@
+use adw::subclass::prelude::*;
 use gtk::glib;
 use gtk::prelude::*;
-use gtk::subclass::prelude::*;
-
-use adw::subclass::prelude::*;
 
 use crate::models;
 use crate::ui;
 
+#[doc(hidden)]
+#[allow(clippy::enum_variant_names)]
 mod imp {
     use std::cell::RefCell;
+
+    use gtk::glib::subclass::Signal;
+    use once_cell::sync::Lazy;
 
     use super::*;
 
     #[derive(Debug, Default, gtk::CompositeTemplate, glib::Properties)]
-    #[properties(wrapper_type = super::ProjectPhonologyView)]
-    #[template(resource = "/com/github/manenfu/Khazanah/ui/project_phonology_view.ui")]
-    pub struct ProjectPhonologyView {
-        #[template_child]
-        pub add_phoneme_button: TemplateChild<ui::AddPhonemeButton>,
-
+    #[properties(wrapper_type = super::Content)]
+    #[template(resource = "/com/github/manenfu/Khazanah/ui/view/inventory/content.ui")]
+    pub struct Content {
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for ProjectPhonologyView {
-        const NAME: &'static str = "KhzProjectPhonologyView";
-        type Type = super::ProjectPhonologyView;
+    impl ObjectSubclass for Content {
+        const NAME: &'static str = "KhzInventoryViewContent";
+        type Type = super::Content;
         type ParentType = adw::Bin;
 
         fn class_init(klass: &mut Self::Class) {
@@ -39,7 +39,11 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for ProjectPhonologyView {
+    impl ObjectImpl for Content {
+        fn constructed(&self) {
+            self.parent_constructed();
+        }
+
         fn properties() -> &'static [glib::ParamSpec] {
             Self::derived_properties()
         }
@@ -51,30 +55,24 @@ mod imp {
         fn property(&self, id: usize, pspec: &glib::ParamSpec) -> glib::Value {
             self.derived_property(id, pspec)
         }
+
+        fn signals() -> &'static [Signal] {
+            static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(Vec::new);
+            SIGNALS.as_ref()
+        }
     }
 
-    impl WidgetImpl for ProjectPhonologyView {}
-
-    impl BinImpl for ProjectPhonologyView {}
+    impl WidgetImpl for Content {}
+    impl BinImpl for Content {}
 }
 
 glib::wrapper! {
-    /// The first view when the application is started.
-    pub struct ProjectPhonologyView(ObjectSubclass<imp::ProjectPhonologyView>)
+    pub struct Content(ObjectSubclass<imp::Content>)
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 #[gtk::template_callbacks]
-impl ProjectPhonologyView {
-    #[template_callback]
-    fn handle_add_phoneme_button_selected(
-        &self,
-        phoneme_object: &models::AddPhonemeObject,
-        _button: ui::AddPhonemeButton,
-    ) {
-        log::debug!("Add phoneme: {}", phoneme_object.name());
-    }
-}
+impl Content {}
 
-impl ui::View for ProjectPhonologyView {}
+impl ui::View for Content {}

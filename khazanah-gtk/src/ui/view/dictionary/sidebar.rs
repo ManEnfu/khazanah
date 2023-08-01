@@ -1,10 +1,9 @@
+use adw::subclass::prelude::*;
 use gtk::glib::FromVariant;
 use gtk::prelude::*;
-use gtk::subclass::prelude::*;
 use gtk::{gio, glib};
-use khazanah_core::Word;
 
-use adw::subclass::prelude::*;
+use khazanah_core::Word;
 use uuid::Uuid;
 
 const EXPECTED_LIST_ITEM: &str = "Expected object to be `GtkListItem`";
@@ -14,7 +13,7 @@ const EXPECTED_WORD_LIST_ROW: &str = "Expected object to be `KhzWordListRow`";
 use crate::models::{self, WordObject};
 use crate::ui;
 
-use super::ProjectLexiconWordListRow;
+use super::WordListRow;
 
 #[doc(hidden)]
 #[allow(clippy::enum_variant_names)]
@@ -29,9 +28,9 @@ mod imp {
     use super::*;
 
     #[derive(Debug, Default, gtk::CompositeTemplate, glib::Properties)]
-    #[properties(wrapper_type = super::ProjectLexiconWordListView)]
-    #[template(resource = "/com/github/manenfu/Khazanah/ui/project_lexicon_view/word_list_view.ui")]
-    pub struct ProjectLexiconWordListView {
+    #[properties(wrapper_type = super::Sidebar)]
+    #[template(resource = "/com/github/manenfu/Khazanah/ui/view/dictionary/sidebar.ui")]
+    pub struct Sidebar {
         #[template_child]
         pub list_view: TemplateChild<gtk::ListView>,
 
@@ -45,7 +44,7 @@ mod imp {
         pub edit_word_button: TemplateChild<gtk::ToggleButton>,
 
         #[template_child]
-        pub view_stack: TemplateChild<gtk::Stack>,
+        pub stack: TemplateChild<gtk::Stack>,
         #[template_child]
         pub main_page: TemplateChild<gtk::Box>,
         #[template_child]
@@ -85,9 +84,9 @@ mod imp {
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for ProjectLexiconWordListView {
-        const NAME: &'static str = "KhzProjectLexiconWordListView";
-        type Type = super::ProjectLexiconWordListView;
+    impl ObjectSubclass for Sidebar {
+        const NAME: &'static str = "KhzDictionaryViewSidebar";
+        type Type = super::Sidebar;
         type ParentType = adw::Bin;
 
         fn class_init(klass: &mut Self::Class) {
@@ -100,7 +99,7 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for ProjectLexiconWordListView {
+    impl ObjectImpl for Sidebar {
         fn constructed(&self) {
             self.parent_constructed();
 
@@ -140,19 +139,19 @@ mod imp {
         }
     }
 
-    impl WidgetImpl for ProjectLexiconWordListView {}
-    impl BinImpl for ProjectLexiconWordListView {}
+    impl WidgetImpl for Sidebar {}
+    impl BinImpl for Sidebar {}
 }
 
 glib::wrapper! {
     /// A List view of words in the lexicon with related controls.
-    pub struct ProjectLexiconWordListView(ObjectSubclass<imp::ProjectLexiconWordListView>)
+    pub struct Sidebar(ObjectSubclass<imp::Sidebar>)
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 #[gtk::template_callbacks]
-impl ProjectLexiconWordListView {
+impl Sidebar {
     // SETUPS
 
     /// Setups models and list
@@ -182,7 +181,7 @@ impl ProjectLexiconWordListView {
         let factory = gtk::SignalListItemFactory::new();
 
         factory.connect_setup(glib::clone!(@weak self as view => move |_, item| {
-            let row = ProjectLexiconWordListRow::new();
+            let row = WordListRow::new();
 
             view.imp().edit_word_button
                 .bind_property("active", &row, "reveal-action-buttons")
@@ -206,7 +205,7 @@ impl ProjectLexiconWordListView {
 
             let row = list_item
                 .child()
-                .and_downcast::<ProjectLexiconWordListRow>()
+                .and_downcast::<WordListRow>()
                 .expect(EXPECTED_WORD_LIST_ROW);
 
             row.bind(&word_object);
@@ -219,7 +218,7 @@ impl ProjectLexiconWordListView {
 
             let row = list_item
                 .child()
-                .and_downcast::<ProjectLexiconWordListRow>()
+                .and_downcast::<WordListRow>()
                 .expect(EXPECTED_WORD_LIST_ROW);
 
             row.unbind();
@@ -249,7 +248,7 @@ impl ProjectLexiconWordListView {
         let imp = self.imp();
         let action_group = &*imp.action_group.borrow();
 
-        self.insert_action_group("lexicon-list", Some(action_group));
+        self.insert_action_group("dictionary", Some(action_group));
 
         action_group.add_action_entries([
             // Adds word to list.
@@ -517,7 +516,7 @@ impl ProjectLexiconWordListView {
     /// Switches to a stack page according to this view's state.
     pub fn switch_stack_page(&self) {
         let imp = self.imp();
-        let stack = imp.view_stack.get();
+        let stack = imp.stack.get();
 
         if self
             .word_list_model()
@@ -525,14 +524,16 @@ impl ProjectLexiconWordListView {
             .unwrap_or_default()
             > 0
         {
-            stack.set_visible_child(&*imp.main_page);
+            // stack.set_visible_child(&*imp.main_page);
+            stack.set_visible_child_name("list");
         } else {
-            stack.set_visible_child(&*imp.list_empty_page);
+            // stack.set_visible_child(&*imp.list_empty_page);
+            stack.set_visible_child_name("empty")
         }
     }
 }
 
-impl ui::View for ProjectLexiconWordListView {
+impl ui::View for Sidebar {
     fn load_state(&self) {
         log::debug!("Loading view state.");
 

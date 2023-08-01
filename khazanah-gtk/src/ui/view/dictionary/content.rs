@@ -17,9 +17,9 @@ mod imp {
     use super::*;
 
     #[derive(Debug, Default, gtk::CompositeTemplate, glib::Properties)]
-    #[properties(wrapper_type = super::ProjectLexiconWordEditView)]
-    #[template(resource = "/com/github/manenfu/Khazanah/ui/project_lexicon_view/word_edit_view.ui")]
-    pub struct ProjectLexiconWordEditView {
+    #[properties(wrapper_type = super::Content)]
+    #[template(resource = "/com/github/manenfu/Khazanah/ui/view/dictionary/content.ui")]
+    pub struct Content {
         #[template_child]
         pub romanization_entry: TemplateChild<adw::EntryRow>,
         #[template_child]
@@ -43,9 +43,9 @@ mod imp {
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for ProjectLexiconWordEditView {
-        const NAME: &'static str = "KhzProjectLexiconWordEditView";
-        type Type = super::ProjectLexiconWordEditView;
+    impl ObjectSubclass for Content {
+        const NAME: &'static str = "KhzDictionaryViewContent";
+        type Type = super::Content;
         type ParentType = adw::Bin;
 
         fn class_init(klass: &mut Self::Class) {
@@ -58,7 +58,7 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for ProjectLexiconWordEditView {
+    impl ObjectImpl for Content {
         fn constructed(&self) {
             self.parent_constructed();
 
@@ -79,19 +79,19 @@ mod imp {
         }
     }
 
-    impl WidgetImpl for ProjectLexiconWordEditView {}
-    impl BinImpl for ProjectLexiconWordEditView {}
+    impl WidgetImpl for Content {}
+    impl BinImpl for Content {}
 }
 
 glib::wrapper! {
     /// The view to edit lexicon word.
-    pub struct ProjectLexiconWordEditView(ObjectSubclass<imp::ProjectLexiconWordEditView>)
+    pub struct Content(ObjectSubclass<imp::Content>)
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 #[gtk::template_callbacks]
-impl ProjectLexiconWordEditView {
+impl Content {
     /// Setups dropdown widget.
     fn setup_dropdown(&self) {
         let imp = self.imp();
@@ -172,7 +172,7 @@ impl ProjectLexiconWordEditView {
     }
 }
 
-impl ui::View for ProjectLexiconWordEditView {
+impl ui::View for Content {
     fn load_state(&self) {
         log::debug!("Loading view state.");
 

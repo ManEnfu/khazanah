@@ -8,15 +8,15 @@ use crate::models;
 use crate::ui;
 
 #[doc(hidden)]
-mod imp {
+pub mod imp {
     use std::cell::RefCell;
 
     use super::*;
 
     #[derive(Debug, Default, gtk::CompositeTemplate, glib::Properties)]
-    #[properties(wrapper_type = super::ProjectOverviewView)]
-    #[template(resource = "/com/github/manenfu/Khazanah/ui/project_overview_view.ui")]
-    pub struct ProjectOverviewView {
+    #[properties(wrapper_type = super::LanguageView)]
+    #[template(resource = "/com/github/manenfu/Khazanah/ui/view/language.ui")]
+    pub struct LanguageView {
         #[template_child]
         pub lang_name_entry: TemplateChild<adw::EntryRow>,
         #[template_child]
@@ -36,9 +36,9 @@ mod imp {
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for ProjectOverviewView {
-        const NAME: &'static str = "KhzProjectOverviewView";
-        type Type = super::ProjectOverviewView;
+    impl ObjectSubclass for LanguageView {
+        const NAME: &'static str = "KhzLanguageView";
+        type Type = super::LanguageView;
         type ParentType = adw::Bin;
 
         fn class_init(klass: &mut Self::Class) {
@@ -51,7 +51,7 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for ProjectOverviewView {
+    impl ObjectImpl for LanguageView {
         fn constructed(&self) {
             self.parent_constructed();
             let obj = self.obj();
@@ -71,19 +71,19 @@ mod imp {
         }
     }
 
-    impl WidgetImpl for ProjectOverviewView {}
-    impl BinImpl for ProjectOverviewView {}
+    impl WidgetImpl for LanguageView {}
+    impl BinImpl for LanguageView {}
 }
 
 glib::wrapper! {
     /// The view to edit project general data, such as name and description.
-    pub struct ProjectOverviewView(ObjectSubclass<imp::ProjectOverviewView>)
+    pub struct LanguageView(ObjectSubclass<imp::LanguageView>)
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 #[gtk::template_callbacks]
-impl ProjectOverviewView {
+impl LanguageView {
     fn setup(&self) {
         self.bind_property("project-model", &self.meta_object(), "project-model")
             .sync_create()
@@ -91,7 +91,7 @@ impl ProjectOverviewView {
     }
 }
 
-impl ui::View for ProjectOverviewView {
+impl ui::View for LanguageView {
     fn load_state(&self) {
         log::debug!("Loading view state.");
 

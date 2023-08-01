@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk" version="4.6"/>
-  <requires lib="Adw" version="1.2"/>
-
-  <!-- The view to edit project metadata. -->
-  <template class="KhzProjectOverviewView" parent="AdwBin">
+  <template class="KhzLanguageView" parent="AdwBin">
     <child>
       <object class="GtkScrolledWindow">
         <property name="hscrollbar-policy">never</property>
@@ -21,7 +17,7 @@
                 <property name="spacing">12</property>
                 <child>
                   <object class="GtkLabel">
-                    <property name="label">Language</property>
+                    <property name="label" translatable="yes">Languago</property>
                     <property name="halign">start</property>
                     <style>
                       <class name="heading"/>
@@ -36,22 +32,22 @@
                     </style>
                     <child>
                       <object class="AdwEntryRow" id="lang_name_entry">
-                        <property name="title">Language Name</property>
+                        <property name="title" translatable="yes">Language Name</property>
                       </object>
                     </child>
                     <child>
                       <object class="AdwEntryRow" id="local_lang_entry">
-                        <property name="title">Local Language</property>
+                        <property name="title" translatable="yes">Local Language</property>
                       </object>
                     </child>
                     <child>
                       <object class="AdwEntryRow" id="author_entry">
-                        <property name="title">Author</property>
+                        <property name="title" translatable="yes">Author</property>
                       </object>
                     </child>
                     <child>
                       <object class="AdwEntryRow" id="description_entry">
-                        <property name="title">Description</property>
+                        <property name="title" translatable="yes">Description</property>
                       </object>
                     </child>
                   </object>
@@ -62,6 +58,6 @@
         </child>
       </object>
     </child>
-  </template> <!-- KhzProjectOverviewView -->
+  </template> <!-- KhzLanguageView -->
 
 </interface>

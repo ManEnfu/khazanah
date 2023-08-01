@@ -14,9 +14,6 @@ mod toolbar_start_controls;
 mod view_switcher_dropdown;
 
 // Views
-mod project_lexicon_view;
-mod project_overview_view;
-mod project_phonology_view;
 mod start_view;
 mod view;
 
@@ -29,13 +26,10 @@ pub use header_bar::HeaderBar;
 pub use ipa_chart::IpaChart;
 pub use ipa_chart_view_window::IpaChartViewWindow;
 pub use main_menu_button::MainMenuButton;
-pub use project_lexicon_view::ProjectLexiconView;
-pub use project_overview_view::ProjectOverviewView;
-pub use project_phonology_view::ProjectPhonologyView;
 pub use start_view::StartView;
 pub use toolbar_end_controls::ToolbarEndControls;
 pub use toolbar_start_controls::ToolbarStartControls;
-pub use view::{MainView, View};
+pub use view::{DictionaryView, InventoryView, LanguageView, MainView, View};
 pub use view_switcher_dropdown::ViewSwitcherDropDown;
 pub use window::ApplicationWindow;
 pub use xsampa_view_window::XSampaViewWindow;

@@ -7,13 +7,13 @@ use adw::subclass::prelude::*;
 use crate::models;
 use crate::ui;
 
-pub use word_edit_view::ProjectLexiconWordEditView;
-pub use word_list_row::ProjectLexiconWordListRow;
-pub use word_list_view::ProjectLexiconWordListView;
+pub use content::Content;
+pub use sidebar::Sidebar;
+pub use word_list_row::WordListRow;
 
-mod word_edit_view;
+mod content;
+mod sidebar;
 mod word_list_row;
-mod word_list_view;
 
 #[doc(hidden)]
 mod imp {
@@ -22,16 +22,16 @@ mod imp {
     use super::*;
 
     #[derive(Debug, Default, gtk::CompositeTemplate, glib::Properties)]
-    #[properties(wrapper_type = super::ProjectLexiconView)]
-    #[template(resource = "/com/github/manenfu/Khazanah/ui/project_lexicon_view.ui")]
-    pub struct ProjectLexiconView {
+    #[properties(wrapper_type = super::DictionaryView)]
+    #[template(resource = "/com/github/manenfu/Khazanah/ui/view/dictionary.ui")]
+    pub struct DictionaryView {
         #[template_child]
         pub leaflet: TemplateChild<adw::Leaflet>,
 
         #[template_child]
-        pub word_list_view: TemplateChild<ProjectLexiconWordListView>,
+        pub sidebar: TemplateChild<Sidebar>,
         #[template_child]
-        pub word_edit_view: TemplateChild<ProjectLexiconWordEditView>,
+        pub content: TemplateChild<Content>,
 
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
@@ -40,23 +40,23 @@ mod imp {
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for ProjectLexiconView {
-        const NAME: &'static str = "KhzProjectLexiconView";
-        type Type = super::ProjectLexiconView;
+    impl ObjectSubclass for DictionaryView {
+        const NAME: &'static str = "KhzDictionaryView";
+        type Type = super::DictionaryView;
         type ParentType = adw::Bin;
 
         fn class_init(klass: &mut Self::Class) {
             klass.bind_template();
             klass.bind_template_instance_callbacks();
 
-            klass.install_action("lexicon.go-back", None, move |view, _, _| {
+            klass.install_action("dictionary.go-back", None, move |view, _, _| {
                 view.navigate_back();
             });
 
             klass.add_binding_action(
                 gdk::Key::Escape,
                 gdk::ModifierType::empty(),
-                "lexicon.go-back",
+                "dictionary.go-back",
                 None,
             );
         }
@@ -66,7 +66,7 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for ProjectLexiconView {
+    impl ObjectImpl for DictionaryView {
         fn constructed(&self) {
             self.parent_constructed();
 
@@ -87,43 +87,43 @@ mod imp {
         }
     }
 
-    impl WidgetImpl for ProjectLexiconView {}
-    impl BinImpl for ProjectLexiconView {}
+    impl WidgetImpl for DictionaryView {}
+    impl BinImpl for DictionaryView {}
 }
 
 glib::wrapper! {
-    /// The view to edit project lexicon.
-    pub struct ProjectLexiconView(ObjectSubclass<imp::ProjectLexiconView>)
+    /// The view to edit project dictionary.
+    pub struct DictionaryView(ObjectSubclass<imp::DictionaryView>)
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 #[gtk::template_callbacks]
-impl ProjectLexiconView {
+impl DictionaryView {
     /// Setups callbacks.
     fn setup_callbacks(&self) {
         let imp = self.imp();
 
-        imp.word_list_view.connect_closure(
+        imp.sidebar.connect_closure(
             "word-selected",
             false,
-            glib::closure_local!(@strong self as view => move |_: &ProjectLexiconWordListView| {
+            glib::closure_local!(@strong self as view => move |_: &Sidebar| {
                 view.load_selected_word();
             }),
         );
 
-        imp.word_list_view.connect_closure(
+        imp.sidebar.connect_closure(
             "word-activated",
             false,
-            glib::closure_local!(@strong self as view => move |_: &ProjectLexiconWordListView| {
+            glib::closure_local!(@strong self as view => move |_: &Sidebar| {
                 view.handle_activate_word();
             }),
         );
 
-        imp.word_list_view.connect_closure(
+        imp.sidebar.connect_closure(
             "search-changed",
             false,
-            glib::closure_local!(@strong self as view => move |_: &ProjectLexiconWordListView| {
+            glib::closure_local!(@strong self as view => move |_: &Sidebar| {
                 view.load_selected_word();
             }),
         );
@@ -140,16 +140,16 @@ impl ProjectLexiconView {
     pub fn load_selected_word(&self) {
         let imp = self.imp();
 
-        imp.word_edit_view.unbind();
-        let word = imp.word_list_view.selected_word();
+        imp.content.unbind();
+        let word = imp.sidebar.selected_word();
 
         if let Some(word) = word {
             log::debug!("selected word: {}", word.id());
-            imp.word_edit_view.bind(&word);
-            imp.word_edit_view.set_fields_sensitive(true);
+            imp.content.bind(&word);
+            imp.content.set_fields_sensitive(true);
         } else {
-            imp.word_edit_view.clear_fields();
-            imp.word_edit_view.set_fields_sensitive(false);
+            imp.content.clear_fields();
+            imp.content.set_fields_sensitive(false);
         }
 
         self.navigate_back();
@@ -176,8 +176,8 @@ impl ProjectLexiconView {
         let imp = self.imp();
         imp.leaflet.navigate(adw::NavigationDirection::Back);
         if imp.leaflet.is_folded() {
-            if let Some(word) = imp.word_list_view.selected_word() {
-                imp.word_list_view.notify_changes_to_model(&word);
+            if let Some(word) = imp.sidebar.selected_word() {
+                imp.sidebar.notify_changes_to_model(&word);
             }
         }
         self.update_buttons_visibility();
@@ -189,20 +189,20 @@ impl ProjectLexiconView {
         if let Some(header_bar) = imp.header_bar.borrow().as_ref() {
             header_bar.set_reveal_back_button(
                 imp.leaflet.is_folded()
-                    && imp.leaflet.visible_child_name() != Some("word-list-view".into()),
+                    && imp.leaflet.visible_child_name() != Some("sidebar".into()),
             );
         }
     }
 }
 
-impl ui::View for ProjectLexiconView {
+impl ui::View for DictionaryView {
     fn load_state(&self) {
         log::debug!("Loading view state.");
 
         let imp = self.imp();
 
-        imp.word_list_view.load_state();
-        imp.word_edit_view.load_state();
+        imp.sidebar.load_state();
+        imp.content.load_state();
 
         self.load_selected_word();
     }
@@ -211,8 +211,8 @@ impl ui::View for ProjectLexiconView {
         log::debug!("Unloading view state.");
 
         let imp = self.imp();
-        imp.word_list_view.unload_state();
-        imp.word_edit_view.unload_state();
+        imp.sidebar.unload_state();
+        imp.content.unload_state();
     }
 
     fn connect_headerbar(&self, header_bar: &ui::HeaderBar) {
@@ -222,7 +222,7 @@ impl ui::View for ProjectLexiconView {
             .imp()
             .back_button
             .connect_clicked(glib::clone!(@weak self as view => move |_| {
-                view.activate_action("lexicon.go-back", None).unwrap_or_default();
+                view.activate_action("dictionary.go-back", None).unwrap_or_default();
             }));
 
         imp.header_bar.replace(Some(header_bar.clone()));

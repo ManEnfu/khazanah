@@ -2,7 +2,6 @@ use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
-// use adw::prelude::*;
 use adw::subclass::prelude::*;
 
 use crate::models::WordObject;
@@ -16,9 +15,9 @@ mod imp {
     use super::*;
 
     #[derive(Debug, Default, gtk::CompositeTemplate, glib::Properties)]
-    #[properties(wrapper_type = super::ProjectLexiconWordListRow)]
-    #[template(resource = "/com/github/manenfu/Khazanah/ui/project_lexicon_view/word_list_row.ui")]
-    pub struct ProjectLexiconWordListRow {
+    #[properties(wrapper_type = super::WordListRow)]
+    #[template(resource = "/com/github/manenfu/Khazanah/ui/view/dictionary/word_list_row.ui")]
+    pub struct WordListRow {
         #[template_child]
         pub word_label: TemplateChild<gtk::Label>,
         #[template_child]
@@ -37,9 +36,9 @@ mod imp {
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for ProjectLexiconWordListRow {
-        const NAME: &'static str = "KhzProjectLexiconWordListRow";
-        type Type = super::ProjectLexiconWordListRow;
+    impl ObjectSubclass for WordListRow {
+        const NAME: &'static str = "KhzDictionaryViewWordListRow";
+        type Type = super::WordListRow;
         type ParentType = adw::Bin;
 
         fn class_init(klass: &mut Self::Class) {
@@ -52,7 +51,7 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for ProjectLexiconWordListRow {
+    impl ObjectImpl for WordListRow {
         fn properties() -> &'static [glib::ParamSpec] {
             Self::derived_properties()
         }
@@ -66,20 +65,19 @@ mod imp {
         }
     }
 
-    impl WidgetImpl for ProjectLexiconWordListRow {}
+    impl WidgetImpl for WordListRow {}
 
-    impl BinImpl for ProjectLexiconWordListRow {}
+    impl BinImpl for WordListRow {}
 }
 
 glib::wrapper! {
-    /// Row widget for `ProjectLexiconWordListView`.
-    pub struct ProjectLexiconWordListRow(ObjectSubclass<imp::ProjectLexiconWordListRow>)
+    pub struct WordListRow(ObjectSubclass<imp::WordListRow>)
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 #[gtk::template_callbacks]
-impl ProjectLexiconWordListRow {
+impl WordListRow {
     /// Creates a new list row.
     pub fn new() -> Self {
         glib::Object::builder().build()
@@ -154,14 +152,14 @@ impl ProjectLexiconWordListRow {
     pub fn handle_delete_button(&self, _button: &gtk::Button) {
         let id = self.imp().id.get();
         self.activate_action(
-            "lexicon-list.delete-word",
+            "dictionary.delete-word",
             Some(&glib::Variant::from(id.to_string())),
         )
         .unwrap_or_default();
     }
 }
 
-impl Default for ProjectLexiconWordListRow {
+impl Default for WordListRow {
     fn default() -> Self {
         Self::new()
     }
