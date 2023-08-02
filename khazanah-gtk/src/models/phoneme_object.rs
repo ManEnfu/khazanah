@@ -23,12 +23,14 @@ mod imp {
     }
 
     #[derive(Debug, Default, glib::Properties)]
-    #[properties(wrapper_types = super::PhonemeObject)]
+    #[properties(wrapper_type = super::PhonemeObject)]
     pub struct PhonemeObject {
         #[property(name = "name", type = String,
             get = Self::get_name)]
         #[property(name = "sound", type = String,
             get = Self::get_sound, set = Self::set_sound)]
+        #[property(name = "romanization", type = String,
+            get = Self::get_romanization, set = Self::set_romanization)]
         #[property(name = "base-symbol", type = String,
             get = Self::get_base_symbol)]
         pub inner: RefCell<Option<Inner>>,
@@ -42,10 +44,16 @@ mod imp {
         {
             match self.inner.borrow().as_ref() {
                 Some(Inner::Owned(phoneme)) => f(phoneme),
-                Some(Inner::QueryFromProject {
-                    project_model: _,
-                    id: _,
-                }) => todo!(),
+                Some(Inner::QueryFromProject { project_model, id }) => project_model
+                    .query(|project| {
+                        project
+                            .language()
+                            .phonemic_inventory()
+                            .phoneme_by_id(*id)
+                            .map(&f)
+                    })
+                    .flatten()
+                    .unwrap_or_default(),
                 None => T::default(),
             }
         }
@@ -56,10 +64,15 @@ mod imp {
         {
             match self.inner.borrow_mut().as_mut() {
                 Some(Inner::Owned(phoneme)) => f(phoneme),
-                Some(Inner::QueryFromProject {
-                    project_model: _,
-                    id: _,
-                }) => todo!(),
+                Some(Inner::QueryFromProject { project_model, id }) => {
+                    project_model.update(|project| {
+                        project
+                            .language_mut()
+                            .phonemic_inventory_mut()
+                            .phoneme_by_id_mut(*id)
+                            .map(&f)
+                    });
+                }
                 None => {}
             }
         }
@@ -76,6 +89,18 @@ mod imp {
             self.update(|phoneme| phoneme.set_sound(value.clone()));
         }
 
+        fn get_romanization(&self) -> String {
+            self.query(|phoneme| phoneme.romanization().unwrap_or_default().to_string())
+        }
+
+        fn set_romanization(&self, value: String) {
+            if value.is_empty() {
+                self.update(|phoneme| phoneme.set_romanization(None));
+            } else {
+                self.update(|phoneme| phoneme.set_romanization(Some(value.clone())));
+            }
+        }
+
         pub fn get_base(&self) -> Option<Ipa> {
             self.query(|phoneme| phoneme.base())
         }
@@ -87,6 +112,14 @@ mod imp {
                     .map(|x| x.symbol_with_placeholder())
                     .unwrap_or_default()
             })
+        }
+
+        pub fn get_id(&self) -> Uuid {
+            if let Some(Inner::QueryFromProject { id, .. }) = self.inner.borrow().as_ref() {
+                *id
+            } else {
+                self.query(|p| p.id().unwrap_or_default())
+            }
         }
     }
 
@@ -132,5 +165,9 @@ impl PhonemeObject {
 
     pub fn base(&self) -> Option<Ipa> {
         self.imp().get_base()
+    }
+
+    pub fn id(&self) -> Uuid {
+        self.imp().get_id()
     }
 }
