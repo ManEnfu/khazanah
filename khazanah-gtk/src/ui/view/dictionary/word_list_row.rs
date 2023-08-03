@@ -1,8 +1,6 @@
+use adw::subclass::prelude::*;
 use gtk::glib;
 use gtk::prelude::*;
-use gtk::subclass::prelude::*;
-
-use adw::subclass::prelude::*;
 
 use crate::models::WordObject;
 

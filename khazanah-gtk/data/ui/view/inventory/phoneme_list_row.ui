@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<interface>
+  <template class="KhzInventoryViewPhonemeListRow" parent="AdwBin">
+    <child>
+      <object class="GtkBox">
+        <property name="margin-bottom">6</property>
+        <property name="margin-top">6</property>
+        <property name="spacing">12</property>
+        <child>
+          <object class="GtkImage" id="word_icon">
+            <property name="icon-name">audio-speakers-symbolic</property>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="hexpand">True</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkBox">
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="sound_label">
+                    <property name="ellipsize">end</property>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkLabel" id="romanization_label">
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                    <property name="ellipsize">end</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkRevealer">
+            <property name="reveal-child"
+                      bind-source="KhzInventoryViewPhonemeListRow"
+                      bind-property="reveal-action-buttons"
+                      bind-flags="sync-create"/>
+            <property name="transition-type">slide-left</property>
+            <property name="child">
+              <object class="GtkButton" id="delete_button">
+                <property name="icon-name">user-trash-symbolic</property>
+                <property name="tooltip-text">Delete word</property>
+                <style>
+                  <class name="destructive-action"/>
+                </style>
+                <signal name="clicked" handler="handle_delete_button" swapped="true"/>
+              </object>
+            </property>
+          </object>
+        </child>
+
+      </object>
+    </child>
+  </template>
+</interface>

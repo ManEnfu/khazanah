@@ -11,7 +11,7 @@ mod imp {
     use super::*;
 
     #[derive(Debug, Default, glib::Properties)]
-    #[properties(wrapper_types = super::MetaObject)]
+    #[properties(wrapper_type = super::MetaObject)]
     pub struct MetaObject {
         #[property(name = "name", type = String,
             get = Self::get_name, set = Self::set_name)]

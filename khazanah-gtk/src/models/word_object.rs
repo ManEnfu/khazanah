@@ -24,7 +24,7 @@ mod imp {
     }
 
     #[derive(Debug, Default, glib::Properties)]
-    #[properties(wrapper_types = super::WordObject)]
+    #[properties(wrapper_type = super::WordObject)]
     pub struct WordObject {
         #[property(name = "romanization", type = String,
             get = Self::get_romanization, set = Self::set_romanization)]

@@ -12,7 +12,7 @@ mod imp {
     use super::*;
 
     #[derive(Debug, Default, glib::Properties)]
-    #[properties(wrapper_types = super::AddPhonemeObject)]
+    #[properties(wrapper_type = super::AddPhonemeObject)]
     pub struct AddPhonemeObject {
         #[property(name = "name", type = String,
             get = Self::get_name)]

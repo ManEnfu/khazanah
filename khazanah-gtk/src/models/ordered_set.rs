@@ -19,7 +19,7 @@ mod imp {
     #[derive(Debug, Default, glib::Properties)]
     #[properties(wrapper_type = super::OrderedSet)]
     pub struct OrderedSet {
-        #[property(get, set)]
+        #[property(get)]
         pub inner: RefCell<gio::ListStore>,
 
         pub key_orders: RefCell<HashMap<Uuid, KeyOrder>>,
@@ -47,10 +47,11 @@ mod imp {
 
         fn constructed(&self) {
             self.parent_constructed();
+            let obj = self.obj();
 
             self.inner.borrow().connect_items_changed(
-                glib::clone!(@weak self as imp => move |_, position, removed, added| {
-                    imp.obj().items_changed(position, removed, added);
+                glib::clone!(@strong obj as set => move |_, position, removed, added| {
+                    set.items_changed(position, removed, added);
                 }),
             );
         }
@@ -78,13 +79,13 @@ glib::wrapper! {
 }
 
 impl OrderedSet {
-    pub fn new(item_type: glib::Type) -> Self {
+    pub fn new(_item_type: glib::Type) -> Self {
         glib::Object::builder()
-            .property("inner", gio::ListStore::new(item_type))
+            // .property("inner", gio::ListStore::new(item_type))
             .build()
     }
 
-    pub fn insert(&self, key: Uuid, item: &glib::Object) {
+    pub fn insert(&self, key: Uuid, item: &impl IsA<glib::Object>) {
         let imp = self.imp();
 
         let n = imp.inner.borrow().n_items();
@@ -111,7 +112,15 @@ impl OrderedSet {
     pub fn remove_by_id(&self, key: &Uuid) {
         let imp = self.imp();
 
-        if let Some(ko) = imp.key_orders.borrow_mut().remove(key) {
+        let mut kos = imp.key_orders.borrow_mut();
+        if let Some(ko) = kos.remove(key) {
+            let n = ko.order;
+            for iko in kos.values_mut() {
+                if iko.order > n {
+                    iko.order -= 1;
+                }
+            }
+
             imp.inner.borrow().remove(ko.order);
         }
     }
@@ -120,6 +129,14 @@ impl OrderedSet {
         let imp = self.imp();
         imp.key_orders.borrow_mut().clear();
         imp.inner.borrow().remove_all();
+    }
+
+    pub fn updated_by_id(&self, key: &Uuid) {
+        let imp = self.imp();
+
+        if let Some(ko) = imp.key_orders.borrow().get(key) {
+            self.items_changed(ko.order, 1, 1);
+        }
     }
 }
 

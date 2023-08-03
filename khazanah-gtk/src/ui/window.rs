@@ -88,6 +88,7 @@ mod imp {
 
             let header_bar = &self.header_bar.get();
             self.language_view.connect_headerbar(header_bar);
+            self.inventory_view.connect_headerbar(header_bar);
             self.dictionary_view.connect_headerbar(header_bar);
         }
 

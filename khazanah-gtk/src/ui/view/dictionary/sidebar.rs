@@ -416,7 +416,7 @@ impl Sidebar {
         }
     }
 
-    /// Notify the model that a word is updates.
+    /// Notify the model that a word is updated.
     pub fn notify_changes_to_model(&self, word: &WordObject) {
         let word_list_model = self
             .word_list_model()
@@ -559,7 +559,7 @@ impl ui::View for Sidebar {
     }
 
     fn unload_state(&self) {
-        log::debug!("Unload view state.");
+        log::debug!("Unloading view state.");
 
         if let Some(word) = self.selected_word() {
             self.imp().selected_id.set(word.id());

@@ -108,7 +108,7 @@ impl Content {
     /// Binds a word to form.
     pub fn bind(&self, word: &models::WordObject) {
         let imp = self.imp();
-        let mut bindings = self.imp().form_bindings.borrow_mut();
+        let mut bindings = imp.form_bindings.borrow_mut();
 
         bindings.push(
             word.bind_property("romanization", &imp.romanization_entry.get(), "text")

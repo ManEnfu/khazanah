@@ -1,5 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <template class="KhzInventoryViewContent" parent="AdwBin">
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="vexpand">True</property>
+        <property name="child">
+          <object class="AdwClamp">
+            <property name="child">
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="margin-top">24</property>
+                <property name="margin-bottom">24</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="spacing">12</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Phoneme</property>
+                    <property name="halign">start</property>
+                    <style>
+                      <class name="heading"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkListBox">
+                    <property name="selection-mode">none</property>
+                    <style>
+                      <class name="boxed-list"/>
+                    </style>
+                    <child>
+                      <object class="AdwEntryRow" id="sound_entry">
+                        <property name="title" translatable="yes">Sound</property>
+                        <property name="sensitive"
+                                  bind-source="KhzInventoryViewContent"
+                                  bind-property="fields-sensitive"
+                                  bind-flags="sync-create"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwEntryRow" id="romanization_entry">
+                        <property name="title" translatable="yes">Romanization</property>
+                        <property name="sensitive"
+                                  bind-source="KhzInventoryViewContent"
+                                  bind-property="fields-sensitive"
+                                  bind-flags="sync-create"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object> <!-- GtkBox -->
+            </property>
+          </object> <!-- AdwClamp -->
+        </property>
+      </object> <!-- GtkScrolledWindow -->
+    </child>
   </template>
 </interface>

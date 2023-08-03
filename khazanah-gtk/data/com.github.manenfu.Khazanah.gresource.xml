@@ -30,6 +30,7 @@
     <file compressed="true" preprocess="xml-stripblanks">ui/view/inventory.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/view/inventory/sidebar.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/view/inventory/content.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/view/inventory/phoneme_list_row.ui</file>
 
     <file compressed="true" preprocess="xml-stripblanks">ui/view/dictionary.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/view/dictionary/sidebar.ui</file>

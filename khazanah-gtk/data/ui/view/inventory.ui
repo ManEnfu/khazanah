@@ -15,6 +15,15 @@
                           bind-source="KhzInventoryView"
                           bind-property="project-model"
                           bind-flags="sync-create"/>
+                <signal name="phoneme-selected" 
+                        handler="handle_sidebar_phoneme_selected" 
+                        swapped="true"/>
+                <signal name="phoneme-activated" 
+                        handler="handle_sidebar_phoneme_activated" 
+                        swapped="true"/>
+                <signal name="search-changed" 
+                        handler="handle_sidebar_search_changed" 
+                        swapped="true"/>
               </object>
             </property>
           </object>
