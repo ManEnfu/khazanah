@@ -66,7 +66,7 @@ mod imp {
         pub project_model: RefCell<models::ProjectModel>,
 
         #[property(get, set)]
-        pub word_list_model: RefCell<Option<gio::ListStore>>,
+        pub list_model: RefCell<Option<models::OrderedSet>>,
         #[property(get, set)]
         pub filter_model: RefCell<Option<gtk::FilterListModel>>,
         #[property(get, set)]
@@ -159,11 +159,11 @@ impl Sidebar {
         let imp = self.imp();
 
         // Setup list models
-        let word_list_model = gio::ListStore::new(WordObject::static_type());
-        self.set_word_list_model(word_list_model.clone());
+        let list_model = models::OrderedSet::new(WordObject::static_type());
+        self.set_list_model(list_model.clone());
 
         let filter_model = gtk::FilterListModel::new(
-            Some(word_list_model),
+            Some(list_model),
             Some(models::WordFilter::new(models::WordFilterBy::None)),
         );
         self.set_filter_model(filter_model.clone());
@@ -325,6 +325,8 @@ impl Sidebar {
 
     /// Adds a new word to the model.
     pub fn add_word(&self) {
+        let imp = self.imp();
+
         if let Some(id) = self.project_model().update(|project| {
             project
                 .language_mut()
@@ -332,18 +334,18 @@ impl Sidebar {
                 .add_word(Word::new())
         }) {
             // Exits search mode first.
-            self.imp().search_bar.set_search_mode(false);
+            imp.search_bar.set_search_mode(false);
 
             log::debug!("Added word of id {}", id);
             let word_object = WordObject::query_project(self.project_model(), id);
 
-            self.word_list_model()
+            self.list_model()
                 .expect("word list model is not initialized")
-                .append(&word_object);
+                .insert(word_object.id(), &word_object);
 
             self.select_word_by_id(id);
 
-            self.imp().edit_word_button.set_active(false);
+            imp.edit_word_button.set_active(false);
             self.emit_by_name::<()>("word-activated", &[]);
         }
 
@@ -360,16 +362,11 @@ impl Sidebar {
         }) {
             log::debug!("Deleted word of id {}", id);
 
-            let word_list_model = self
-                .word_list_model()
+            let list_model = self
+                .list_model()
                 .expect("word list model is not initialized");
 
-            if let Some(position) = word_list_model
-                .iter::<glib::Object>()
-                .position(|w| w.unwrap().downcast_ref::<WordObject>().unwrap().id() == id)
-            {
-                word_list_model.remove(position as u32);
-            };
+            list_model.remove_by_id(&id);
 
             self.handle_selection_changed();
 
@@ -418,13 +415,9 @@ impl Sidebar {
 
     /// Notify the model that a word is updated.
     pub fn notify_changes_to_model(&self, word: &WordObject) {
-        let word_list_model = self
-            .word_list_model()
-            .expect("Word list model is not initialized.");
-
-        if let Some(position) = word_list_model.find(word) {
-            word_list_model.items_changed(position, 1, 1);
-        }
+        self.list_model()
+            .expect("Word list model is not initialized.")
+            .updated_by_id(&word.id());
     }
 
     // SEARCHING
@@ -518,12 +511,7 @@ impl Sidebar {
         let imp = self.imp();
         let stack = imp.stack.get();
 
-        if self
-            .word_list_model()
-            .map(|wl| wl.n_items())
-            .unwrap_or_default()
-            > 0
-        {
+        if self.list_model().map(|wl| wl.n_items()).unwrap_or_default() > 0 {
             // stack.set_visible_child(&*imp.main_page);
             stack.set_visible_child_name("list");
         } else {
@@ -538,15 +526,15 @@ impl ui::View for Sidebar {
         log::debug!("Loading view state.");
 
         // reload list
-        if let Some(mut word_list_model) = self.word_list_model() {
-            word_list_model.remove_all();
+        if let Some(mut list_model) = self.list_model() {
+            list_model.remove_all();
             if let Some(project) = self.project_model().project().as_ref() {
-                word_list_model.extend(
+                list_model.extend(
                     project
                         .language()
                         .dictionary()
                         .ids()
-                        .map(|i| WordObject::query_project(self.project_model(), *i)),
+                        .map(|i| (*i, WordObject::query_project(self.project_model(), *i))),
                 );
             }
 
@@ -554,6 +542,7 @@ impl ui::View for Sidebar {
         }
 
         self.imp().edit_word_button.set_active(false);
+        self.imp().search_word_button.set_active(false);
 
         self.switch_stack_page();
     }
