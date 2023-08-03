@@ -16,6 +16,8 @@ pub struct Phoneme {
     id: Option<Uuid>,
     /// The IPA sound of the phoneme.
     sound: String,
+    /// The sound of the phoneme in X-SAMPA.
+    xsampa_sound: Option<String>,
     /// The romanization of the phoneme.
     romanization: Option<String>,
 }
@@ -67,6 +69,21 @@ impl Phoneme {
         self.sound = value;
     }
 
+    /// Gets the X-SAMPA sound of the phoneme.
+    pub fn xsampa_sound(&self) -> Option<&str> {
+        self.xsampa_sound.as_deref()
+    }
+
+    /// Sets the X-SAMPA sound of the phoneme.
+    /// The value will be converted to IPA pronunciation and used
+    /// to set the sound of the phoneme.
+    pub fn set_xsampa_sound(&mut self, value: Option<String>) {
+        if let Some(s) = &value {
+            self.sound = ipa::transliterate_xsampa(s);
+        }
+        self.xsampa_sound = value;
+    }
+
     /// Gets the romanization of the phoneme.
     pub fn romanization(&self) -> Option<&str> {
         self.romanization.as_deref()
@@ -75,6 +92,16 @@ impl Phoneme {
     /// Sets the romanization of the phoneme.
     pub fn set_romanization(&mut self, value: Option<String>) {
         self.romanization = value;
+    }
+
+    /// Gets the displayed romanization of the phoneme.
+    /// If a romanization field is not set, the IPA sound will be returned instead.
+    pub fn display_romanization(&self) -> &str {
+        if let Some(r) = self.romanization.as_deref() {
+            r
+        } else {
+            &self.sound
+        }
     }
 
     /// Gets the base of the phoneme.
@@ -108,7 +135,13 @@ impl ReadXml for Phoneme {
                     .map_err(|e| XmlError::Other(Error::Id(e)))?;
                 self.id = Some(id);
             }
-            "sound" => self.sound.clear(),
+            "sound" => {
+                self.xsampa_sound = attrs
+                    .iter()
+                    .find(|&x| x.0 == "xsampa")
+                    .map(|x| x.1.to_owned());
+                self.sound.clear();
+            }
             "romanization" => {
                 self.romanization = Some(String::default());
             }
@@ -161,7 +194,11 @@ impl WriteXml for Phoneme {
             [("id", self.id.unwrap_or_default().to_string().as_str())],
         )?;
 
-        w.write_tag_start("sound")?;
+        if let Some(xs) = &self.xsampa_sound {
+            w.write_tag_start_with_attributes("sound", [("xsampa", xs.as_str())])?;
+        } else {
+            w.write_tag_start("sound")?;
+        }
         w.write_text(&self.sound)?;
         w.write_tag_end("sound")?;
 
