@@ -36,6 +36,33 @@
                                   bind-source="KhzInventoryViewContent"
                                   bind-property="fields-sensitive"
                                   bind-flags="sync-create"/>
+                        <property name="editable"
+                                  bind-source="xsampa_toggle_button"
+                                  bind-property="active"
+                                  bind-flags="sync-create|invert-boolean"/>
+                        <child>
+                          <object class="GtkToggleButton" id="xsampa_toggle_button">
+                            <property name="icon-name">format-text-plaintext-symbolic</property>
+                            <property name="tooltip-text" translatable="yes">Convert from X-SAMPA</property>
+                            <property name="valign">center</property>
+                            <style>
+                              <class name="flat"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwEntryRow" id="xsampa_entry">
+                        <property name="title" translatable="yes">X-SAMPA Sound</property>
+                        <property name="sensitive"
+                                  bind-source="KhzInventoryViewContent"
+                                  bind-property="fields-sensitive"
+                                  bind-flags="sync-create"/>
+                        <property name="visible"
+                                  bind-source="xsampa_toggle_button"
+                                  bind-property="active"
+                                  bind-flags="sync-create"/>
                       </object>
                     </child>
                     <child>

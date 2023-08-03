@@ -241,6 +241,9 @@ impl Sidebar {
                 .phonemic_inventory_mut()
                 .add_phoneme(Phoneme::new())
         }) {
+            // Exits search mode first.
+            // self.imp().search_bar.set_search_mode(false);
+
             log::debug!("Added phoneme of id {}", id);
             let phoneme_object = models::PhonemeObject::query_project(self.project_model(), id);
 

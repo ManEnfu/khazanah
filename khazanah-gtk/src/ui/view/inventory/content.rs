@@ -22,6 +22,10 @@ mod imp {
         #[template_child]
         pub sound_entry: TemplateChild<adw::EntryRow>,
         #[template_child]
+        pub xsampa_toggle_button: TemplateChild<gtk::Button>,
+        #[template_child]
+        pub xsampa_entry: TemplateChild<adw::EntryRow>,
+        #[template_child]
         pub romanization_entry: TemplateChild<adw::EntryRow>,
 
         #[property(get, set)]
@@ -104,6 +108,22 @@ impl Content {
         bindings.push(
             phoneme
                 .bind_property("sound", &imp.sound_entry.get(), "text")
+                .sync_create()
+                .bidirectional()
+                .build(),
+        );
+
+        bindings.push(
+            phoneme
+                .bind_property("use-xsampa", &imp.xsampa_toggle_button.get(), "active")
+                .sync_create()
+                .bidirectional()
+                .build(),
+        );
+
+        bindings.push(
+            phoneme
+                .bind_property("xsampa-sound", &imp.xsampa_entry.get(), "text")
                 .sync_create()
                 .bidirectional()
                 .build(),

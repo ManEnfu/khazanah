@@ -95,7 +95,7 @@ impl PhonemeListRow {
 
         bindings.push(
             phoneme_object
-                .bind_property("romanization", &romanization_label, "label")
+                .bind_property("display-romanization", &romanization_label, "label")
                 .sync_create()
                 .transform_to(|_, s: Option<String>| {
                     Some(s.map_or(String::default(), |s| format!("<{}>", s)))

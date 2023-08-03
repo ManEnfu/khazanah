@@ -29,8 +29,14 @@ mod imp {
             get = Self::get_name)]
         #[property(name = "sound", type = String,
             get = Self::get_sound, set = Self::set_sound)]
+        #[property(name = "use-xsampa", type = bool,
+            get = Self::get_use_xsampa, set = Self::set_use_xsampa)]
+        #[property(name = "xsampa-sound", type = String,
+            get = Self::get_xsampa_sound, set = Self::set_xsampa_sound)]
         #[property(name = "romanization", type = String,
             get = Self::get_romanization, set = Self::set_romanization)]
+        #[property(name = "display-romanization", type = String,
+            get = Self::get_display_romanization)]
         #[property(name = "base-symbol", type = String,
             get = Self::get_base_symbol)]
         pub inner: RefCell<Option<Inner>>,
@@ -87,6 +93,9 @@ mod imp {
 
         fn set_sound(&self, value: String) {
             self.update(|phoneme| phoneme.set_sound(value.clone()));
+            self.obj().notify_display_romanization();
+            self.obj().notify_name();
+            self.obj().notify_base_symbol();
         }
 
         fn get_romanization(&self) -> String {
@@ -99,6 +108,11 @@ mod imp {
             } else {
                 self.update(|phoneme| phoneme.set_romanization(Some(value.clone())));
             }
+            self.obj().notify_display_romanization();
+        }
+
+        fn get_display_romanization(&self) -> String {
+            self.query(|phoneme| phoneme.display_romanization().to_string())
         }
 
         pub fn get_base(&self) -> Option<Ipa> {
@@ -112,6 +126,41 @@ mod imp {
                     .map(|x| x.symbol_with_placeholder())
                     .unwrap_or_default()
             })
+        }
+
+        fn get_xsampa_sound(&self) -> String {
+            self.query(|phoneme| phoneme.xsampa_sound().unwrap_or_default().to_string())
+        }
+
+        fn set_xsampa_sound(&self, value: String) {
+            self.update(|phoneme| {
+                if phoneme.xsampa_sound().is_some() {
+                    phoneme.set_xsampa_sound(Some(value.clone()));
+                }
+            });
+            self.obj().notify_sound();
+            self.obj().notify_display_romanization();
+            self.obj().notify_name();
+            self.obj().notify_base_symbol();
+        }
+
+        fn get_use_xsampa(&self) -> bool {
+            self.query(|phoneme| phoneme.xsampa_sound().is_some())
+        }
+
+        fn set_use_xsampa(&self, value: bool) {
+            self.update(|phoneme| {
+                if value {
+                    if phoneme.xsampa_sound().is_none() {
+                        phoneme.set_xsampa_sound(Some("".to_string()));
+                    }
+                } else {
+                    phoneme.set_xsampa_sound(None);
+                }
+            });
+            let obj = self.obj();
+            obj.notify_xsampa_sound();
+            obj.notify_sound();
         }
 
         pub fn get_id(&self) -> Uuid {
