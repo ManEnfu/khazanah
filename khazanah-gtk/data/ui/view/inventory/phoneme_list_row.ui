@@ -37,6 +37,20 @@
               </object>
             </child>
 
+            <child>
+              <object class="GtkBox">
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="name_label">
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                    <property name="ellipsize">end</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+
           </object>
         </child>
 

@@ -20,6 +20,8 @@ mod imp {
         pub sound_label: TemplateChild<gtk::Label>,
         #[template_child]
         pub romanization_label: TemplateChild<gtk::Label>,
+        #[template_child]
+        pub name_label: TemplateChild<gtk::Label>,
 
         #[property(get, set)]
         pub reveal_action_buttons: Cell<bool>,
@@ -80,6 +82,7 @@ impl PhonemeListRow {
         let imp = self.imp();
         let sound_label = imp.sound_label.get();
         let romanization_label = imp.romanization_label.get();
+        let name_label = imp.name_label.get();
 
         let mut bindings = imp.bindings.borrow_mut();
 
@@ -100,6 +103,13 @@ impl PhonemeListRow {
                 .transform_to(|_, s: Option<String>| {
                     Some(s.map_or(String::default(), |s| format!("<{}>", s)))
                 })
+                .build(),
+        );
+
+        bindings.push(
+            phoneme_object
+                .bind_property("name", &name_label, "label")
+                .sync_create()
                 .build(),
         );
 
