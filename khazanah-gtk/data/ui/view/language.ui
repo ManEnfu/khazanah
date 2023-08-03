@@ -17,7 +17,7 @@
                 <property name="spacing">12</property>
                 <child>
                   <object class="GtkLabel">
-                    <property name="label" translatable="yes">Languago</property>
+                    <property name="label" translatable="yes">Language</property>
                     <property name="halign">start</property>
                     <style>
                       <class name="heading"/>
