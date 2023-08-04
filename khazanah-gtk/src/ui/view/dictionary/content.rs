@@ -170,6 +170,23 @@ impl Content {
         imp.pronunciation_entry.set_text("");
         imp.pos_dropdown.set_selected(0);
     }
+
+    /// Handler for `clicked` signal `from convert_from_ipa_button`
+    #[template_callback]
+    fn handle_convert_from_ipa_button_clicked(&self, _button: &gtk::Button) {
+        let imp = self.imp();
+        let pronunciation = imp.pronunciation_entry.text().to_string();
+        let romanization = self
+            .project_model()
+            .query(|project| {
+                project
+                    .language()
+                    .phonemic_inventory()
+                    .get_romanization(&pronunciation)
+            })
+            .unwrap_or_default();
+        imp.romanization_entry.set_text(&romanization);
+    }
 }
 
 impl ui::View for Content {

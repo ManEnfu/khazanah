@@ -37,10 +37,17 @@
                                   bind-property="fields-sensitive"
                                   bind-flags="sync-create"/>
                         <child>
-                          <object class="GtkButton">
+                          <object class="GtkButton" id="convert_from_ipa_button">
                             <property name="icon-name">format-text-rich-symbolic</property>
                             <property name="tooltip-text" translatable="yes">Convert from pronunciation</property>
                             <property name="valign">center</property>
+                            <property name="sensitive"
+                                      bind-source="KhzDictionaryViewContent"
+                                      bind-property="fields-sensitive"
+                                      bind-flags="sync-create"/>
+                            <signal name="clicked"
+                                    handler="handle_convert_from_ipa_button_clicked"
+                                    swapped="true"/>
                             <style>
                               <class name="flat"/>
                             </style>
