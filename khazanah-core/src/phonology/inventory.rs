@@ -1,6 +1,7 @@
 use std::collections::{hash_map::Keys, HashMap};
 
 use bimap::BiHashMap;
+use std::cell::RefCell;
 use uuid::Uuid;
 
 use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
@@ -13,7 +14,7 @@ use super::Error;
 pub struct Inventory {
     phonemes: HashMap<Uuid, Phoneme>,
 
-    romanization_pronunciation_map: Option<BiHashMap<String, String>>,
+    romanization_pronunciation_map: RefCell<Option<BiHashMap<String, String>>>,
 }
 
 impl Inventory {
@@ -24,7 +25,7 @@ impl Inventory {
 
     /// Adds a phoneme into the inventory and returns its id.
     pub fn add_phoneme(&mut self, mut phoneme: Phoneme) -> Uuid {
-        self.romanization_pronunciation_map = None;
+        self.romanization_pronunciation_map.replace(None);
         let id = if let Some(id) = phoneme.id() {
             id
         } else {
@@ -36,7 +37,7 @@ impl Inventory {
 
     /// Removes a phoneme of id `id` from the inventory.
     pub fn delete_phoneme_by_id(&mut self, id: Uuid) -> Option<Phoneme> {
-        self.romanization_pronunciation_map = None;
+        self.romanization_pronunciation_map.replace(None);
         self.phonemes.remove(&id)
     }
 
@@ -53,7 +54,7 @@ impl Inventory {
     /// Gets a mutable reference to phoneme by id.
     pub fn phoneme_by_id_mut(&mut self, id: Uuid) -> Option<&mut Phoneme> {
         // Assume that the romanization map is outdated.
-        self.romanization_pronunciation_map = None;
+        self.romanization_pronunciation_map.replace(None);
         self.phonemes.get_mut(&id)
     }
 
@@ -73,11 +74,11 @@ impl Inventory {
     }
 
     /// Converts a romanization to IPA pronunciation using rules specified by the inventory.
-    pub fn pronunce_romanization(&mut self, romanization: &str) -> String {
-        if self.romanization_pronunciation_map.is_none() {
+    pub fn pronunce_romanization(&self, romanization: &str) -> String {
+        if self.romanization_pronunciation_map.borrow().is_none() {
             self.populate_romanization_pronunciation_map();
         }
-        if let Some(map) = &self.romanization_pronunciation_map {
+        if let Some(map) = &self.romanization_pronunciation_map.borrow().as_ref() {
             String::from_iter(utils::transliterate(romanization, 5, |s| {
                 map.get_by_left(s).cloned()
             }))
@@ -87,11 +88,11 @@ impl Inventory {
     }
 
     /// Converts an IPA pronunciation to romanization using rules specified by the inventory.
-    pub fn get_romanization(&mut self, pronunciation: &str) -> String {
-        if self.romanization_pronunciation_map.is_none() {
+    pub fn get_romanization(&self, pronunciation: &str) -> String {
+        if self.romanization_pronunciation_map.borrow().is_none() {
             self.populate_romanization_pronunciation_map();
         }
-        if let Some(map) = &self.romanization_pronunciation_map {
+        if let Some(map) = &self.romanization_pronunciation_map.borrow().as_ref() {
             String::from_iter(utils::transliterate(pronunciation, 5, |s| {
                 map.get_by_right(s).cloned()
             }))
@@ -100,7 +101,7 @@ impl Inventory {
         }
     }
 
-    fn populate_romanization_pronunciation_map(&mut self) {
+    fn populate_romanization_pronunciation_map(&self) {
         let mut map = BiHashMap::new();
         for phoneme in self.iter_phonemes() {
             map.insert(
@@ -111,7 +112,7 @@ impl Inventory {
                 phoneme.sound().to_string(),
             );
         }
-        self.romanization_pronunciation_map = Some(map);
+        self.romanization_pronunciation_map.replace(Some(map));
     }
 }
 
@@ -275,7 +276,7 @@ mod tests {
 
     #[test]
     fn romanization_and_pronunciation() {
-        let mut inv = Inventory::load_xml_str(XML1).unwrap();
+        let inv = Inventory::load_xml_str(XML1).unwrap();
         let romanization = "thëmaartsim".to_string();
         let pronunciation = "ˈtʰə.maːɹ.t͡sɪm".to_string();
         let pronunciation_no_delimiter = "tʰəmaːɹt͡sɪm".to_string();
