@@ -388,11 +388,26 @@ impl Sidebar {
             if result && selection_model.n_items() == 1 {
                 self.handle_selection_changed();
             }
+
+            self.imp()
+                .list_view
+                .activate_action(
+                    "list.scroll-to-item",
+                    Some(&glib::Variant::from(position as u32)),
+                )
+                .unwrap_or_default();
+
             return result;
         }
 
         if id == Uuid::default() {
             selection_model.select_item(0, true);
+
+            self.imp()
+                .list_view
+                .activate_action("list.scroll-to-item", Some(&glib::Variant::from(0_u32)))
+                .unwrap_or_default();
+
             return true;
         }
 
