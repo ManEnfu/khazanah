@@ -50,6 +50,7 @@ mod imp {
 
         pub action_group: RefCell<gio::SimpleActionGroup>,
 
+        pub selected_id: Cell<Uuid>,
         pub old_selected_id: Cell<Option<Uuid>>,
     }
 
@@ -160,8 +161,10 @@ impl Sidebar {
             gtk::FilterListModel::new(Some(list_model), Option::<gtk::CustomFilter>::None);
         self.set_filter_model(filter_model.clone());
 
-        let sort_model =
-            gtk::SortListModel::new(Some(filter_model), Option::<gtk::CustomSorter>::None);
+        let sort_model = gtk::SortListModel::new(
+            Some(filter_model),
+            Some(models::PhonemeSorter::new(models::PhonemeSortBy::Base)),
+        );
         self.set_sort_model(sort_model.clone());
 
         let selection_model = gtk::SingleSelection::new(Some(sort_model));
@@ -304,6 +307,11 @@ impl Sidebar {
             return result;
         }
 
+        if id == Uuid::default() {
+            selection_model.select_item(0, true);
+            return true;
+        }
+
         false
     }
 
@@ -368,6 +376,8 @@ impl ui::View for Sidebar {
                     )
                 }));
             }
+
+            self.select_phoneme_by_id(self.imp().selected_id.get());
         }
 
         self.imp().edit_phoneme_button.set_active(false);
@@ -376,6 +386,12 @@ impl ui::View for Sidebar {
     }
 
     fn unload_state(&self) {
-        log::debug!("Unloading view state.")
+        log::debug!("Unloading view state.");
+
+        if let Some(phoneme) = self.selected_phoneme() {
+            self.imp().selected_id.set(phoneme.id());
+        }
+
+        self.imp().edit_phoneme_button.set_active(false);
     }
 }

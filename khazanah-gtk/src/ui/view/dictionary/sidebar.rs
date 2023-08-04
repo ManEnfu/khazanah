@@ -391,6 +391,11 @@ impl Sidebar {
             return result;
         }
 
+        if id == Uuid::default() {
+            selection_model.select_item(0, true);
+            return true;
+        }
+
         false
     }
 
