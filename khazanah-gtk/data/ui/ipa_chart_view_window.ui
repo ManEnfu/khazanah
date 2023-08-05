@@ -8,9 +8,9 @@
     <property name="title">IPA Charts</property>
     <property name="default-height">600</property>
     <property name="default-width">800</property>
-    <style>
-      <class name="devel"/>
-    </style>
+    <!-- <style> -->
+    <!--   <class name="devel"/> -->
+    <!-- </style> -->
     <property name="content">
       <object class="AdwToastOverlay" id="toast_overlay">
         <child>

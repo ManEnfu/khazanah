@@ -50,6 +50,11 @@
                         <property name="title" translatable="yes">Description</property>
                       </object>
                     </child>
+                    <child>
+                      <object class="KhzTextAreaRow" id="description_area">
+                        <property name="title" translatable="yes">Description</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object> <!-- GtkBox -->

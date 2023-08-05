@@ -60,3 +60,20 @@ grid.ipa-chart > button.corner-bottom-right {
   border-bottom: 1px solid @borders;
   padding: 6px;
 }
+
+.text-area-row {
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+
+.text-area-row box.text-view {
+  border-radius: 6px;
+  background: @card_bg_color;
+}
+
+.text-area-row box.text-view > textview {
+  background: none;
+}
+
+
+

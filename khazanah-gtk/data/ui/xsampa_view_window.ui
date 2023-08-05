@@ -8,9 +8,9 @@
     <property name="title">X-SAMPA Transliterator</property>
     <!-- <property name="default-height">300</property> -->
     <property name="default-width">400</property>
-    <style>
-      <class name="devel"/>
-    </style>
+    <!-- <style> -->
+    <!--   <class name="devel"/> -->
+    <!-- </style> -->
     <property name="content">
       <object class="AdwToastOverlay" id="toast_overlay">
         <child>

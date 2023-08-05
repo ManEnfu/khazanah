@@ -25,6 +25,8 @@ pub mod imp {
         pub author_entry: TemplateChild<adw::EntryRow>,
         #[template_child]
         pub description_entry: TemplateChild<adw::EntryRow>,
+        #[template_child]
+        pub description_area: TemplateChild<ui::TextAreaRow>,
 
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
