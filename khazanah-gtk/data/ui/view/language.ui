@@ -46,11 +46,6 @@
                       </object>
                     </child>
                     <child>
-                      <object class="AdwEntryRow" id="description_entry">
-                        <property name="title" translatable="yes">Description</property>
-                      </object>
-                    </child>
-                    <child>
                       <object class="KhzTextAreaRow" id="description_area">
                         <property name="title" translatable="yes">Description</property>
                       </object>

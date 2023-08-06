@@ -24,8 +24,6 @@ pub mod imp {
         #[template_child]
         pub author_entry: TemplateChild<adw::EntryRow>,
         #[template_child]
-        pub description_entry: TemplateChild<adw::EntryRow>,
-        #[template_child]
         pub description_area: TemplateChild<ui::TextAreaRow>,
 
         #[property(get, set)]
@@ -130,13 +128,15 @@ impl ui::View for LanguageView {
                 .build(),
         );
 
-        bindings.push(
-            meta_object
-                .bind_property("description", &imp.description_entry.get(), "text")
-                .sync_create()
-                .bidirectional()
-                .build(),
-        );
+        let desc = meta_object.description();
+        imp.description_area.buffer().set_text(&desc);
+    }
+
+    fn commit_state(&self) {
+        let desc_buf = self.imp().description_area.buffer();
+        let desc = desc_buf.text(&desc_buf.start_iter(), &desc_buf.end_iter(), false);
+
+        self.meta_object().set_description(desc);
     }
 
     fn unload_state(&self) {
