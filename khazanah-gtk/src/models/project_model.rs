@@ -179,6 +179,11 @@ impl ProjectModel {
     {
         self.project().as_ref().map(f)
     }
+
+    pub fn notify_changes(&self) {
+        self.set_dirty(true);
+        self.notify_title();
+    }
 }
 
 impl Default for ProjectModel {

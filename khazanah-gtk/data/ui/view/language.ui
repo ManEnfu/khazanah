@@ -48,6 +48,13 @@
                     <child>
                       <object class="KhzTextAreaRow" id="description_area">
                         <property name="title" translatable="yes">Description</property>
+                        <property name="buffer">
+                          <object class="GtkTextBuffer" id="desc_buf">
+                            <signal name="modified-changed"
+                                    handler="handle_desc_buf_modified_changed"
+                                    swapped="true"/>
+                          </object>
+                        </property>
                       </object>
                     </child>
                   </object>

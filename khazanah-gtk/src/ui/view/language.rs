@@ -9,7 +9,7 @@ use crate::ui;
 
 #[doc(hidden)]
 pub mod imp {
-    use std::cell::RefCell;
+    use std::cell::{Cell, RefCell};
 
     use super::*;
 
@@ -33,6 +33,11 @@ pub mod imp {
         pub meta_object: RefCell<models::MetaObject>,
 
         pub form_bindings: RefCell<Vec<glib::Binding>>,
+
+        pub desc_modified_handler: RefCell<Option<glib::SignalHandlerId>>,
+
+        #[property(get, set)]
+        pub bound: Cell<bool>,
     }
 
     #[glib::object_subclass]
@@ -89,20 +94,16 @@ impl LanguageView {
             .sync_create()
             .build();
     }
-}
 
-impl ui::View for LanguageView {
-    fn load_state(&self) {
-        log::debug!("Loading view state.");
+    /// Binds form to model.
+    fn bind(&self) {
+        // make sure there's no existing bindings.
+        self.unbind();
 
         let imp = self.imp();
 
         let mut bindings = imp.form_bindings.borrow_mut();
         let meta_object = self.meta_object();
-
-        for binding in bindings.drain(..) {
-            binding.unbind()
-        }
 
         bindings.push(
             meta_object
@@ -129,23 +130,60 @@ impl ui::View for LanguageView {
         );
 
         let desc = meta_object.description();
-        imp.description_area.buffer().set_text(&desc);
-    }
-
-    fn commit_state(&self) {
         let desc_buf = self.imp().description_area.buffer();
-        let desc = desc_buf.text(&desc_buf.start_iter(), &desc_buf.end_iter(), false);
+        desc_buf.set_text(&desc);
+        desc_buf.set_modified(false);
 
-        self.meta_object().set_description(desc);
+        self.set_bound(true);
     }
 
-    fn unload_state(&self) {
-        log::debug!("Unloading view state.");
+    /// Unbinds form.
+    fn unbind(&self) {
+        self.set_bound(false);
 
         let imp = self.imp();
 
         for binding in imp.form_bindings.borrow_mut().drain(..) {
             binding.unbind()
         }
+    }
+
+    /// Save form fields not handled by bindings to model.
+    fn save_fields_to_model(&self) {
+        let desc_buf = self.imp().description_area.buffer();
+
+        if desc_buf.is_modified() {
+            let desc = desc_buf.text(&desc_buf.start_iter(), &desc_buf.end_iter(), false);
+            self.meta_object().set_description(desc);
+
+            desc_buf.set_modified(false);
+        }
+    }
+
+    #[template_callback]
+    fn handle_desc_buf_modified_changed(&self, buf: &gtk::TextBuffer) {
+        if self.bound() && buf.is_modified() {
+            self.project_model().notify_changes();
+        }
+    }
+}
+
+impl ui::View for LanguageView {
+    fn load_state(&self) {
+        log::debug!("Loading view state.");
+
+        self.bind();
+    }
+
+    fn commit_state(&self) {
+        log::debug!("Committing view state.");
+
+        self.save_fields_to_model();
+    }
+
+    fn unload_state(&self) {
+        log::debug!("Unloading view state.");
+
+        self.unbind();
     }
 }
