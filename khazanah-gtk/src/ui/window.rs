@@ -222,6 +222,12 @@ impl ApplicationWindow {
         ]);
         self.action_set_enabled("win.save", false);
         self.action_set_enabled("win.save-as", false);
+
+        let shortcuts_window =
+            gtk::Builder::from_resource("/com/github/manenfu/Khazanah/ui/shortcuts_window.ui")
+                .object::<gtk::ShortcutsWindow>("shortcuts_window")
+                .expect("Error building shortcuts window.");
+        self.set_help_overlay(Some(&shortcuts_window));
     }
 
     fn setup_bindings(&self) {

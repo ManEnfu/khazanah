@@ -156,6 +156,7 @@ impl Application {
         self.set_accels_for_action("win.new", &["<primary>n"]);
         self.set_accels_for_action("win.save", &["<primary>s"]);
         self.set_accels_for_action("win.save-as", &["<shift><primary>s"]);
+        self.set_accels_for_action("win.show-help-overlay", &["<Primary>question"]);
         self.set_accels_for_action("win.go-back", &["<Alt>Up"]);
     }
 
