@@ -50,7 +50,7 @@ mod imp {
             klass.bind_template_instance_callbacks();
 
             klass.install_action("dictionary.go-back", None, move |view, _, _| {
-                view.navigate_back();
+                view.navigate_backward();
             });
 
             klass.add_binding_action(
@@ -152,7 +152,7 @@ impl DictionaryView {
             imp.content.set_fields_sensitive(false);
         }
 
-        self.navigate_back();
+        self.navigate_backward();
     }
 
     /// Activates currently selected word. If the leaflet is folded, switch to form page.
@@ -160,19 +160,19 @@ impl DictionaryView {
         let imp = self.imp();
 
         if imp.leaflet.is_folded() {
-            self.navigate_to_forward();
+            self.navigate_forward();
         }
     }
 
     /// Navigates forward.
-    fn navigate_to_forward(&self) {
+    fn navigate_forward(&self) {
         let imp = self.imp();
         imp.leaflet.navigate(adw::NavigationDirection::Forward);
         self.update_buttons_visibility();
     }
 
     /// Navigates back.
-    fn navigate_back(&self) {
+    fn navigate_backward(&self) {
         let imp = self.imp();
         imp.leaflet.navigate(adw::NavigationDirection::Back);
         if imp.leaflet.is_folded() {
@@ -226,5 +226,9 @@ impl ui::View for DictionaryView {
             }));
 
         imp.header_bar.replace(Some(header_bar.clone()));
+    }
+
+    fn go_back(&self) {
+        self.navigate_backward();
     }
 }

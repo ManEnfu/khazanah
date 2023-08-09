@@ -24,6 +24,9 @@ pub trait View {
 
     /// Connects things on headerbar.
     fn connect_headerbar(&self, _header_bar: &super::HeaderBar) {}
+
+    /// Called on `win.go-back` action.
+    fn go_back(&self) {}
 }
 
 /// Possible views of the main window.
@@ -40,12 +43,12 @@ pub enum MainView {
 }
 
 impl MainView {
-    pub const ALL: &[Self] = &[Self::Language, Self::Inventory, Self::Dictionary];
+    pub const SELECTABLES: &[Self] = &[Self::Language, Self::Inventory, Self::Dictionary];
 }
 
 impl From<u32> for MainView {
     fn from(value: u32) -> Self {
-        if let Some(mv) = Self::ALL.get(value as usize) {
+        if let Some(mv) = Self::SELECTABLES.get(value as usize) {
             *mv
         } else {
             Self::Unknown
@@ -55,7 +58,7 @@ impl From<u32> for MainView {
 
 impl From<MainView> for u32 {
     fn from(value: MainView) -> Self {
-        MainView::ALL
+        MainView::SELECTABLES
             .iter()
             .position(|v| v == &value)
             .unwrap_or_default() as u32

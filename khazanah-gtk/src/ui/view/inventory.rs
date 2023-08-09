@@ -190,4 +190,8 @@ impl ui::View for InventoryView {
 
         imp.header_bar.replace(Some(header_bar.clone()));
     }
+
+    fn go_back(&self) {
+        self.navigate_backward();
+    }
 }

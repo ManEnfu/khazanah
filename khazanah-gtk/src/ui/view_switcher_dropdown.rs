@@ -53,8 +53,10 @@ mod imp {
         fn constructed(&self) {
             self.parent_constructed();
 
-            let string_list: Vec<String> =
-                ui::MainView::ALL.iter().map(ToString::to_string).collect();
+            let string_list: Vec<String> = ui::MainView::SELECTABLES
+                .iter()
+                .map(ToString::to_string)
+                .collect();
 
             let str_list: Vec<&str> = string_list.iter().map(String::as_str).collect();
 

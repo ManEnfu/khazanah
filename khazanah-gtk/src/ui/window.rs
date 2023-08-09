@@ -58,7 +58,7 @@ mod imp {
         #[property(get, set)]
         pub force_action: Cell<bool>,
 
-        pub current_view_index: Cell<MainView>,
+        pub selected_view: Cell<MainView>,
 
         pub file_dialog: RefCell<Option<gtk::FileDialog>>,
     }
@@ -207,7 +207,19 @@ impl ApplicationWindow {
             })
             .build();
 
-        self.add_action_entries([open_action, new_action, save_action, save_as_action]);
+        let go_back_action = gio::ActionEntry::builder("go-back")
+            .activate(|window: &Self, _, _| {
+                window.go_back();
+            })
+            .build();
+
+        self.add_action_entries([
+            open_action,
+            new_action,
+            save_action,
+            save_as_action,
+            go_back_action,
+        ]);
         self.action_set_enabled("win.save", false);
         self.action_set_enabled("win.save-as", false);
     }
@@ -472,7 +484,7 @@ impl ApplicationWindow {
         log::debug!("Switching to view: {:?} ({})", view, idx);
 
         let imp = self.imp();
-        let current_view = imp.current_view_index.get();
+        let current_view = imp.selected_view.get();
 
         if current_view != MainView::Unknown {
             self.commit_view_state(current_view);
@@ -486,12 +498,12 @@ impl ApplicationWindow {
             MainView::Language => main_stack.set_visible_child(&*imp.language_view),
             MainView::Inventory => main_stack.set_visible_child(&*imp.inventory_view),
             MainView::Dictionary => main_stack.set_visible_child(&*imp.dictionary_view),
-            _ => log::warn!("Attempting to switch to unknown view."),
+            MainView::Unknown => log::warn!("Attempting to switch to unknown view."),
         }
 
         imp.header_bar.set_flat(false);
         imp.action_bar.remove_css_class("flat");
-        imp.current_view_index.set(view);
+        imp.selected_view.set(view);
     }
 
     /// Loads view state from the project model.
@@ -502,13 +514,13 @@ impl ApplicationWindow {
             MainView::Language => imp.language_view.load_state(),
             MainView::Inventory => imp.inventory_view.load_state(),
             MainView::Dictionary => imp.dictionary_view.load_state(),
-            _ => log::warn!("Attempting to load unknown view."),
+            MainView::Unknown => log::warn!("Attempting to load unknown view."),
         }
     }
 
     /// Loads all view states from the project model.
     pub fn load_all_views(&self) {
-        for view in ui::MainView::ALL.iter() {
+        for view in ui::MainView::SELECTABLES.iter() {
             self.load_view_state(*view);
         }
     }
@@ -527,7 +539,7 @@ impl ApplicationWindow {
 
     /// Commits all view states to the project model.
     pub fn commit_all_views(&self) {
-        for view in ui::MainView::ALL.iter() {
+        for view in ui::MainView::SELECTABLES.iter() {
             self.commit_view_state(*view);
         }
     }
@@ -540,14 +552,26 @@ impl ApplicationWindow {
             MainView::Language => imp.language_view.unload_state(),
             MainView::Inventory => imp.inventory_view.unload_state(),
             MainView::Dictionary => imp.dictionary_view.unload_state(),
-            _ => log::warn!("Attempting to load unknown view."),
+            MainView::Unknown => log::warn!("Attempting to load unknown view."),
         }
     }
 
     /// Unloads all view states from the project model.
     pub fn unload_all_views(&self) {
-        for view in ui::MainView::ALL.iter() {
+        for view in ui::MainView::SELECTABLES.iter() {
             self.unload_view_state(*view);
+        }
+    }
+
+    pub fn go_back(&self) {
+        let imp = self.imp();
+        let view = imp.selected_view.get();
+
+        match view {
+            MainView::Language => imp.language_view.go_back(),
+            MainView::Inventory => imp.inventory_view.go_back(),
+            MainView::Dictionary => imp.dictionary_view.go_back(),
+            MainView::Unknown => {}
         }
     }
 
