@@ -111,6 +111,14 @@ impl Phoneme {
         let ipas = ipa::parse_str(&self.sound);
         ipas.get(0).copied()
     }
+
+    pub fn mora(&self) -> u32 {
+        self.mora
+    }
+
+    pub fn set_mora(&mut self, value: u32) {
+        self.mora = value;
+    }
 }
 
 impl Default for Phoneme {

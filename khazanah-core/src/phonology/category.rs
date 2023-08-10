@@ -104,10 +104,18 @@ impl ReadXml for Category {
         reader: &mut XmlReader<R>,
         state: &mut Self::ReaderState,
         name: String,
-        _attrs: Vec<(String, String)>,
+        attrs: Vec<(String, String)>,
     ) -> Result<(), XmlError<Self::Error>> {
         match reader.last_tag_pair() {
-            (_, Some(Self::TAG)) => {}
+            (_, Some(Self::TAG)) => {
+                let id = attrs
+                    .iter()
+                    .find(|&x| x.0 == "id")
+                    .map(|x| Uuid::parse_str(&x.1))
+                    .unwrap_or_else(|| Ok(Uuid::new_v4()))
+                    .map_err(|e| XmlError::Other(Error::Id(e)))?;
+                self.id = Some(id);
+            }
             (Some(Self::TAG), Some("name")) => {
                 self.name.clear();
             }
@@ -167,7 +175,12 @@ impl WriteXml for Category {
         &self,
         writer: &mut XmlWriter<W>,
     ) -> Result<(), XmlError<Self::Error>> {
-        writer.write_tag_start("category")?;
+        if let Some(id) = self.id {
+            writer
+                .write_tag_start_with_attributes("category", [("id", id.to_string().as_str())])?;
+        } else {
+            writer.write_tag_start("category")?;
+        };
 
         writer.write_tag_start("name")?;
         writer.write_text(self.name())?;
@@ -192,7 +205,7 @@ mod tests {
     use super::*;
 
     const XML1: &str = r#"
-    <category>
+    <category id="74a61b73-2830-4d23-80d7-fe3222741e80">
         <name>C</name>
         <phonemes>
             <id>fdd685d9-9a96-42b0-856c-fd3b7de584e7</id>
@@ -207,6 +220,10 @@ mod tests {
         let cat = Category::load_xml_str(XML1).unwrap();
         dbg!(&cat);
 
+        assert_eq!(
+            cat.id(),
+            Some(Uuid::parse_str("74a61b73-2830-4d23-80d7-fe3222741e80").unwrap())
+        );
         assert_eq!(cat.name(), "C");
 
         assert!(cat.contains_phoneme_id(
