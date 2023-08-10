@@ -10,7 +10,7 @@ use crate::{
 use super::Error;
 
 /// A Phoneme.
-#[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Phoneme {
     /// The id of the phoneme.
     id: Option<Uuid>,
@@ -20,6 +20,8 @@ pub struct Phoneme {
     xsampa_sound: Option<String>,
     /// The romanization of the phoneme.
     romanization: Option<String>,
+    /// The mora length of the phoneme.
+    mora: u32,
 }
 
 impl Phoneme {
@@ -108,6 +110,18 @@ impl Phoneme {
     pub fn base(&self) -> Option<ipa::Ipa> {
         let ipas = ipa::parse_str(&self.sound);
         ipas.get(0).copied()
+    }
+}
+
+impl Default for Phoneme {
+    fn default() -> Self {
+        Self {
+            id: Default::default(),
+            sound: Default::default(),
+            xsampa_sound: Default::default(),
+            romanization: Default::default(),
+            mora: 1,
+        }
     }
 }
 

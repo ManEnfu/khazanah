@@ -153,6 +153,23 @@ where
         ev
     }
 
+    /// Gets the last read tag name.
+    pub fn last_tag(&self) -> Option<&str> {
+        self.context.last().map(|s| s.as_str())
+    }
+
+    /// Gets the last read tag name and its parent.
+    pub fn last_tag_pair(&self) -> (Option<&str>, Option<&str>) {
+        let l = self.context.len();
+        let last_tag = self.context.last().map(|s| s.as_str());
+        let parent_tag = match l {
+            2.. => self.context.get(l - 2).map(|s| s.as_str()),
+            _ => None,
+        };
+
+        (parent_tag, last_tag)
+    }
+
     /// Finishes reading and returns the underlying reader.
     pub fn finish(self) -> R {
         self.reader.into_inner()
@@ -174,7 +191,7 @@ where
     /// Creates a new writer.
     pub fn new(writer: W) -> Self {
         Self {
-            writer: Writer::new(writer),
+            writer: Writer::new_with_indent(writer, b' ', 2),
         }
     }
 
@@ -316,7 +333,7 @@ where
         Ok(data)
     }
 
-    /// Reads fro XML.
+    /// Reads from XML.
     fn read_xml<R: BufRead>(reader: R) -> Result<(Self, R), XmlError<Self::Error>> {
         let mut r = XmlReader::new(reader);
         let ret = Self::deserialize_xml(&mut r, None)?;
