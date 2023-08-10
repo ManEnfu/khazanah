@@ -1,11 +1,15 @@
+use std::collections::HashMap;
+
+use uuid::Uuid;
+
 use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
 
 use super::{Category, Error};
 
 /// Collections of categories
-#[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Categories {
-    inner: Vec<Category>,
+    inner: HashMap<Uuid, Category>,
 }
 
 impl Categories {
@@ -15,33 +19,50 @@ impl Categories {
     }
 
     /// Adds a category.
-    pub fn add_category(&mut self, category: Category) {
-        self.inner.push(category);
+    pub fn add_category(&mut self, mut category: Category) -> Uuid {
+        // self.inner.push(category);
+        let id = if let Some(id) = category.id() {
+            id
+        } else {
+            category.generate_id()
+        };
+        self.inner.insert(id, category);
+        id
     }
 
-    /// Removes a category at index `index`
-    pub fn remove_category_by_index(&mut self, index: usize) -> Category {
-        self.inner.remove(index)
+    /// Removes a category by id.
+    pub fn remove_category_by_id(&mut self, id: Uuid) -> Option<Category> {
+        self.inner.remove(&id)
     }
 
     /// Removes a category by name.
     pub fn remove_category_by_name(&mut self, name: &str) -> Option<Category> {
-        if let Some(index) = self.inner.iter().position(|v| v.name() == name) {
-            Some(self.inner.remove(index))
+        if let Some(id) = self.inner.iter().find_map(|(id, cat)| {
+            if cat.name() == name {
+                Some(id.to_owned())
+            } else {
+                None
+            }
+        }) {
+            self.inner.remove(&id)
         } else {
             None
         }
     }
 
-    /// Gets a reference to category by index.
-    pub fn category_by_index(&self, index: usize) -> Option<&Category> {
-        self.inner.get(index)
+    /// Gets a reference to category by id.
+    pub fn category_by_id(&self, id: Uuid) -> Option<&Category> {
+        self.inner.get(&id)
     }
 
     /// Gets a reference to category by name.
     pub fn category_by_name(&self, name: &str) -> Option<&Category> {
-        if let Some(index) = self.inner.iter().position(|v| v.name() == name) {
-            self.inner.get(index)
+        if let Some(id) =
+            self.inner
+                .iter()
+                .find_map(|(id, cat)| if cat.name() == name { Some(id) } else { None })
+        {
+            self.inner.get(id)
         } else {
             None
         }
@@ -49,7 +70,7 @@ impl Categories {
 
     /// Iterates over categories.
     pub fn iter_categories(&self) -> impl Iterator<Item = &Category> {
-        self.inner.iter()
+        self.inner.values()
     }
 }
 
@@ -71,7 +92,7 @@ impl ReadXml for Categories {
             (_, Some(Self::TAG)) => {}
             (Some(Self::TAG), Some(Category::TAG)) => {
                 let cat = Category::deserialize_xml(reader, Some((name, attrs)))?;
-                self.inner.push(cat);
+                self.add_category(cat);
             }
             _ => {
                 return Err(XmlError::InvalidTag(name));
@@ -108,7 +129,7 @@ impl WriteXml for Categories {
     ) -> Result<(), XmlError<Self::Error>> {
         writer.write_tag_start("categories")?;
 
-        for cat in self.inner.iter() {
+        for (_, cat) in self.inner.iter() {
             cat.serialize_xml(writer)?;
         }
 
@@ -125,7 +146,7 @@ mod tests {
 
     const XML1: &str = r#"
     <categories>
-        <category>
+        <category id="74a61b73-2830-4d23-80d7-fe3222741e80">
             <name>C</name>
             <phonemes>
                 <id>fdd685d9-9a96-42b0-856c-fd3b7de584e7</id>
@@ -142,6 +163,10 @@ mod tests {
         dbg!(&cats);
 
         let cat = cats.category_by_name("C").unwrap();
+        let cat2 = cats
+            .category_by_id(Uuid::parse_str("74a61b73-2830-4d23-80d7-fe3222741e80").unwrap())
+            .unwrap();
+        assert_eq!(&cat, &cat2);
 
         assert!(cat.contains_phoneme_id(
             &Uuid::parse_str("ae835d0b-b4ce-4686-b16f-d7fbbec55d96").unwrap()
