@@ -1,18 +1,17 @@
-use std::collections::{hash_map::Keys, HashMap};
-
 use bimap::BiHashMap;
 use std::cell::RefCell;
 use uuid::Uuid;
 
 use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
-use crate::{utils, Phoneme};
+use crate::{utils, Phoneme, Store};
 
 use super::Error;
 
 /// An inventory of phonemes.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Inventory {
-    phonemes: HashMap<Uuid, Phoneme>,
+    // phonemes: HashMap<Uuid, Phoneme>,
+    phonemes: Store<Phoneme>,
 
     romanization_pronunciation_map: RefCell<Option<BiHashMap<String, String>>>,
 }
@@ -24,21 +23,15 @@ impl Inventory {
     }
 
     /// Adds a phoneme into the inventory and returns its id.
-    pub fn add_phoneme(&mut self, mut phoneme: Phoneme) -> Uuid {
+    pub fn add_phoneme(&mut self, phoneme: Phoneme) -> Uuid {
         self.romanization_pronunciation_map.replace(None);
-        let id = if let Some(id) = phoneme.id() {
-            id
-        } else {
-            phoneme.generate_id()
-        };
-        self.phonemes.insert(id, phoneme);
-        id
+        self.phonemes.add(phoneme)
     }
 
     /// Removes a phoneme of id `id` from the inventory.
     pub fn delete_phoneme_by_id(&mut self, id: Uuid) -> Option<Phoneme> {
         self.romanization_pronunciation_map.replace(None);
-        self.phonemes.remove(&id)
+        self.phonemes.remove(id)
     }
 
     /// Gets the number of phonemes.
@@ -48,29 +41,29 @@ impl Inventory {
 
     /// Gets a reference to phoneme by id.
     pub fn phoneme_by_id(&self, id: Uuid) -> Option<&Phoneme> {
-        self.phonemes.get(&id)
+        self.phonemes.get(id)
     }
 
     /// Gets a mutable reference to phoneme by id.
     pub fn phoneme_by_id_mut(&mut self, id: Uuid) -> Option<&mut Phoneme> {
         // Assume that the romanization map is outdated.
         self.romanization_pronunciation_map.replace(None);
-        self.phonemes.get_mut(&id)
+        self.phonemes.get_mut(id)
     }
 
     /// Iterates over phonemes.
     pub fn iter_phonemes(&self) -> impl Iterator<Item = &Phoneme> {
-        self.phonemes.values()
+        self.phonemes.iter()
     }
 
     /// Iterates over mutable reference of phonemes.
     pub fn iter_phonemes_mut(&mut self) -> impl Iterator<Item = &mut Phoneme> {
-        self.phonemes.values_mut()
+        self.phonemes.iter_mut()
     }
 
     /// Iterates over phoneme ids.
-    pub fn ids(&self) -> Keys<Uuid, Phoneme> {
-        self.phonemes.keys()
+    pub fn ids(&self) -> impl Iterator<Item = &Uuid> {
+        self.phonemes.ids()
     }
 
     /// Converts a romanization to IPA pronunciation using rules specified by the inventory.
@@ -126,25 +119,12 @@ impl ReadXml for Inventory {
     fn process_tag_start<R: std::io::BufRead>(
         &mut self,
         reader: &mut XmlReader<R>,
-        _state: &mut Self::ReaderState,
+        state: &mut Self::ReaderState,
         name: String,
         attrs: Vec<(String, String)>,
     ) -> Result<(), XmlError<Self::Error>> {
-        let l = reader.context.len();
-        let ptag = match l {
-            2.. => reader.context.get(l - 2).map(|s| s.as_str()),
-            _ => None,
-        };
-
-        match (ptag, name.as_str()) {
-            (_, Self::TAG) => {}
-            (Some(Self::TAG), Phoneme::TAG) => {
-                let phoneme = Phoneme::deserialize_xml(reader, Some((name, attrs)))?;
-                self.add_phoneme(phoneme);
-            }
-            _ => return Err(XmlError::InvalidTag(name)),
-        }
-        Ok(())
+        self.phonemes
+            ._process_tag_start(Self::TAG, reader, state, name, attrs)
     }
 
     fn process_text<R: std::io::BufRead>(
@@ -173,15 +153,7 @@ impl WriteXml for Inventory {
         &self,
         writer: &mut XmlWriter<W>,
     ) -> Result<(), XmlError<Self::Error>> {
-        writer.write_tag_start("inventory")?;
-
-        for (_, phoneme) in self.phonemes.iter() {
-            phoneme.serialize_xml(writer)?;
-        }
-
-        writer.write_tag_end("inventory")?;
-
-        Ok(())
+        self.phonemes._serialize_xml("inventory", writer)
     }
 }
 

@@ -52,7 +52,14 @@ mod imp {
 
             match self.sort_by.get() {
                 PhonemeSortBy::Name => self.compare_by_name(phoneme1, phoneme2),
-                PhonemeSortBy::Base => self.compare_by_base(phoneme1, phoneme2),
+                PhonemeSortBy::Base => {
+                    let c = self.compare_by_base(phoneme1, phoneme2);
+                    if c == gtk::Ordering::Equal {
+                        self.compare_by_name(phoneme1, phoneme2)
+                    } else {
+                        c
+                    }
+                }
                 _ => gtk::Ordering::Equal,
             }
         }

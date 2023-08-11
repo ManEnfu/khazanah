@@ -3,6 +3,7 @@ use uuid::Uuid;
 use crate::{
     ipa,
     xml::{ReadXml, WriteXml, XmlError, XmlWriter},
+    IdAble,
 };
 
 use super::{Error, PartOfSpeech};
@@ -25,6 +26,20 @@ pub struct Word {
     xsampa_pronunciation: Option<String>,
 }
 
+impl IdAble for Word {
+    /// Gets the id of the word.
+    fn id(&self) -> Option<Uuid> {
+        self.id
+    }
+
+    /// Generates new id for the word, and then returns it.
+    fn generate_id(&mut self) -> Uuid {
+        let id = Uuid::new_v4();
+        self.id = Some(id);
+        id
+    }
+}
+
 impl Word {
     /// Creates a new word.
     pub fn new() -> Self {
@@ -37,18 +52,6 @@ impl Word {
             id: Some(id),
             ..Default::default()
         }
-    }
-
-    /// Gets the id of the word.
-    pub fn id(&self) -> Option<Uuid> {
-        self.id
-    }
-
-    /// Generates new id for the word, and then returns it.
-    pub fn generate_id(&mut self) -> Uuid {
-        let id = Uuid::new_v4();
-        self.id = Some(id);
-        id
     }
 
     /// Gets the romanization of the word.

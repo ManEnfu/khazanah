@@ -4,6 +4,7 @@ use uuid::Uuid;
 
 use crate::{
     ipa,
+    prelude::*,
     xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter},
 };
 
@@ -22,6 +23,20 @@ pub struct Phoneme {
     romanization: Option<String>,
     /// The mora length of the phoneme.
     mora: u32,
+}
+
+impl IdAble for Phoneme {
+    /// Gets the id of the phoneme.
+    fn id(&self) -> Option<Uuid> {
+        self.id
+    }
+
+    /// Generates new id for the phoneme, and then returns it.
+    fn generate_id(&mut self) -> Uuid {
+        let id = Uuid::new_v4();
+        self.id = Some(id);
+        id
+    }
 }
 
 impl Phoneme {
@@ -47,18 +62,6 @@ impl Phoneme {
 
     pub fn builder() -> PhonemeBuilder {
         PhonemeBuilder::new()
-    }
-
-    /// Gets the id of the phoneme.
-    pub fn id(&self) -> Option<Uuid> {
-        self.id
-    }
-
-    /// Generates new id for the phoneme, and then returns it.
-    pub fn generate_id(&mut self) -> Uuid {
-        let id = Uuid::new_v4();
-        self.id = Some(id);
-        id
     }
 
     /// Gets the sound of the phoneme.

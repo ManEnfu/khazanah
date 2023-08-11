@@ -1,10 +1,10 @@
 use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
-use khazanah_core::Ipa;
+use khazanah_core::prelude::*;
 
 use crate::models;
-use khazanah_core::Phoneme;
+use khazanah_core::{Ipa, Phoneme};
 use uuid::Uuid;
 
 #[doc(hidden)]

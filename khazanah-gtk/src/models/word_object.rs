@@ -1,6 +1,7 @@
 use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
+use khazanah_core::prelude::*;
 use khazanah_core::{Word, ALL_PARTS_OF_SPEECH};
 use uuid::Uuid;
 

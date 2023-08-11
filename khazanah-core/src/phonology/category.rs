@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use rand::{seq::SliceRandom, Rng};
 use uuid::Uuid;
 
@@ -16,6 +17,20 @@ pub struct Category {
     phonemes_id: Vec<Uuid>,
 }
 
+impl IdAble for Category {
+    /// Gets the id of the category.
+    fn id(&self) -> Option<Uuid> {
+        self.id
+    }
+
+    /// Generates new id for the category, and then returns it.
+    fn generate_id(&mut self) -> Uuid {
+        let id = Uuid::new_v4();
+        self.id = Some(id);
+        id
+    }
+}
+
 impl Category {
     /// Creates a new category.
     pub fn new() -> Self {
@@ -28,18 +43,6 @@ impl Category {
             id: Some(id),
             ..Default::default()
         }
-    }
-
-    /// Gets the id of the category.
-    pub fn id(&self) -> Option<Uuid> {
-        self.id
-    }
-
-    /// Generates new id for the category, and then returns it.
-    pub fn generate_id(&mut self) -> Uuid {
-        let id = Uuid::new_v4();
-        self.id = Some(id);
-        id
     }
 
     /// Gets the name of the category.

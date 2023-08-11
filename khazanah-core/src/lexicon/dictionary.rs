@@ -1,19 +1,16 @@
 use super::{Error, Word};
+use crate::prelude::*;
+use crate::Store;
 use uuid::Uuid;
 
-use std::{
-    collections::{
-        hash_map::{Iter, Keys},
-        HashMap,
-    },
-    io::{BufRead, Write},
-};
+use std::io::{BufRead, Write};
 
-use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
+use crate::xml::{XmlError, XmlReader, XmlWriter};
+
 /// A lexicon. Stores dictionary of words.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Dictionary {
-    words: HashMap<Uuid, Word>,
+    words: Store<Word>,
 }
 
 impl Dictionary {
@@ -23,19 +20,13 @@ impl Dictionary {
     }
 
     /// Adds a `Word` to `Lexicon` and returns its id.
-    pub fn add_word(&mut self, mut word: Word) -> Uuid {
-        let id = if let Some(id) = word.id() {
-            id
-        } else {
-            word.generate_id()
-        };
-        self.words.insert(id, word);
-        id
+    pub fn add_word(&mut self, word: Word) -> Uuid {
+        self.words.add(word)
     }
 
     /// Removes a word of id `id` from lexicon. Returns `true` if removal is successful.
-    pub fn delete_word_by_id(&mut self, id: Uuid) -> bool {
-        self.words.remove(&id).is_some()
+    pub fn delete_word_by_id(&mut self, id: Uuid) -> Option<Word> {
+        self.words.remove(id)
     }
 
     /// Gets the number of words.
@@ -43,44 +34,24 @@ impl Dictionary {
         self.words.len()
     }
 
-    // /// Gets a reference to word list.
-    // pub fn words(&self) -> &[Word] {
-    //     &self.words.va
-    // }
-
-    // /// Gets a mutable reference to word list.
-    // pub fn words_mut(&mut self) -> &mut [Word] {
-    //     &mut self.words
-    // }
-
-    // /// Gets a reference to word by index.
-    // pub fn word_by_index(&self, index: usize) -> Option<&Word> {
-    //     self.words.get(index)
-    // }
-
-    // /// Gets a mutable reference to word by index.
-    // pub fn word_by_index_mut(&mut self, index: usize) -> Option<&mut Word> {
-    //     self.words.get_mut(index)
-    // }
-
     /// Gets a reference to word by id.
     pub fn word_by_id(&self, id: Uuid) -> Option<&Word> {
-        self.words.get(&id)
+        self.words.get(id)
     }
 
     /// Gets a mutable reference to word by id.
     pub fn word_by_id_mut(&mut self, id: Uuid) -> Option<&mut Word> {
-        self.words.get_mut(&id)
+        self.words.get_mut(id)
     }
 
     /// Iterates over words.
-    pub fn iter_words(&self) -> Iter<Uuid, Word> {
+    pub fn iter_words(&self) -> impl Iterator<Item = &Word> {
         self.words.iter()
     }
 
     /// Iterates over word ids.
-    pub fn ids(&self) -> Keys<Uuid, Word> {
-        self.words.keys()
+    pub fn ids(&self) -> impl Iterator<Item = &Uuid> {
+        self.words.ids()
     }
 }
 
@@ -94,28 +65,12 @@ impl ReadXml for Dictionary {
     fn process_tag_start<R: BufRead>(
         &mut self,
         reader: &mut XmlReader<R>,
-        _state: &mut Self::ReaderState,
+        state: &mut Self::ReaderState,
         name: String,
         attrs: Vec<(String, String)>,
     ) -> Result<(), XmlError<Self::Error>> {
-        let l = reader.context.len();
-        let tag = reader.context.last().map(|s| s.as_str());
-        let ptag = match l {
-            2.. => reader.context.get(l - 2).map(|s| s.as_str()),
-            _ => None,
-        };
-
-        match (ptag, tag) {
-            // Root tag;
-            (_, Some(Self::TAG)) => {}
-            // Insert new word
-            (Some(Self::TAG), Some(Word::TAG)) => {
-                let word = Word::deserialize_xml(reader, Some((name, attrs)))?;
-                self.add_word(word);
-            }
-            _ => return Err(XmlError::InvalidTag(tag.unwrap_or_default().to_string())),
-        }
-        Ok(())
+        self.words
+            ._process_tag_start(Self::TAG, reader, state, name, attrs)
     }
 
     fn process_text<R: BufRead>(
@@ -144,15 +99,7 @@ impl WriteXml for Dictionary {
         &self,
         writer: &mut XmlWriter<W>,
     ) -> Result<(), XmlError<Self::Error>> {
-        writer.write_tag_start("dictionary")?;
-
-        for (_, word) in self.words.iter() {
-            word.serialize_xml(writer)?;
-        }
-
-        writer.write_tag_end("dictionary")?;
-
-        Ok(())
+        self.words._serialize_xml("dictionary", writer)
     }
 }
 
@@ -197,7 +144,7 @@ mod tests {
             "#
         .to_string();
 
-        for (id, word) in lex.iter_words() {
+        for word in lex.iter_words() {
             xml += format!(
                 r#"
                 <word id="{}">
@@ -207,7 +154,7 @@ mod tests {
                     <part-of-speech>{}</part-of-speech>
                 </word>
                 "#,
-                id.to_string(),
+                word.id().unwrap().to_string(),
                 &word.romanization(),
                 &word.pronunciation(),
                 &word.translation(),

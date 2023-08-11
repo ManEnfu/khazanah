@@ -354,12 +354,17 @@ impl Sidebar {
 
     /// Deletes a word by its id.
     pub fn delete_word_by_id(&self, id: Uuid) {
-        if let Some(true) = self.project_model().update(|project| {
-            project
-                .language_mut()
-                .dictionary_mut()
-                .delete_word_by_id(id)
-        }) {
+        if self
+            .project_model()
+            .update(|project| {
+                project
+                    .language_mut()
+                    .dictionary_mut()
+                    .delete_word_by_id(id)
+            })
+            .flatten()
+            .is_some()
+        {
             log::debug!("Deleted word of id {}", id);
 
             let list_model = self

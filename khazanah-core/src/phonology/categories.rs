@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use crate::prelude::*;
+use crate::Store;
 
 use uuid::Uuid;
 
@@ -9,7 +10,7 @@ use super::{Category, Error};
 /// Collections of categories
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Categories {
-    inner: HashMap<Uuid, Category>,
+    inner: Store<Category>,
 }
 
 impl Categories {
@@ -19,32 +20,24 @@ impl Categories {
     }
 
     /// Adds a category.
-    pub fn add_category(&mut self, mut category: Category) -> Uuid {
-        // self.inner.push(category);
-        let id = if let Some(id) = category.id() {
-            id
-        } else {
-            category.generate_id()
-        };
-        self.inner.insert(id, category);
-        id
+    pub fn add_category(&mut self, category: Category) -> Uuid {
+        self.inner.add(category)
     }
 
     /// Removes a category by id.
     pub fn remove_category_by_id(&mut self, id: Uuid) -> Option<Category> {
-        self.inner.remove(&id)
+        self.inner.remove(id)
     }
 
     /// Removes a category by name.
     pub fn remove_category_by_name(&mut self, name: &str) -> Option<Category> {
-        if let Some(id) = self.inner.iter().find_map(|(id, cat)| {
-            if cat.name() == name {
-                Some(id.to_owned())
-            } else {
-                None
-            }
-        }) {
-            self.inner.remove(&id)
+        let id = self
+            .inner
+            .iter()
+            .find_map(|cat| if cat.name() == name { cat.id() } else { None });
+
+        if let Some(id) = id {
+            self.inner.remove(id)
         } else {
             None
         }
@@ -52,16 +45,17 @@ impl Categories {
 
     /// Gets a reference to category by id.
     pub fn category_by_id(&self, id: Uuid) -> Option<&Category> {
-        self.inner.get(&id)
+        self.inner.get(id)
     }
 
     /// Gets a reference to category by name.
     pub fn category_by_name(&self, name: &str) -> Option<&Category> {
-        if let Some(id) =
-            self.inner
-                .iter()
-                .find_map(|(id, cat)| if cat.name() == name { Some(id) } else { None })
-        {
+        let id = self
+            .inner
+            .iter()
+            .find_map(|cat| if cat.name() == name { cat.id() } else { None });
+
+        if let Some(id) = id {
             self.inner.get(id)
         } else {
             None
@@ -70,7 +64,12 @@ impl Categories {
 
     /// Iterates over categories.
     pub fn iter_categories(&self) -> impl Iterator<Item = &Category> {
-        self.inner.values()
+        self.inner.iter()
+    }
+
+    /// Iterates over category ids.
+    pub fn ids(&self) -> impl Iterator<Item = &Uuid> {
+        self.inner.ids()
     }
 }
 
@@ -84,21 +83,12 @@ impl ReadXml for Categories {
     fn process_tag_start<R: std::io::BufRead>(
         &mut self,
         reader: &mut XmlReader<R>,
-        _state: &mut Self::ReaderState,
+        state: &mut Self::ReaderState,
         name: String,
         attrs: Vec<(String, String)>,
     ) -> Result<(), XmlError<Self::Error>> {
-        match reader.last_tag_pair() {
-            (_, Some(Self::TAG)) => {}
-            (Some(Self::TAG), Some(Category::TAG)) => {
-                let cat = Category::deserialize_xml(reader, Some((name, attrs)))?;
-                self.add_category(cat);
-            }
-            _ => {
-                return Err(XmlError::InvalidTag(name));
-            }
-        }
-        Ok(())
+        self.inner
+            ._process_tag_start(Self::TAG, reader, state, name, attrs)
     }
 
     fn process_text<R: std::io::BufRead>(
@@ -127,64 +117,6 @@ impl WriteXml for Categories {
         &self,
         writer: &mut XmlWriter<W>,
     ) -> Result<(), XmlError<Self::Error>> {
-        writer.write_tag_start("categories")?;
-
-        for (_, cat) in self.inner.iter() {
-            cat.serialize_xml(writer)?;
-        }
-
-        writer.write_tag_end("categories")?;
-
-        Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use uuid::Uuid;
-
-    const XML1: &str = r#"
-    <categories>
-        <category id="74a61b73-2830-4d23-80d7-fe3222741e80">
-            <name>C</name>
-            <phonemes>
-                <id>fdd685d9-9a96-42b0-856c-fd3b7de584e7</id>
-                <id>266bd118-7c61-4822-ad82-b73a3125f9b5</id>
-                <id>ae835d0b-b4ce-4686-b16f-d7fbbec55d96</id>
-            </phonemes>
-        </category>
-    </categories>
-    "#;
-
-    #[test]
-    fn read_xml() {
-        let cats = Categories::load_xml_str(XML1).unwrap();
-        dbg!(&cats);
-
-        let cat = cats.category_by_name("C").unwrap();
-        let cat2 = cats
-            .category_by_id(Uuid::parse_str("74a61b73-2830-4d23-80d7-fe3222741e80").unwrap())
-            .unwrap();
-        assert_eq!(&cat, &cat2);
-
-        assert!(cat.contains_phoneme_id(
-            &Uuid::parse_str("ae835d0b-b4ce-4686-b16f-d7fbbec55d96").unwrap()
-        ));
-        assert_eq!(
-            cat.phoneme_id_by_index(1),
-            Some(&Uuid::parse_str("266bd118-7c61-4822-ad82-b73a3125f9b5").unwrap())
-        );
-        assert!(!cat.contains_phoneme_id(
-            &Uuid::parse_str("70583203-66ab-4b94-ae52-786d83374406").unwrap()
-        ));
-    }
-
-    #[test]
-    fn write_xml() {
-        let cats = Categories::load_xml_str(XML1).unwrap();
-        let xml2 = cats.save_xml_string().unwrap();
-        let cats2 = Categories::load_xml_str(&xml2).unwrap();
-        assert_eq!(&cats, &cats2);
+        self.inner._serialize_xml("categories", writer)
     }
 }
