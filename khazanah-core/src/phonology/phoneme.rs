@@ -170,6 +170,9 @@ impl ReadXml for Phoneme {
             "romanization" => {
                 self.romanization = Some(String::default());
             }
+            "mora" => {
+                self.mora = 1;
+            }
             _ => return Err(XmlError::InvalidTag(name)),
         }
         Ok(())
@@ -191,6 +194,9 @@ impl ReadXml for Phoneme {
                 if let Some(rom) = self.romanization.as_mut() {
                     *rom += &text;
                 }
+            }
+            Some("mora") => {
+                self.mora = text.parse::<u32>().unwrap_or(1);
             }
             _ => {
                 return Err(XmlError::InvalidTag(tag.unwrap_or_default().to_string()));
@@ -232,6 +238,10 @@ impl WriteXml for Phoneme {
             w.write_text(rom)?;
             w.write_tag_end("romanization")?;
         }
+
+        w.write_tag_start("mora")?;
+        w.write_text(self.mora.to_string().as_str())?;
+        w.write_tag_end("mora")?;
 
         w.write_tag_end("phoneme")?;
 
@@ -277,6 +287,7 @@ mod tests {
             .romanization("aa".to_string())
             .build();
         ret.generate_id();
+        ret.set_mora(2);
         ret
     }
 
@@ -286,6 +297,7 @@ mod tests {
             <phoneme id="{id}">
                 <sound>aː</sound>
                 <romanization>aa</romanization>
+                <mora>2</mora>
             </phoneme>
             "#,
         )
