@@ -66,6 +66,11 @@ impl Inventory {
         self.phonemes.ids()
     }
 
+    /// Gets a reference to the inner store.
+    pub fn phonemes(&self) -> &Store<Phoneme> {
+        &self.phonemes
+    }
+
     /// Converts a romanization to IPA pronunciation using rules specified by the inventory.
     pub fn pronunce_romanization(&self, romanization: &str) -> String {
         if self.romanization_pronunciation_map.borrow().is_none() {

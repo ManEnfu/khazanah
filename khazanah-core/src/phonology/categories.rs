@@ -71,6 +71,11 @@ impl Categories {
     pub fn ids(&self) -> impl Iterator<Item = &Uuid> {
         self.inner.ids()
     }
+
+    /// Gets a reference to the inner store.
+    pub fn categories(&self) -> &Store<Category> {
+        &self.inner
+    }
 }
 
 impl ReadXml for Categories {

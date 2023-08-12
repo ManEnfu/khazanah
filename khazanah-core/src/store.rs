@@ -66,6 +66,10 @@ where
     pub fn ids(&self) -> impl Iterator<Item = &Uuid> {
         self.inner.keys()
     }
+
+    pub fn contains(&self, id: Uuid) -> bool {
+        self.inner.contains_key(&id)
+    }
 }
 
 impl<T> Store<T>

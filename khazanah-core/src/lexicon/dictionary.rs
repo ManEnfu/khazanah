@@ -53,6 +53,11 @@ impl Dictionary {
     pub fn ids(&self) -> impl Iterator<Item = &Uuid> {
         self.words.ids()
     }
+
+    /// Gets a reference to the inner store.
+    pub fn words(&self) -> &Store<Word> {
+        &self.words
+    }
 }
 
 impl ReadXml for Dictionary {
