@@ -1,7 +1,7 @@
 pub use add_phoneme_list::AddPhonemeListModel;
 pub use add_phoneme_object::AddPhonemeObject;
 pub use meta_object::MetaObject;
-pub use ordered_set::OrderedSet;
+pub use ordered_set::KeyStore;
 pub use phoneme_object::PhonemeObject;
 pub use phoneme_sorter::{PhonemeSortBy, PhonemeSorter};
 pub use project_model::ProjectModel;

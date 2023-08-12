@@ -40,7 +40,7 @@ mod imp {
         pub project_model: RefCell<models::ProjectModel>,
 
         #[property(get, set)]
-        pub list_model: RefCell<Option<models::OrderedSet>>,
+        pub list_model: RefCell<Option<models::KeyStore>>,
         #[property(get, set)]
         pub filter_model: RefCell<Option<gtk::FilterListModel>>,
         #[property(get, set)]
@@ -154,7 +154,7 @@ impl Sidebar {
         let imp = self.imp();
 
         // let list_model = gio::ListStore::new(models::PhonemeObject::static_type());
-        let list_model = models::OrderedSet::new(models::PhonemeObject::static_type());
+        let list_model = models::KeyStore::new(models::PhonemeObject::static_type());
         self.set_list_model(list_model.clone());
 
         let filter_model =
@@ -381,15 +381,12 @@ impl ui::View for Sidebar {
     fn load_state(&self) {
         log::debug!("Loading view state.");
 
-        if let Some(mut list_model) = self.list_model() {
-            list_model.remove_all();
+        if let Some(list_model) = self.list_model() {
             if let Some(project) = self.project_model().project().as_ref() {
-                list_model.extend(project.language().phonemic_inventory().ids().map(|i| {
-                    (
-                        *i,
-                        models::PhonemeObject::query_project(self.project_model(), *i),
-                    )
-                }));
+                list_model.sync_with_store(
+                    project.language().phonemic_inventory().phonemes(),
+                    |i, _| models::PhonemeObject::query_project(self.project_model(), i),
+                )
             }
 
             self.select_phoneme_by_id(self.imp().selected_id.get());

@@ -66,7 +66,7 @@ mod imp {
         pub project_model: RefCell<models::ProjectModel>,
 
         #[property(get, set)]
-        pub list_model: RefCell<Option<models::OrderedSet>>,
+        pub list_model: RefCell<Option<models::KeyStore>>,
         #[property(get, set)]
         pub filter_model: RefCell<Option<gtk::FilterListModel>>,
         #[property(get, set)]
@@ -159,7 +159,7 @@ impl Sidebar {
         let imp = self.imp();
 
         // Setup list models
-        let list_model = models::OrderedSet::new(WordObject::static_type());
+        let list_model = models::KeyStore::new(WordObject::static_type());
         self.set_list_model(list_model.clone());
 
         let filter_model = gtk::FilterListModel::new(
@@ -551,16 +551,11 @@ impl ui::View for Sidebar {
         log::debug!("Loading view state.");
 
         // reload list
-        if let Some(mut list_model) = self.list_model() {
-            list_model.remove_all();
+        if let Some(list_model) = self.list_model() {
             if let Some(project) = self.project_model().project().as_ref() {
-                list_model.extend(
-                    project
-                        .language()
-                        .dictionary()
-                        .ids()
-                        .map(|i| (*i, WordObject::query_project(self.project_model(), *i))),
-                );
+                list_model.sync_with_store(project.language().dictionary().words(), |i, _| {
+                    WordObject::query_project(self.project_model(), i)
+                })
             }
 
             self.select_word_by_id(self.imp().selected_id.get());

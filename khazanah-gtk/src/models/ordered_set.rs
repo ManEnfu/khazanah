@@ -2,6 +2,8 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gio, glib};
 
+use khazanah_core::prelude::*;
+use khazanah_core::Store;
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -17,8 +19,8 @@ mod imp {
     use super::*;
 
     #[derive(Debug, Default, glib::Properties)]
-    #[properties(wrapper_type = super::OrderedSet)]
-    pub struct OrderedSet {
+    #[properties(wrapper_type = super::KeyStore)]
+    pub struct KeyStore {
         #[property(get)]
         pub inner: RefCell<gio::ListStore>,
 
@@ -26,13 +28,13 @@ mod imp {
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for OrderedSet {
+    impl ObjectSubclass for KeyStore {
         const NAME: &'static str = "KhzOrderedSet";
-        type Type = super::OrderedSet;
+        type Type = super::KeyStore;
         type Interfaces = (gio::ListModel,);
     }
 
-    impl ObjectImpl for OrderedSet {
+    impl ObjectImpl for KeyStore {
         fn properties() -> &'static [glib::ParamSpec] {
             Self::derived_properties()
         }
@@ -57,7 +59,7 @@ mod imp {
         }
     }
 
-    impl ListModelImpl for OrderedSet {
+    impl ListModelImpl for KeyStore {
         fn item_type(&self) -> glib::Type {
             self.inner.borrow().item_type()
         }
@@ -74,15 +76,13 @@ mod imp {
 
 glib::wrapper! {
     /// A set with `Uuid` as key represented by an ordered list.
-    pub struct OrderedSet(ObjectSubclass<imp::OrderedSet>)
+    pub struct KeyStore(ObjectSubclass<imp::KeyStore>)
         @implements gio::ListModel;
 }
 
-impl OrderedSet {
+impl KeyStore {
     pub fn new(_item_type: glib::Type) -> Self {
-        glib::Object::builder()
-            // .property("inner", gio::ListStore::new(item_type))
-            .build()
+        glib::Object::builder().build()
     }
 
     pub fn insert(&self, key: Uuid, item: &impl IsA<glib::Object>) {
@@ -107,6 +107,11 @@ impl OrderedSet {
         } else {
             None
         }
+    }
+
+    pub fn contains_id(&self, key: &Uuid) -> bool {
+        let imp = self.imp();
+        imp.key_orders.borrow().contains_key(key)
     }
 
     pub fn remove_by_id(&self, key: &Uuid) {
@@ -138,9 +143,41 @@ impl OrderedSet {
             self.items_changed(ko.order, 1, 1);
         }
     }
+
+    pub fn sync_with_store<T, F, O>(&self, store: &Store<T>, factory: F)
+    where
+        T: IdAble + Default,
+        F: Fn(Uuid, &T) -> O,
+        O: IsA<glib::Object>,
+    {
+        let imp = self.imp();
+
+        // iterates `self`, removes items not in `store`
+        let mut to_be_removed = Vec::<Uuid>::new();
+
+        for key in imp.key_orders.borrow().keys() {
+            if !store.contains(*key) {
+                to_be_removed.push(*key);
+            }
+        }
+
+        for key in to_be_removed {
+            self.remove_by_id(&key);
+        }
+
+        // iterates `store`, adds items in `store` but not in `self`
+        for item in store.iter() {
+            if let Some(id) = item.id() {
+                if !self.contains_id(&id) {
+                    let obj = factory(id, item);
+                    self.insert(id, obj.upcast_ref::<glib::Object>());
+                }
+            }
+        }
+    }
 }
 
-impl<A> Extend<(Uuid, A)> for OrderedSet
+impl<A> Extend<(Uuid, A)> for KeyStore
 where
     A: IsA<glib::Object>,
 {
@@ -148,5 +185,140 @@ where
         for (key, item) in iter.into_iter() {
             self.insert(key, item.upcast_ref::<glib::Object>());
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[derive(Debug, Default, PartialEq, Eq)]
+    struct Item {
+        pub id: Option<Uuid>,
+    }
+
+    impl IdAble for Item {
+        fn id(&self) -> Option<Uuid> {
+            self.id
+        }
+
+        fn generate_id(&mut self) -> Uuid {
+            let id = Uuid::new_v4();
+            self.id = Some(id);
+            id
+        }
+    }
+
+    #[gtk::test]
+    fn sync() {
+        let mut store = Store::<Item>::new();
+        let os = KeyStore::new(gtk::Label::static_type());
+
+        let id1 = store.add(Item::default());
+        let id2 = store.add(Item::default());
+        let id3 = store.add(Item::default());
+        let id4 = store.add(Item::default());
+        let id5 = store.add(Item::default());
+        let id6 = store.add(Item::default());
+
+        os.sync_with_store(&store, |i, _| gtk::Label::new(Some(i.to_string().as_str())));
+
+        assert!(os.contains_id(&id1));
+        assert_eq!(
+            os.get_by_id(&id1)
+                .and_downcast::<gtk::Label>()
+                .unwrap()
+                .label(),
+            id1.to_string().as_str()
+        );
+        assert!(os.contains_id(&id2));
+        assert_eq!(
+            os.get_by_id(&id2)
+                .and_downcast::<gtk::Label>()
+                .unwrap()
+                .label(),
+            id2.to_string().as_str()
+        );
+        assert!(os.contains_id(&id3));
+        assert_eq!(
+            os.get_by_id(&id3)
+                .and_downcast::<gtk::Label>()
+                .unwrap()
+                .label(),
+            id3.to_string().as_str()
+        );
+        assert!(os.contains_id(&id4));
+        assert_eq!(
+            os.get_by_id(&id4)
+                .and_downcast::<gtk::Label>()
+                .unwrap()
+                .label(),
+            id4.to_string().as_str()
+        );
+        assert!(os.contains_id(&id5));
+        assert_eq!(
+            os.get_by_id(&id5)
+                .and_downcast::<gtk::Label>()
+                .unwrap()
+                .label(),
+            id5.to_string().as_str()
+        );
+        assert!(os.contains_id(&id6));
+        assert_eq!(
+            os.get_by_id(&id6)
+                .and_downcast::<gtk::Label>()
+                .unwrap()
+                .label(),
+            id6.to_string().as_str()
+        );
+
+        store.remove(id2);
+        store.remove(id5);
+        let id7 = store.add(Item::default());
+
+        os.sync_with_store(&store, |i, _| gtk::Label::new(Some(i.to_string().as_str())));
+
+        assert!(os.contains_id(&id1));
+        assert_eq!(
+            os.get_by_id(&id1)
+                .and_downcast::<gtk::Label>()
+                .unwrap()
+                .label(),
+            id1.to_string().as_str()
+        );
+        assert!(!os.contains_id(&id2));
+        assert!(os.contains_id(&id3));
+        assert_eq!(
+            os.get_by_id(&id3)
+                .and_downcast::<gtk::Label>()
+                .unwrap()
+                .label(),
+            id3.to_string().as_str()
+        );
+        assert!(os.contains_id(&id4));
+        assert_eq!(
+            os.get_by_id(&id4)
+                .and_downcast::<gtk::Label>()
+                .unwrap()
+                .label(),
+            id4.to_string().as_str()
+        );
+        assert!(!os.contains_id(&id5));
+        assert!(os.contains_id(&id6));
+        assert_eq!(
+            os.get_by_id(&id6)
+                .and_downcast::<gtk::Label>()
+                .unwrap()
+                .label(),
+            id6.to_string().as_str()
+        );
+        assert!(os.contains_id(&id7));
+        assert_eq!(
+            os.get_by_id(&id7)
+                .and_downcast::<gtk::Label>()
+                .unwrap()
+                .label(),
+            id7.to_string().as_str()
+        );
     }
 }
