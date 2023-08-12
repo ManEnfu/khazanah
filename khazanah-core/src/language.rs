@@ -43,7 +43,7 @@ impl Language {
         &self.phoneme_categories
     }
 
-    pub fn phoneme_categories_mut(&mut self) -> &Categories {
+    pub fn phoneme_categories_mut(&mut self) -> &mut Categories {
         &mut self.phoneme_categories
     }
 
