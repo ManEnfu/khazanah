@@ -1,3 +1,4 @@
+use crate::phonology::Categories;
 use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
 use crate::{phonology::Inventory, Dictionary};
 
@@ -12,6 +13,7 @@ mod meta;
 pub struct Language {
     meta: Meta,
     phonemic_inventory: Inventory,
+    phoneme_categories: Categories,
     dictionary: Dictionary,
 }
 
@@ -37,6 +39,14 @@ impl Language {
         &mut self.phonemic_inventory
     }
 
+    pub fn phoneme_categories(&self) -> &Categories {
+        &self.phoneme_categories
+    }
+
+    pub fn phoneme_categories_mut(&mut self) -> &Categories {
+        &mut self.phoneme_categories
+    }
+
     pub fn dictionary(&self) -> &Dictionary {
         &self.dictionary
     }
@@ -60,24 +70,22 @@ impl ReadXml for Language {
         name: String,
         attrs: Vec<(String, String)>,
     ) -> Result<(), XmlError<Self::Error>> {
-        let l = reader.context.len();
-        let ptag = match l {
-            2.. => reader.context.get(l - 2).map(|s| s.as_str()),
-            _ => None,
-        };
-
-        match (ptag, name.as_str()) {
-            (_, Self::TAG) => {}
-            (Some(Self::TAG), "meta") => {
+        match reader.last_tag_pair() {
+            (_, Some(Self::TAG)) => {}
+            (Some(Self::TAG), Some(Meta::TAG)) => {
                 self.meta = Meta::deserialize_xml(reader, Some((name, attrs)))?;
             }
-            (Some(Self::TAG), "phonology") => {}
-            (Some("phonology"), "inventory") => {
+            (Some(Self::TAG), Some("phonology")) => {}
+            (Some("phonology"), Some(Inventory::TAG)) => {
                 self.phonemic_inventory = Inventory::deserialize_xml(reader, Some((name, attrs)))
                     .map_err(|xe| xe.map_into())?;
             }
-            (Some(Self::TAG), "lexicon") => {}
-            (Some("lexicon"), "dictionary") => {
+            (Some("phonology"), Some(Categories::TAG)) => {
+                self.phoneme_categories = Categories::deserialize_xml(reader, Some((name, attrs)))
+                    .map_err(|xe| xe.map_into())?;
+            }
+            (Some(Self::TAG), Some("lexicon")) => {}
+            (Some("lexicon"), Some(Dictionary::TAG)) => {
                 self.dictionary = Dictionary::deserialize_xml(reader, Some((name, attrs)))
                     .map_err(|xe| xe.map_into())?;
             }
@@ -119,6 +127,9 @@ impl WriteXml for Language {
 
         writer.write_tag_start("phonology")?;
         self.phonemic_inventory
+            .serialize_xml(writer)
+            .map_err(|xe| xe.map_into())?;
+        self.phoneme_categories
             .serialize_xml(writer)
             .map_err(|xe| xe.map_into())?;
         writer.write_tag_end("phonology")?;
