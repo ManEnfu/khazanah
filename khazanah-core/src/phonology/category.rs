@@ -1,10 +1,10 @@
-use crate::prelude::*;
+use crate::{prelude::*, Phoneme};
 use rand::{seq::SliceRandom, Rng};
 use uuid::Uuid;
 
 use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
 
-use super::Error;
+use super::{Error, Inventory};
 
 /// A category of phonemes. Used in phonotactics and word generator.
 #[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -79,19 +79,50 @@ impl Category {
         self.phonemes_id.get(index)
     }
 
+    /// Gets a reference to phoneme by index.
+    pub fn phoneme_by_index<'a>(
+        &'a self,
+        index: usize,
+        inventory: &'a Inventory,
+    ) -> Option<&'a Phoneme> {
+        self.phoneme_id_by_index(index)
+            .and_then(|&id| inventory.phoneme_by_id(id))
+    }
+
     /// Returns `true` if a phoneme id is in the category.
     pub fn contains_phoneme_id(&self, id: &Uuid) -> bool {
         self.phonemes_id.contains(id)
     }
 
     /// Iterates over phoneme ids.
-    pub fn iter_phoneme_ids(&mut self) -> impl Iterator<Item = &Uuid> {
+    pub fn iter_phoneme_ids(&self) -> impl Iterator<Item = &Uuid> {
         self.phonemes_id.iter()
+    }
+
+    /// Iterates over phonemes.
+    pub fn iter_phonemes<'a>(
+        &'a self,
+        inventory: &'a Inventory,
+    ) -> impl Iterator<Item = &'a Phoneme> {
+        self.phonemes_id
+            .iter()
+            .filter_map(|&id| inventory.phoneme_by_id(id))
     }
 
     /// Randomly chooses phoneme ids from the category.
     pub fn choose_phoneme_id<R: Rng + ?Sized>(&self, rng: &mut R) -> Option<&Uuid> {
         self.phonemes_id.choose(rng)
+    }
+
+    /// Randomly chooses phoneme from the category.
+    pub fn choose_phoneme<'a, R: Rng + ?Sized>(
+        &self,
+        rng: &mut R,
+        inventory: &'a Inventory,
+    ) -> Option<&'a Phoneme> {
+        self.phonemes_id
+            .choose(rng)
+            .and_then(|&id| inventory.phoneme_by_id(id))
     }
 }
 

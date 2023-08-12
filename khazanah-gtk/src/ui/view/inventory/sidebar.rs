@@ -241,8 +241,7 @@ impl Sidebar {
         if let Some(id) = self.project_model().update(|project| {
             project
                 .language_mut()
-                .phonemic_inventory_mut()
-                .add_phoneme(Phoneme::new())
+                .phonemic_inventory_add_phoneme(Phoneme::new())
         }) {
             // Exits search mode first.
             // self.imp().search_bar.set_search_mode(false);
@@ -270,8 +269,7 @@ impl Sidebar {
             .update(|project| {
                 project
                     .language_mut()
-                    .phonemic_inventory_mut()
-                    .delete_phoneme_by_id(id)
+                    .phonemic_inventory_remove_phoneme_by_id(id, true)
             })
             .flatten()
             .is_some()

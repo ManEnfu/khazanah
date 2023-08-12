@@ -70,8 +70,7 @@ mod imp {
                     project_model.update(|project| {
                         project
                             .language_mut()
-                            .dictionary_mut()
-                            .word_by_id_mut(*id)
+                            .dictionary_word_by_id_mut(*id)
                             .map(&f)
                     });
                 }

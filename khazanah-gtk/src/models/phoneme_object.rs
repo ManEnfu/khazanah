@@ -74,8 +74,7 @@ mod imp {
                     project_model.update(|project| {
                         project
                             .language_mut()
-                            .phonemic_inventory_mut()
-                            .phoneme_by_id_mut(*id)
+                            .phonemic_inventory_phoneme_by_id_mut(*id)
                             .map(&f)
                     });
                 }

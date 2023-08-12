@@ -29,7 +29,7 @@ impl Inventory {
     }
 
     /// Removes a phoneme of id `id` from the inventory.
-    pub fn delete_phoneme_by_id(&mut self, id: Uuid) -> Option<Phoneme> {
+    pub fn remove_phoneme_by_id(&mut self, id: Uuid) -> Option<Phoneme> {
         self.romanization_pronunciation_map.replace(None);
         self.phonemes.remove(id)
     }

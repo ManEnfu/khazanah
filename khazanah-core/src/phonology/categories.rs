@@ -48,6 +48,11 @@ impl Categories {
         self.inner.get(id)
     }
 
+    /// Gets a mutable reference to category by id.
+    pub fn category_by_id_mut(&mut self, id: Uuid) -> Option<&mut Category> {
+        self.inner.get_mut(id)
+    }
+
     /// Gets a reference to category by name.
     pub fn category_by_name(&self, name: &str) -> Option<&Category> {
         let id = self
@@ -62,9 +67,28 @@ impl Categories {
         }
     }
 
+    /// Gets a mutable reference to category by name.
+    pub fn category_by_name_mut(&mut self, name: &str) -> Option<&mut Category> {
+        let id = self
+            .inner
+            .iter()
+            .find_map(|cat| if cat.name() == name { cat.id() } else { None });
+
+        if let Some(id) = id {
+            self.inner.get_mut(id)
+        } else {
+            None
+        }
+    }
+
     /// Iterates over categories.
     pub fn iter_categories(&self) -> impl Iterator<Item = &Category> {
         self.inner.iter()
+    }
+
+    /// Iterates over categories.
+    pub fn iter_categories_mut(&mut self) -> impl Iterator<Item = &mut Category> {
+        self.inner.iter_mut()
     }
 
     /// Iterates over category ids.

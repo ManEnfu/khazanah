@@ -55,7 +55,7 @@ mod imp {
                 PhonemeSortBy::Base => {
                     let c = self.compare_by_base(phoneme1, phoneme2);
                     if c == gtk::Ordering::Equal {
-                        self.compare_by_name(phoneme1, phoneme2)
+                        self.compare_by_sound(phoneme1, phoneme2)
                     } else {
                         c
                     }
@@ -83,6 +83,16 @@ mod imp {
         ) -> gtk::Ordering {
             let v1 = phoneme1.base();
             let v2 = phoneme2.base();
+            self.convert_ordering(v1.cmp(&v2))
+        }
+
+        fn compare_by_sound(
+            &self,
+            phoneme1: &PhonemeObject,
+            phoneme2: &PhonemeObject,
+        ) -> gtk::Ordering {
+            let v1 = phoneme1.sound();
+            let v2 = phoneme2.sound();
             self.convert_ordering(v1.cmp(&v2))
         }
 

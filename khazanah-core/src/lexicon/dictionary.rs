@@ -24,8 +24,8 @@ impl Dictionary {
         self.words.add(word)
     }
 
-    /// Removes a word of id `id` from lexicon. Returns `true` if removal is successful.
-    pub fn delete_word_by_id(&mut self, id: Uuid) -> Option<Word> {
+    /// Removes a word of id `id` from lexicon.
+    pub fn remove_word_by_id(&mut self, id: Uuid) -> Option<Word> {
         self.words.remove(id)
     }
 
@@ -47,6 +47,11 @@ impl Dictionary {
     /// Iterates over words.
     pub fn iter_words(&self) -> impl Iterator<Item = &Word> {
         self.words.iter()
+    }
+
+    /// Iterates over words.
+    pub fn iter_words_mut(&mut self) -> impl Iterator<Item = &mut Word> {
+        self.words.iter_mut()
     }
 
     /// Iterates over word ids.
