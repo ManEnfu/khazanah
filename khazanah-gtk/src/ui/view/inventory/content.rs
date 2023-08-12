@@ -27,6 +27,10 @@ mod imp {
         pub xsampa_entry: TemplateChild<adw::EntryRow>,
         #[template_child]
         pub romanization_entry: TemplateChild<adw::EntryRow>,
+        #[template_child]
+        pub mora_entry: TemplateChild<adw::ActionRow>,
+        #[template_child]
+        pub mora_adj: TemplateChild<gtk::Adjustment>,
 
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
@@ -134,6 +138,16 @@ impl Content {
                 .bind_property("romanization", &imp.romanization_entry.get(), "text")
                 .sync_create()
                 .bidirectional()
+                .build(),
+        );
+
+        bindings.push(
+            phoneme
+                .bind_property("mora", &imp.mora_adj.get(), "value")
+                .sync_create()
+                .bidirectional()
+                .transform_to(|_, v: u32| Some(v as f64))
+                .transform_from(|_, v: f64| Some(v as u32))
                 .build(),
         );
     }

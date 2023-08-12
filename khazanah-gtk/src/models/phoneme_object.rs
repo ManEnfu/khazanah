@@ -35,6 +35,8 @@ mod imp {
             get = Self::get_xsampa_sound, set = Self::set_xsampa_sound)]
         #[property(name = "romanization", type = String,
             get = Self::get_romanization, set = Self::set_romanization)]
+        #[property(name = "mora", type = u32,
+            get = Self::get_mora, set = Self::set_mora)]
         #[property(name = "display-romanization", type = String,
             get = Self::get_display_romanization)]
         #[property(name = "base-symbol", type = String,
@@ -112,6 +114,14 @@ mod imp {
 
         fn get_display_romanization(&self) -> String {
             self.query(|phoneme| phoneme.display_romanization().to_string())
+        }
+
+        pub fn get_mora(&self) -> u32 {
+            self.query(|phoneme| phoneme.mora())
+        }
+
+        pub fn set_mora(&self, value: u32) {
+            self.update(|phoneme| phoneme.set_mora(value))
         }
 
         pub fn get_base(&self) -> Option<Ipa> {

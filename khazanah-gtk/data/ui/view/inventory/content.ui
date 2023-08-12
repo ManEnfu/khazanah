@@ -74,6 +74,31 @@
                                   bind-flags="sync-create"/>
                       </object>
                     </child>
+                    <child>
+                      <object class="AdwActionRow" id="mora_entry">
+                        <property name="title" translatable="yes">Mora</property>
+                        <property name="subtitle" translatable="yes">Affects syllable stress in words.</property>
+                        <property name="sensitive"
+                                  bind-source="KhzInventoryViewContent"
+                                  bind-property="fields-sensitive"
+                                  bind-flags="sync-create"/>
+                        <child type="suffix">
+                          <object class="GtkSpinButton">
+                            <property name="valign">center</property>
+                            <property name="numeric">True</property>
+                            <property name="adjustment">
+                              <object class="GtkAdjustment" id="mora_adj">
+                                <property name="lower">0</property>
+                                <property name="upper">10</property>
+                                <property name="value">1</property>
+                                <property name="step-increment">1</property>
+                                <property name="page-increment">10</property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object> <!-- GtkBox -->
