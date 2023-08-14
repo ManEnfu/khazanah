@@ -28,137 +28,127 @@ macro_rules! chart_titles {
     };
 }
 
-pub static PULMONIC_CONSONANT_MANNER_TITLES: Lazy<ChartTitle<ipa::MannerOfArticulation>> =
+pub static PULMONIC_CONSONANT_MANNER_TITLES: Lazy<ChartTitle<ipa::Manner>> = Lazy::new(|| {
+    use ipa::Manner::*;
+    chart_titles! {
+        "Nasal" => Nasal,
+        "Plosive" => Plosive,
+        "Sibilant fricative" => SibilantFricative,
+        "Non-sibilant fricative" => NonSibilantFricative,
+        "Sibilant affricate" => SibilantAffricate,
+        "Non-sibilant affricate" => NonSibilantAffricate,
+        "Approximant" => Approximant,
+        "Tap/flap" => Flap,
+        "Trill" => Trill,
+        "Lateral fricative" => LateralFricative,
+        "Lateral affricate" => LateralAffricate,
+        "Lateral approximant" => LateralApproximant,
+        "Lateral tap/flap" => LateralFlap,
+    }
+});
+
+pub static PULMONIC_CONSONANT_PLACE_TITLES: Lazy<ChartTitle<ipa::Place>> = Lazy::new(|| {
+    use ipa::Place::*;
+    chart_titles! {
+        "BL" => Bilabial,
+        "LD" => Labiodental,
+        "D" => Dental,
+        "A" => Alveolar,
+        "PA" => PostAlveolar,
+        "RF" => Retroflex,
+        "P" => Palatal,
+        "V" => Velar,
+        "U" => Uvular,
+        "EG" => Pharyngeal,
+        "G" => Glottal,
+    }
+});
+
+pub static COARTICULATED_CONSONANT_MANNER_TITLES: Lazy<ChartTitle<ipa::Manner>> = Lazy::new(|| {
+    use ipa::Manner::*;
+    chart_titles! {
+        "Nasal" => Nasal,
+        "Plosive" => Plosive,
+        "Fricative" => NonSibilantFricative,
+        "Approximant" => Approximant,
+    }
+});
+
+pub static COARTICULATED_CONSONANT_PLACE_TITLES: Lazy<ChartTitle<ipa::Place>> = Lazy::new(|| {
+    use ipa::Place::*;
+    chart_titles! {
+        "Labial-alveolar" => LabialAlveolar,
+        "Labial-palatal" => LabialPalatal,
+        "Labial-velar" => LabialVelar,
+        "Uvular-pharyngeal" => UvularPharyngeal,
+    }
+});
+
+pub static EJECTIVE_CONSONANT_MANNER_TITLES: Lazy<ChartTitle<ipa::Manner>> = Lazy::new(|| {
+    use ipa::Manner::*;
+    chart_titles! {
+        "Plosive" => Plosive,
+        "Sibilant fricative" => SibilantFricative,
+        "Non-sibilant fricative" => NonSibilantFricative,
+        "Sibilant affricate" => SibilantAffricate,
+        "Non-sibilant affricate" => NonSibilantAffricate,
+        "Lateral fricative" => LateralFricative,
+        "Lateral affricate" => LateralAffricate,
+    }
+});
+
+pub static EJECTIVE_CONSONANT_PLACE_TITLES: Lazy<ChartTitle<ipa::Place>> = Lazy::new(|| {
+    use ipa::Place::*;
+    chart_titles! {
+        "BL" => Bilabial,
+        "LD" => Labiodental,
+        "D" => Dental,
+        "A" => Alveolar,
+        "PA" => PostAlveolar,
+        "RF" => Retroflex,
+        "P" => Palatal,
+        "V" => Velar,
+        "U" => Uvular,
+        "EG" => Pharyngeal,
+    }
+});
+
+pub static CLICK_CONSONANT_MANNER_PLACE_TITLES: Lazy<ChartTitle<(ipa::Manner, ipa::Phonation)>> =
     Lazy::new(|| {
-        use ipa::FricativeVariant::*;
-        use ipa::MannerOfArticulation::*;
+        use ipa::Manner::*;
+        use ipa::Phonation::*;
         chart_titles! {
-            "Nasal" => Nasal,
-            "Plosive" => Plosive,
-            "Sibilant fricative" => Fricative(Sibilant),
-            "Non-sibilant fricative" => Fricative(NonSibilant),
-            "Sibilant affricate" => Affricate(Sibilant),
-            "Non-sibilant affricate" => Affricate(NonSibilant),
-            "Approximant" => Approximant,
-            "Tap/flap" => Flap,
-            "Trill" => Trill,
-            "Lateral fricative" => LateralFricative,
-            "Lateral affricate" => LateralAffricate,
-            "Lateral approximant" => LateralApproximant,
-            "Lateral tap/flap" => LateralFlap,
+            "Tenuis" => (Plosive, Voiceless),
+            "Voiced" => (Plosive, Voiced),
+            "Nasal" => (Nasal, Voiced),
+            "Tenuis lateral" => (Lateral, Voiceless),
+            "Voiced lateral" => (Lateral, Voiced),
+            "Nasal lateral" => (LateralNasal, Voiced),
         }
     });
 
-pub static PULMONIC_CONSONANT_PLACE_TITLES: Lazy<ChartTitle<ipa::PlaceOfArticulation>> =
-    Lazy::new(|| {
-        use ipa::PlaceOfArticulation::*;
-        chart_titles! {
-            "BL" => Bilabial,
-            "LD" => Labiodental,
-            "D" => Dental,
-            "A" => Alveolar,
-            "PA" => PostAlveolar,
-            "RF" => Retroflex,
-            "P" => Palatal,
-            "V" => Velar,
-            "U" => Uvular,
-            "EG" => Pharyngeal,
-            "G" => Glottal,
-        }
-    });
+pub static CLICK_CONSONANT_PLACE_TITLES: Lazy<ChartTitle<ipa::Place>> = Lazy::new(|| {
+    use ipa::Place::*;
+    chart_titles! {
+        "BL" => Bilabial,
+        "D" => Dental,
+        "A" => Alveolar,
+        "RF" => Retroflex,
+        "P" => Palatal,
+    }
+});
 
-pub static COARTICULATED_CONSONANT_MANNER_TITLES: Lazy<ChartTitle<ipa::MannerOfArticulation>> =
-    Lazy::new(|| {
-        use ipa::FricativeVariant::*;
-        use ipa::MannerOfArticulation::*;
-        chart_titles! {
-            "Nasal" => Nasal,
-            "Plosive" => Plosive,
-            "Fricative" => Fricative(NonSibilant),
-            "Approximant" => Approximant,
-        }
-    });
-
-pub static COARTICULATED_CONSONANT_PLACE_TITLES: Lazy<ChartTitle<ipa::PlaceOfArticulation>> =
-    Lazy::new(|| {
-        use ipa::PlaceOfArticulation::*;
-        chart_titles! {
-            "Labial-alveolar" => LabialAlveolar,
-            "Labial-palatal" => LabialPalatal,
-            "Labial-velar" => LabialVelar,
-            "Uvular-pharyngeal" => UvularPharyngeal,
-        }
-    });
-
-pub static EJECTIVE_CONSONANT_MANNER_TITLES: Lazy<ChartTitle<ipa::MannerOfArticulation>> =
-    Lazy::new(|| {
-        use ipa::FricativeVariant::*;
-        use ipa::MannerOfArticulation::*;
-        chart_titles! {
-            "Plosive" => Plosive,
-            "Sibilant fricative" => Fricative(Sibilant),
-            "Non-sibilant fricative" => Fricative(NonSibilant),
-            "Sibilant affricate" => Affricate(Sibilant),
-            "Non-sibilant affricate" => Affricate(NonSibilant),
-            "Lateral fricative" => LateralFricative,
-            "Lateral affricate" => LateralAffricate,
-        }
-    });
-
-pub static EJECTIVE_CONSONANT_PLACE_TITLES: Lazy<ChartTitle<ipa::PlaceOfArticulation>> =
-    Lazy::new(|| {
-        use ipa::PlaceOfArticulation::*;
-        chart_titles! {
-            "BL" => Bilabial,
-            "LD" => Labiodental,
-            "D" => Dental,
-            "A" => Alveolar,
-            "PA" => PostAlveolar,
-            "RF" => Retroflex,
-            "P" => Palatal,
-            "V" => Velar,
-            "U" => Uvular,
-            "EG" => Pharyngeal,
-        }
-    });
-
-pub static CLICK_CONSONANT_MANNER_PLACE_TITLES: Lazy<ChartTitle<ipa::ClickMannerOfArticulation>> =
-    Lazy::new(|| {
-        use ipa::ClickMannerOfArticulation::*;
-        chart_titles! {
-            "Tenuis" => Tenuis,
-            "Voiced" => Voiced,
-            "Nasal" => Nasal,
-            "Tenuis lateral" => TenuisLateral,
-            "Voiced lateral" => VoicedLateral,
-            "Nasal lateral" => NasalLateral,
-        }
-    });
-
-pub static CLICK_CONSONANT_PLACE_TITLES: Lazy<ChartTitle<ipa::PlaceOfArticulation>> =
-    Lazy::new(|| {
-        use ipa::PlaceOfArticulation::*;
-        chart_titles! {
-            "BL" => Bilabial,
-            "D" => Dental,
-            "A" => Alveolar,
-            "RF" => Retroflex,
-            "P" => Palatal,
-        }
-    });
-
-pub static IMPLOSIVE_CONSONANT_PLACE_TITLES: Lazy<ChartTitle<ipa::PlaceOfArticulation>> =
-    Lazy::new(|| {
-        use ipa::PlaceOfArticulation::*;
-        chart_titles! {
-            "BL" => Bilabial,
-            "A" => Alveolar,
-            "RF" => Retroflex,
-            "P" => Palatal,
-            "V" => Velar,
-            "U" => Uvular,
-        }
-    });
+pub static IMPLOSIVE_CONSONANT_PLACE_TITLES: Lazy<ChartTitle<ipa::Place>> = Lazy::new(|| {
+    use ipa::Place::*;
+    chart_titles! {
+        "BL" => Bilabial,
+        "A" => Alveolar,
+        "RF" => Retroflex,
+        "P" => Palatal,
+        "V" => Velar,
+        "U" => Uvular,
+    }
+});
 
 pub static CONSONANT_PHONATION_TITLES: Lazy<ChartTitle<ipa::Phonation>> = Lazy::new(|| {
     use ipa::Phonation::*;
@@ -168,8 +158,8 @@ pub static CONSONANT_PHONATION_TITLES: Lazy<ChartTitle<ipa::Phonation>> = Lazy::
     }
 });
 
-pub static VOWEL_HEIGHT_TITLES: Lazy<ChartTitle<ipa::VowelHeight>> = Lazy::new(|| {
-    use ipa::VowelHeight::*;
+pub static VOWEL_HEIGHT_TITLES: Lazy<ChartTitle<ipa::Height>> = Lazy::new(|| {
+    use ipa::Height::*;
     chart_titles! {
         "Close" => Close,
         "Near-close" => NearClose,
@@ -181,8 +171,8 @@ pub static VOWEL_HEIGHT_TITLES: Lazy<ChartTitle<ipa::VowelHeight>> = Lazy::new(|
     }
 });
 
-pub static VOWEL_BACKNESS_TITLES: Lazy<ChartTitle<ipa::VowelBackness>> = Lazy::new(|| {
-    use ipa::VowelBackness::*;
+pub static VOWEL_BACKNESS_TITLES: Lazy<ChartTitle<ipa::Backness>> = Lazy::new(|| {
+    use ipa::Backness::*;
     chart_titles! {
         "Front" => Front,
         "Central" => Central,
@@ -190,8 +180,8 @@ pub static VOWEL_BACKNESS_TITLES: Lazy<ChartTitle<ipa::VowelBackness>> = Lazy::n
     }
 });
 
-pub static VOWEL_ROUNDING_TITLES: Lazy<ChartTitle<ipa::VowelRounding>> = Lazy::new(|| {
-    use ipa::VowelRounding::*;
+pub static VOWEL_ROUNDING_TITLES: Lazy<ChartTitle<ipa::Rounding>> = Lazy::new(|| {
+    use ipa::Rounding::*;
     chart_titles! {
         "Unrounded" => Unrounded,
         "Rounded" => Rounded,
@@ -357,7 +347,12 @@ impl IpaChart {
             &PULMONIC_CONSONANT_PLACE_TITLES,
             &PULMONIC_CONSONANT_MANNER_TITLES,
             &CONSONANT_PHONATION_TITLES,
-            |p, m, v| ipa::Ipa::Consonant(v, p, m),
+            |p, m, v| ipa::Ipa::Consonant {
+                mechanism: ipa::Mechanism::Pulmonic,
+                manner: m,
+                place: p,
+                phonation: v,
+            },
         );
     }
 
@@ -367,7 +362,12 @@ impl IpaChart {
             &COARTICULATED_CONSONANT_PLACE_TITLES,
             &COARTICULATED_CONSONANT_MANNER_TITLES,
             &CONSONANT_PHONATION_TITLES,
-            |p, m, v| ipa::Ipa::Consonant(v, p, m),
+            |p, m, v| ipa::Ipa::Consonant {
+                mechanism: ipa::Mechanism::Pulmonic,
+                manner: m,
+                place: p,
+                phonation: v,
+            },
         );
     }
 
@@ -377,7 +377,12 @@ impl IpaChart {
             &EJECTIVE_CONSONANT_PLACE_TITLES,
             &EJECTIVE_CONSONANT_MANNER_TITLES,
             &UNIT_TITLE,
-            |p, m, _| ipa::Ipa::EjectiveConsonant(p, m),
+            |p, m, _| ipa::Ipa::Consonant {
+                mechanism: ipa::Mechanism::Ejective,
+                manner: m,
+                place: p,
+                phonation: ipa::Phonation::Voiceless,
+            },
         );
     }
 
@@ -387,7 +392,12 @@ impl IpaChart {
             &IMPLOSIVE_CONSONANT_PLACE_TITLES,
             &CONSONANT_PHONATION_TITLES,
             &UNIT_TITLE,
-            |p, v, _| ipa::Ipa::ImplosiveConsonant(v, p),
+            |p, v, _| ipa::Ipa::Consonant {
+                mechanism: ipa::Mechanism::Implosive,
+                manner: ipa::Manner::Plosive,
+                place: p,
+                phonation: v,
+            },
         );
     }
 
@@ -397,7 +407,12 @@ impl IpaChart {
             &CLICK_CONSONANT_PLACE_TITLES,
             &CLICK_CONSONANT_MANNER_PLACE_TITLES,
             &UNIT_TITLE,
-            |p, m, _| ipa::Ipa::ClickConsonant(p, m),
+            |p, (m, v), _| ipa::Ipa::Consonant {
+                mechanism: ipa::Mechanism::Click,
+                manner: m,
+                place: p,
+                phonation: v,
+            },
         );
     }
 
@@ -407,7 +422,11 @@ impl IpaChart {
             &VOWEL_BACKNESS_TITLES,
             &VOWEL_HEIGHT_TITLES,
             &VOWEL_ROUNDING_TITLES,
-            |b, h, r| ipa::Ipa::Vowel(h, b, r),
+            |b, h, r| ipa::Ipa::Vowel {
+                height: h,
+                backness: b,
+                rounding: r,
+            },
         );
     }
 }

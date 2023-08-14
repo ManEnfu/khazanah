@@ -681,6 +681,7 @@ version = "0.1.0"
 dependencies = [
  "bimap",
  "lazy_static",
+ "once_cell",
  "quick-xml",
  "rand",
  "regex",

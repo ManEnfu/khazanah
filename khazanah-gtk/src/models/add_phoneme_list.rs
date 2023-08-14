@@ -8,7 +8,7 @@ mod imp {
 
     use crate::models;
 
-    use khazanah_core::{ipa::IPA_BASE_PHONEMES, Phoneme};
+    use khazanah_core::{Ipa, Phoneme};
 
     use super::*;
 
@@ -28,9 +28,8 @@ mod imp {
         fn constructed(&self) {
             self.parent_constructed();
             self.list.replace(
-                IPA_BASE_PHONEMES
-                    .iter()
-                    .map(|ip| Phoneme::from_ipa(*ip))
+                Ipa::iter_valids()
+                    .map(Phoneme::from_ipa)
                     .map(models::AddPhonemeObject::new)
                     .collect(),
             );

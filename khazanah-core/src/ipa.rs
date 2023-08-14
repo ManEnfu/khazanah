@@ -1,17 +1,17 @@
 //! IPA symbols and related functions.
 
-mod enums;
 mod error;
 mod xsampa;
 
+mod symbol;
+
 use std::str::FromStr;
 
-pub use enums::{
-    ClickMannerOfArticulation, Delimiter, Diacritic, DiacriticPosition, FricativeVariant, Ipa,
-    MannerOfArticulation, Phonation, PlaceOfArticulation, Prosody, Tone, VowelBackness,
-    VowelHeight, VowelRounding, IPA_BASE_PHONEMES, IPA_CHAR_MAP, IPA_CHAR_MAP_MAX_PATTERN_LEN,
-};
 pub use error::Error;
+pub use symbol::{
+    Backness, Delimiter, Diacritic, DiacriticPosition, Height, Ipa, Manner, Mechanism, Phonation,
+    Place, Rounding, Suprasegmental, Tone, IPA_CHAR_MAP, IPA_CHAR_MAP_MAX_PATTERN_LEN,
+};
 pub use xsampa::{transliterate_xsampa, XSAMPA_CHAR_MAP};
 
 use crate::utils::transliterate;
