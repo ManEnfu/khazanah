@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 
 use crate::utils;
 
@@ -11,9 +11,7 @@ pub fn transliterate_xsampa(s: &str) -> String {
     }))
 }
 
-lazy_static! {
-    pub static ref XSAMPA_CHAR_MAP: BTreeMap<&'static str, &'static str> = xsampa_char_map();
-}
+pub static XSAMPA_CHAR_MAP: Lazy<BTreeMap<&'static str, &'static str>> = Lazy::new(xsampa_char_map);
 
 #[doc(hidden)]
 fn xsampa_char_map() -> BTreeMap<&'static str, &'static str> {
