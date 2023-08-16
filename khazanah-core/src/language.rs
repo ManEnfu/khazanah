@@ -1,4 +1,4 @@
-use crate::phonology::{Categories, Category};
+use crate::phonology::{Categories, Category, Phonotactic};
 use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
 use crate::{phonology::Inventory, Dictionary};
 use crate::{Phoneme, Word};
@@ -16,18 +16,21 @@ pub struct Language {
     meta: Meta,
     phonemic_inventory: Inventory,
     phoneme_categories: Categories,
+    phonotactic: Phonotactic,
     dictionary: Dictionary,
 }
 
 pub struct LanguageStores<'a> {
     pub phonemic_inventory: &'a Inventory,
     pub phoneme_categories: &'a Categories,
+    pub phonotactic: &'a Phonotactic,
     pub dictionary: &'a Dictionary,
 }
 
 pub struct LanguageStoresMut<'a> {
     pub phonemic_inventory: &'a mut Inventory,
     pub phoneme_categories: &'a mut Categories,
+    pub phonotactic: &'a mut Phonotactic,
     pub dictionary: &'a mut Dictionary,
 }
 
@@ -35,6 +38,27 @@ impl Language {
     /// Creates a new language.
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Gets references to stores in the language.
+    pub fn stores(&self) -> LanguageStores {
+        LanguageStores {
+            phonemic_inventory: &self.phonemic_inventory,
+            phoneme_categories: &self.phoneme_categories,
+            phonotactic: &self.phonotactic,
+            dictionary: &self.dictionary,
+        }
+    }
+
+    /// Gets mutable references to stores in the language.
+    pub fn stores_mut(&mut self) -> LanguageStoresMut {
+        self.phonemic_inventory.is_inner = true;
+        LanguageStoresMut {
+            phonemic_inventory: &mut self.phonemic_inventory,
+            phoneme_categories: &mut self.phoneme_categories,
+            phonotactic: &mut self.phonotactic,
+            dictionary: &mut self.dictionary,
+        }
     }
 
     pub fn meta(&self) -> &Meta {
@@ -95,6 +119,18 @@ impl Language {
         self.phoneme_categories.remove_category_by_name(name)
     }
 
+    // PHONOTACTIC
+
+    /// Gets a reference to the language's phonotactic.
+    pub fn phonotactic(&self) -> &Phonotactic {
+        &self.phonotactic
+    }
+
+    /// Gets a mutable reference to the language's phonotactic.
+    pub fn phonotactic_mut(&mut self) -> &mut Phonotactic {
+        &mut self.phonotactic
+    }
+
     // DICTIONARY
 
     /// Gets a reference to dictionary store.
@@ -143,6 +179,10 @@ impl ReadXml for Language {
                 self.phoneme_categories = Categories::deserialize_xml(reader, Some((name, attrs)))
                     .map_err(|xe| xe.map_into())?;
             }
+            (Some("phonology"), Some(Phonotactic::TAG)) => {
+                self.phonotactic = Phonotactic::deserialize_xml(reader, Some((name, attrs)))
+                    .map_err(|xe| xe.map_into())?;
+            }
             (Some(Self::TAG), Some("lexicon")) => {}
             (Some("lexicon"), Some(Dictionary::TAG)) => {
                 self.dictionary = Dictionary::deserialize_xml(reader, Some((name, attrs)))
@@ -189,6 +229,9 @@ impl WriteXml for Language {
             .serialize_xml(writer)
             .map_err(|xe| xe.map_into())?;
         self.phoneme_categories
+            .serialize_xml(writer)
+            .map_err(|xe| xe.map_into())?;
+        self.phonotactic
             .serialize_xml(writer)
             .map_err(|xe| xe.map_into())?;
         writer.write_tag_end("phonology")?;
