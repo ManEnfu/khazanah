@@ -1,10 +1,14 @@
 use std::str::Chars;
 
+use rand::Rng;
 use regex::Regex;
 
 use super::{Categories, Category, Error, Inventory};
 
-use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
+use crate::{
+    xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter},
+    Phoneme,
+};
 
 /// An element of a pattern.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -110,7 +114,7 @@ impl Pattern {
 
     /// Gets a regex string for the pattern.
     pub fn regex_pattern(&self, categories: &Categories, inventory: &Inventory) -> String {
-        let mut ret = "^".to_string();
+        let mut ret = "".to_string();
 
         for elem in self.parse_elements(categories) {
             match elem {
@@ -133,14 +137,39 @@ impl Pattern {
             }
         }
 
-        ret += "$";
-
         ret
     }
 
     /// Gets a regular expression for the pattern, using data in `categories` and `inventory`.
     pub fn regex(&self, categories: &Categories, inventory: &Inventory) -> Result<Regex, Error> {
-        Regex::new(&self.regex_pattern(categories, inventory)).map_err(Error::from)
+        let r = format!("^{}$", self.regex_pattern(categories, inventory));
+        Regex::new(&r).map_err(Error::from)
+    }
+
+    /// Generates a random syllable following the pattern.
+    pub fn generate<R: Rng + ?Sized>(
+        &self,
+        rng: &mut R,
+        categories: &Categories,
+        inventory: &Inventory,
+    ) -> String {
+        let mut ret = String::new();
+
+        for elem in self.parse_elements(categories) {
+            match elem {
+                PatternElement::Str(s) => {
+                    ret += s;
+                }
+                PatternElement::Category(c) => {
+                    ret += c
+                        .choose_phoneme(rng, inventory)
+                        .map(Phoneme::sound)
+                        .unwrap_or_default();
+                }
+            }
+        }
+
+        ret
     }
 }
 
@@ -353,8 +382,7 @@ mod tests {
         );
     }
 
-    #[test]
-    fn regex() {
+    fn test_data() -> (Categories, Inventory) {
         let mut cats = Categories::new();
         let mut inv = Inventory::new();
 
@@ -374,6 +402,13 @@ mod tests {
         cat.add_phoneme_id(inv.add_phoneme(Phoneme::with_sound("u".to_string())));
         let _ = cats.add_category(cat);
 
+        (cats, inv)
+    }
+
+    #[test]
+    fn regex() {
+        let (cats, inv) = test_data();
+
         let pat = Pattern::new("CrVC".to_string());
         dbg!(pat.regex_pattern(&cats, &inv));
 
@@ -384,5 +419,22 @@ mod tests {
         assert!(!re.is_match("kun"));
         assert!(!re.is_match("atrun"));
         assert!(!re.is_match("truna"));
+    }
+
+    #[test]
+    fn generate() {
+        let (cats, inv) = test_data();
+        let mut rng = rand::thread_rng();
+
+        for p in ["CV", "CrV", "CVC", "CrVC"] {
+            dbg!(p);
+            let pat = Pattern::new(p.to_string());
+            let re = pat.regex(&cats, &inv).unwrap();
+            for _i in 0..10 {
+                let s = pat.generate(&mut rng, &cats, &inv);
+                dbg!(&s);
+                assert!(re.is_match(&s));
+            }
+        }
     }
 }
