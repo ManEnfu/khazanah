@@ -3,12 +3,9 @@ use std::str::Chars;
 use rand::Rng;
 use regex::Regex;
 
-use super::{Categories, Category, Error, Inventory};
+use super::{Categories, Category, Error, Inventory, Phoneme};
 
-use crate::{
-    xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter},
-    Phoneme,
-};
+use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
 
 /// An element of a pattern.
 #[derive(Debug, Clone, PartialEq, Eq)]
