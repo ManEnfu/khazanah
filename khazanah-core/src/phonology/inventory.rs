@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
 use crate::{utils, Phoneme, Store};
 
-use super::Error;
+use super::{Categories, Error};
 
 /// An inventory of phonemes.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -14,6 +14,8 @@ pub struct Inventory {
     phonemes: Store<Phoneme>,
 
     romanization_pronunciation_map: RefCell<Option<BiHashMap<String, String>>>,
+
+    pub(crate) is_inner: bool,
 }
 
 impl Inventory {
@@ -29,7 +31,38 @@ impl Inventory {
     }
 
     /// Removes a phoneme of id `id` from the inventory.
+    ///
+    /// Panics if part of `Language`. If that's the case, use `remove_phoneme_by_id_joined`
+    /// instead.
     pub fn remove_phoneme_by_id(&mut self, id: Uuid) -> Option<Phoneme> {
+        self.check_is_inner();
+        self._remove_phoneme_by_id(id)
+    }
+
+    /// Removes a phoneme of id `id` from the inventory.
+    /// If `cascade` is `true`, any reference to the phoneme is also removed.
+    /// If `cascade` is `false`, the operation fails if any reference to the phoneme exists.
+    pub fn remove_phoneme_by_id_joined(
+        &mut self,
+        id: Uuid,
+        cascade: bool,
+        categories: &mut Categories,
+    ) -> Option<Phoneme> {
+        if cascade {
+            for cat in categories.iter_categories_mut() {
+                cat.remove_phoneme_id(id);
+            }
+        } else if categories
+            .iter_categories()
+            .any(|cat| cat.contains_phoneme_id(&id))
+        {
+            return None;
+        }
+
+        self._remove_phoneme_by_id(id)
+    }
+
+    fn _remove_phoneme_by_id(&mut self, id: Uuid) -> Option<Phoneme> {
         self.romanization_pronunciation_map.replace(None);
         self.phonemes.remove(id)
     }
@@ -111,6 +144,12 @@ impl Inventory {
             );
         }
         self.romanization_pronunciation_map.replace(Some(map));
+    }
+
+    fn check_is_inner(&self) {
+        if self.is_inner {
+            panic!("The method is not supported for `Inventory` that is part of `Language`.")
+        }
     }
 }
 

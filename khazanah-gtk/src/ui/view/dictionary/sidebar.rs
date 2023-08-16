@@ -327,10 +327,12 @@ impl Sidebar {
     pub fn add_word(&self) {
         let imp = self.imp();
 
-        if let Some(id) = self
-            .project_model()
-            .update(|project| project.language_mut().dictionary_add_word(Word::new()))
-        {
+        if let Some(id) = self.project_model().update(|project| {
+            project
+                .language_mut()
+                .dictionary_mut()
+                .add_word(Word::new())
+        }) {
             // Exits search mode first.
             imp.search_bar.set_search_mode(false);
 

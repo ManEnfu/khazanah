@@ -19,6 +19,18 @@ pub struct Language {
     dictionary: Dictionary,
 }
 
+pub struct LanguageStores<'a> {
+    pub phonemic_inventory: &'a Inventory,
+    pub phoneme_categories: &'a Categories,
+    pub dictionary: &'a Dictionary,
+}
+
+pub struct LanguageStoresMut<'a> {
+    pub phonemic_inventory: &'a mut Inventory,
+    pub phoneme_categories: &'a mut Categories,
+    pub dictionary: &'a mut Dictionary,
+}
+
 impl Language {
     /// Creates a new language.
     pub fn new() -> Self {
@@ -40,9 +52,10 @@ impl Language {
         &self.phonemic_inventory
     }
 
-    /// Adds a phoneme into the inventory and returns its id.
-    pub fn phonemic_inventory_add_phoneme(&mut self, phoneme: Phoneme) -> Uuid {
-        self.phonemic_inventory.add_phoneme(phoneme)
+    /// Gets a reference to phonemic inventory store.
+    pub fn phonemic_inventory_mut(&mut self) -> &mut Inventory {
+        self.phonemic_inventory.is_inner = true;
+        &mut self.phonemic_inventory
     }
 
     /// Removes a phoneme of id `id` from the inventory.
@@ -53,29 +66,11 @@ impl Language {
         id: Uuid,
         cascade: bool,
     ) -> Option<Phoneme> {
-        if cascade {
-            for cat in self.phoneme_categories.iter_categories_mut() {
-                cat.remove_phoneme_id(id);
-            }
-        } else if self
-            .phoneme_categories
-            .iter_categories()
-            .any(|cat| cat.contains_phoneme_id(&id))
-        {
-            return None;
-        }
-
-        self.phonemic_inventory.remove_phoneme_by_id(id)
-    }
-
-    /// Gets a mutable reference to phoneme by id.
-    pub fn phonemic_inventory_phoneme_by_id_mut(&mut self, id: Uuid) -> Option<&mut Phoneme> {
-        self.phonemic_inventory.phoneme_by_id_mut(id)
-    }
-
-    /// Iterates over mutable reference of phonemes.
-    pub fn phonemic_inventory_iter_phonemes_mut(&mut self) -> impl Iterator<Item = &mut Phoneme> {
-        self.phonemic_inventory.iter_phonemes_mut()
+        self.phonemic_inventory.remove_phoneme_by_id_joined(
+            id,
+            cascade,
+            &mut self.phoneme_categories,
+        )
     }
 
     // PHONEME CATEGORIES
@@ -85,9 +80,9 @@ impl Language {
         &self.phoneme_categories
     }
 
-    /// Adds a category.
-    pub fn phoneme_categories_add_category(&mut self, category: Category) -> Uuid {
-        self.phoneme_categories.add_category(category)
+    /// Gets a mutable reference to phoneme categories store.
+    pub fn phoneme_categories_mut(&mut self) -> &mut Categories {
+        &mut self.phoneme_categories
     }
 
     /// Removes a category by id.
@@ -100,23 +95,6 @@ impl Language {
         self.phoneme_categories.remove_category_by_name(name)
     }
 
-    /// Gets a mutable reference to category by id.
-    pub fn phoneme_categories_category_by_id_mut(&mut self, id: Uuid) -> Option<&mut Category> {
-        self.phoneme_categories.category_by_id_mut(id)
-    }
-
-    /// Gets a mutable reference to category by name.
-    pub fn phoneme_categories_category_by_name_mut(&mut self, name: &str) -> Option<&mut Category> {
-        self.phoneme_categories.category_by_name_mut(name)
-    }
-
-    /// Iterates over categories.
-    pub fn phoneme_categories_iter_categories_mut(
-        &mut self,
-    ) -> impl Iterator<Item = &mut Category> {
-        self.phoneme_categories.iter_categories_mut()
-    }
-
     // DICTIONARY
 
     /// Gets a reference to dictionary store.
@@ -124,9 +102,9 @@ impl Language {
         &self.dictionary
     }
 
-    /// Adds a `Word` to `Lexicon` and returns its id.
-    pub fn dictionary_add_word(&mut self, word: Word) -> Uuid {
-        self.dictionary.add_word(word)
+    /// Gets a reference to dictionary store.
+    pub fn dictionary_mut(&mut self) -> &mut Dictionary {
+        &mut self.dictionary
     }
 
     /// Removes a word of id `id` from lexicon. Returns `true` if removal is successful.
@@ -134,16 +112,6 @@ impl Language {
     /// If `cascade` is `false`, the operation fails if any reference to the word exists.
     pub fn dictionary_remove_word_by_id(&mut self, id: Uuid, _cascade: bool) -> Option<Word> {
         self.dictionary.remove_word_by_id(id)
-    }
-
-    /// Gets a mutable reference to word by id.
-    pub fn dictionary_word_by_id_mut(&mut self, id: Uuid) -> Option<&mut Word> {
-        self.dictionary.word_by_id_mut(id)
-    }
-
-    /// Iterates over mutable word references.
-    pub fn dictionary_iter_words_mut(&mut self) -> impl Iterator<Item = &mut Word> {
-        self.dictionary.iter_words_mut()
     }
 }
 

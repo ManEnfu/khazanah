@@ -241,7 +241,8 @@ impl Sidebar {
         if let Some(id) = self.project_model().update(|project| {
             project
                 .language_mut()
-                .phonemic_inventory_add_phoneme(Phoneme::new())
+                .phonemic_inventory_mut()
+                .add_phoneme(Phoneme::new())
         }) {
             // Exits search mode first.
             // self.imp().search_bar.set_search_mode(false);
