@@ -1,6 +1,8 @@
 use std::str::Chars;
 
-use super::{Categories, Category, Error};
+use regex::Regex;
+
+use super::{Categories, Category, Error, Inventory};
 
 use crate::xml::{ReadXml, WriteXml, XmlError, XmlReader, XmlWriter};
 
@@ -102,11 +104,43 @@ impl Pattern {
     }
 
     /// Parse and iterates pattern string into elements.
-    pub fn parse_elements<'a>(
-        &'a self,
-        categories: &'a Categories,
-    ) -> impl Iterator<Item = PatternElement> {
+    pub fn parse_elements<'a>(&'a self, categories: &'a Categories) -> PatternElements<'a> {
         PatternElements::new(self, categories)
+    }
+
+    /// Gets a regex string for the pattern.
+    pub fn regex_pattern(&self, categories: &Categories, inventory: &Inventory) -> String {
+        let mut ret = "^".to_string();
+
+        for elem in self.parse_elements(categories) {
+            match elem {
+                PatternElement::Str(s) => {
+                    ret += s;
+                }
+                PatternElement::Category(c) => {
+                    ret += "(";
+                    let mut first = true;
+                    for p in c.iter_phonemes(inventory) {
+                        if first {
+                            first = false;
+                        } else {
+                            ret += "|"
+                        }
+                        ret += &regex::escape(p.sound());
+                    }
+                    ret += ")";
+                }
+            }
+        }
+
+        ret += "$";
+
+        ret
+    }
+
+    /// Gets a regular expression for the pattern, using data in `categories` and `inventory`.
+    pub fn regex(&self, categories: &Categories, inventory: &Inventory) -> Result<Regex, Error> {
+        Regex::new(&self.regex_pattern(categories, inventory)).map_err(Error::from)
     }
 }
 
@@ -211,6 +245,8 @@ impl WriteXml for Pattern {
 
 #[cfg(test)]
 mod tests {
+    use crate::Phoneme;
+
     use super::*;
 
     const XML1: &str = r#"
@@ -315,5 +351,38 @@ mod tests {
                 PatternElement::Category(c_ref),
             ]
         );
+    }
+
+    #[test]
+    fn regex() {
+        let mut cats = Categories::new();
+        let mut inv = Inventory::new();
+
+        let mut cat = Category::new();
+        cat.set_name("C".to_string());
+        cat.add_phoneme_id(inv.add_phoneme(Phoneme::with_sound("m".to_string())));
+        cat.add_phoneme_id(inv.add_phoneme(Phoneme::with_sound("n".to_string())));
+        cat.add_phoneme_id(inv.add_phoneme(Phoneme::with_sound("p".to_string())));
+        cat.add_phoneme_id(inv.add_phoneme(Phoneme::with_sound("t".to_string())));
+        cat.add_phoneme_id(inv.add_phoneme(Phoneme::with_sound("k".to_string())));
+        let _ = cats.add_category(cat);
+
+        let mut cat = Category::new();
+        cat.set_name("V".to_string());
+        cat.add_phoneme_id(inv.add_phoneme(Phoneme::with_sound("a".to_string())));
+        cat.add_phoneme_id(inv.add_phoneme(Phoneme::with_sound("i".to_string())));
+        cat.add_phoneme_id(inv.add_phoneme(Phoneme::with_sound("u".to_string())));
+        let _ = cats.add_category(cat);
+
+        let pat = Pattern::new("CrVC".to_string());
+        dbg!(pat.regex_pattern(&cats, &inv));
+
+        let re = pat.regex(&cats, &inv).unwrap();
+        assert!(re.is_match("krak"));
+        assert!(re.is_match("mrin"));
+        assert!(re.is_match("prun"));
+        assert!(!re.is_match("kun"));
+        assert!(!re.is_match("atrun"));
+        assert!(!re.is_match("truna"));
     }
 }

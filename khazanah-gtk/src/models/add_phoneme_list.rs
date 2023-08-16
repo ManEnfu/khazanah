@@ -29,7 +29,7 @@ mod imp {
             self.parent_constructed();
             self.list.replace(
                 Ipa::iter_valids()
-                    .map(Phoneme::from_ipa)
+                    .map(Phoneme::with_ipa)
                     .map(models::AddPhonemeObject::new)
                     .collect(),
             );

@@ -136,7 +136,7 @@ impl IpaChartViewWindow {
 
         let mut list_model = gio::ListStore::new(models::PhonemeObject::static_type());
         list_model.extend(
-            Ipa::iter_valids().map(|i| models::PhonemeObject::from_phoneme(Phoneme::from_ipa(i))),
+            Ipa::iter_valids().map(|i| models::PhonemeObject::from_phoneme(Phoneme::with_ipa(i))),
         );
 
         self.set_list_model(list_model.clone());

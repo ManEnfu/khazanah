@@ -53,9 +53,16 @@ impl Phoneme {
         }
     }
 
-    pub fn from_ipa(ipa: ipa::Ipa) -> Self {
+    pub fn with_ipa(ipa: ipa::Ipa) -> Self {
         Self {
             sound: ipa.symbol().unwrap_or_default().to_string(),
+            ..Default::default()
+        }
+    }
+
+    pub fn with_sound(sound: String) -> Self {
+        Self {
+            sound,
             ..Default::default()
         }
     }

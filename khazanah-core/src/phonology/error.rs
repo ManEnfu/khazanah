@@ -6,4 +6,6 @@ pub enum Error {
     NoId,
     #[error("Id error: {0}")]
     Id(#[from] uuid::Error),
+    #[error("Regex: {0}")]
+    Regex(#[from] regex::Error),
 }
