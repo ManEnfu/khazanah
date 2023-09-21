@@ -12,11 +12,21 @@
           <object class="GtkLabel" id="symbol_label">
             <property name="width-request">18</property>
             <property name="halign">end</property>
+            <binding name="label">
+              <lookup name="base-symbol">
+                <lookup name="phoneme">KhzIpaChartViewWindowListRow</lookup>
+              </lookup>
+            </binding>
           </object>
         </child>
 
         <child>
           <object class="GtkLabel" id="name_label">
+            <binding name="label">
+              <lookup name="name">
+                <lookup name="phoneme">KhzIpaChartViewWindowListRow</lookup>
+              </lookup>
+            </binding>
             <style>
               <class name="dim-label"/>
             </style>

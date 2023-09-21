@@ -117,15 +117,21 @@ impl KeyStore {
     pub fn remove_by_id(&self, key: &Uuid) {
         let imp = self.imp();
 
-        let mut kos = imp.key_orders.borrow_mut();
-        if let Some(ko) = kos.remove(key) {
-            let n = ko.order;
-            for iko in kos.values_mut() {
-                if iko.order > n {
-                    iko.order -= 1;
+        let ko = {
+            let mut kos = imp.key_orders.borrow_mut();
+            let ko = kos.remove(key);
+            if let Some(ko) = &ko {
+                let n = ko.order;
+                for iko in kos.values_mut() {
+                    if iko.order > n {
+                        iko.order -= 1;
+                    }
                 }
             }
+            ko
+        };
 
+        if let Some(ko) = ko {
             imp.inner.borrow().remove(ko.order);
         }
     }

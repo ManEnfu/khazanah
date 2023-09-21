@@ -40,6 +40,9 @@
                           bind-source="KhzDictionaryView"
                           bind-property="project-model"
                           bind-flags="sync-create"/>
+                <binding name="word">
+                  <lookup name="selected-word">sidebar</lookup>
+                </binding>
               </object>
             </property>
           </object>

@@ -9,8 +9,6 @@ use crate::{models, ui};
 use list_row::ListRow;
 
 const EXPECTED_LIST_ITEM: &str = "Expected object to be `GtkListItem`";
-const EXPECTED_LIST_ROW: &str = "Expected object to be `KhzIpaChartViewWindowListRow`";
-const EXPECTED_PHONEME_OBJECT: &str = "Expected object to be `KhzPhonemeObject`";
 
 mod list_row;
 
@@ -107,7 +105,6 @@ mod imp {
 }
 
 glib::wrapper! {
-    /// X-SAMPA transliteration tool as a window.
     pub struct IpaChartViewWindow(ObjectSubclass<imp::IpaChartViewWindow>)
         @extends gtk::Widget, gtk::Window, adw::Window;
 }
@@ -152,42 +149,11 @@ impl IpaChartViewWindow {
 
         factory.connect_setup(glib::clone!(@weak self as view => move |_, item| {
             let row = ListRow::new();
-
-            item.downcast_ref::<gtk::ListItem>()
-                .expect(EXPECTED_LIST_ITEM)
-                .set_child(Some(&row));
+            let item = item.downcast_ref::<gtk::ListItem>()
+                .expect(EXPECTED_LIST_ITEM);
+            item.set_child(Some(&row));
+            item.bind_property("item", &row, "phoneme").build();
         }));
-
-        factory.connect_bind(move |_, item| {
-            let list_item = item
-                .downcast_ref::<gtk::ListItem>()
-                .expect(EXPECTED_LIST_ITEM);
-
-            let word_object = list_item
-                .item()
-                .and_downcast::<models::PhonemeObject>()
-                .expect(EXPECTED_PHONEME_OBJECT);
-
-            let row = list_item
-                .child()
-                .and_downcast::<ListRow>()
-                .expect(EXPECTED_LIST_ROW);
-
-            row.bind(&word_object);
-        });
-
-        factory.connect_unbind(move |_, item| {
-            let list_item = item
-                .downcast_ref::<gtk::ListItem>()
-                .expect(EXPECTED_LIST_ITEM);
-
-            let row = list_item
-                .child()
-                .and_downcast::<ListRow>()
-                .expect(EXPECTED_LIST_ROW);
-
-            row.unbind();
-        });
 
         imp.list_view.set_model(Some(&selection_model));
         imp.list_view.set_factory(Some(&factory));

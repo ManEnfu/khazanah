@@ -104,11 +104,17 @@ impl DictionaryView {
     fn setup_callbacks(&self) {
         let imp = self.imp();
 
-        imp.sidebar.connect_closure(
-            "word-selected",
-            false,
-            glib::closure_local!(@strong self as view => move |_: &Sidebar| {
-                view.load_selected_word();
+        // imp.sidebar.connect_closure(
+        //     "word-selected",
+        //     false,
+        //     glib::closure_local!(@strong self as view => move |_: &Sidebar| {
+        //         view.load_selected_word();
+        //     }),
+        // );
+
+        imp.sidebar.connect_selected_word_notify(
+            glib::clone!(@weak self as view => move |_sidebar| {
+                view.navigate_backward();
             }),
         );
 
@@ -124,7 +130,7 @@ impl DictionaryView {
             "search-changed",
             false,
             glib::closure_local!(@strong self as view => move |_: &Sidebar| {
-                view.load_selected_word();
+                view.navigate_backward();
             }),
         );
 
@@ -137,23 +143,18 @@ impl DictionaryView {
     }
 
     /// Loads form contents with word data.
-    pub fn load_selected_word(&self) {
-        let imp = self.imp();
+    // pub fn load_selected_word(&self) {
+    //     let imp = self.imp();
 
-        imp.content.unbind();
-        let word = imp.sidebar.selected_word();
+    //     let word = imp.sidebar.selected_word();
 
-        if let Some(word) = word {
-            log::debug!("selected word: {}", word.id());
-            imp.content.bind(&word);
-            imp.content.set_fields_sensitive(true);
-        } else {
-            imp.content.clear_fields();
-            imp.content.set_fields_sensitive(false);
-        }
+    //     if let Some(word) = &word {
+    //         log::debug!("selected word: {}", word.id());
+    //     }
+    //     // imp.content.set_word(word);
 
-        self.navigate_backward();
-    }
+    //     self.navigate_backward();
+    // }
 
     /// Activates currently selected word. If the leaflet is folded, switch to form page.
     fn handle_activate_word(&self) {
@@ -204,7 +205,7 @@ impl ui::View for DictionaryView {
         imp.sidebar.load_state();
         imp.content.load_state();
 
-        self.load_selected_word();
+        self.navigate_backward();
     }
 
     fn unload_state(&self) {

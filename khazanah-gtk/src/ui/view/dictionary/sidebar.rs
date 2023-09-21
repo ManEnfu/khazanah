@@ -7,8 +7,6 @@ use khazanah_core::Word;
 use uuid::Uuid;
 
 const EXPECTED_LIST_ITEM: &str = "Expected object to be `GtkListItem`";
-const EXPECTED_WORD_OBJECT: &str = "Expected object to be `KhzWordObject`";
-const EXPECTED_WORD_LIST_ROW: &str = "Expected object to be `KhzWordListRow`";
 
 use crate::models::{self, WordObject};
 use crate::ui;
@@ -65,6 +63,10 @@ mod imp {
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
 
+        #[property(get = Self::get_selected_word)]
+        pub selected_word: RefCell<Option<WordObject>>,
+        pub old_selected_word: RefCell<Option<WordObject>>,
+
         #[property(get, set)]
         pub list_model: RefCell<Option<models::KeyStore>>,
         #[property(get, set)]
@@ -80,7 +82,16 @@ mod imp {
         pub action_group: RefCell<gio::SimpleActionGroup>,
 
         pub selected_id: Cell<Uuid>,
-        pub old_selected_word: RefCell<Option<WordObject>>,
+    }
+
+    impl Sidebar {
+        fn get_selected_word(&self) -> Option<WordObject> {
+            self.selection_model
+                .borrow()
+                .as_ref()
+                .and_then(|s| s.selected_item())
+                .and_downcast()
+        }
     }
 
     #[glib::object_subclass]
@@ -182,55 +193,24 @@ impl Sidebar {
 
         factory.connect_setup(glib::clone!(@weak self as view => move |_, item| {
             let row = WordListRow::new();
-
+            let item = item.downcast_ref::<gtk::ListItem>()
+                .expect(EXPECTED_LIST_ITEM);
             view.imp().edit_word_button
                 .bind_property("active", &row, "reveal-action-buttons")
                 .sync_create()
                 .build();
-
-            item.downcast_ref::<gtk::ListItem>()
-                .expect(EXPECTED_LIST_ITEM)
-                .set_child(Some(&row));
+            item.set_child(Some(&row));
+            item.bind_property("item", &row, "word").build();
         }));
-
-        factory.connect_bind(move |_, item| {
-            let list_item = item
-                .downcast_ref::<gtk::ListItem>()
-                .expect(EXPECTED_LIST_ITEM);
-
-            let word_object = list_item
-                .item()
-                .and_downcast::<models::WordObject>()
-                .expect(EXPECTED_WORD_OBJECT);
-
-            let row = list_item
-                .child()
-                .and_downcast::<WordListRow>()
-                .expect(EXPECTED_WORD_LIST_ROW);
-
-            row.bind(&word_object);
-        });
-
-        factory.connect_unbind(move |_, item| {
-            let list_item = item
-                .downcast_ref::<gtk::ListItem>()
-                .expect(EXPECTED_LIST_ITEM);
-
-            let row = list_item
-                .child()
-                .and_downcast::<WordListRow>()
-                .expect(EXPECTED_WORD_LIST_ROW);
-
-            row.unbind();
-        });
 
         imp.list_view.set_model(Some(&selection_model));
         imp.list_view.set_factory(Some(&factory));
 
         // List callbacks
-        selection_model.connect_selection_changed(
-            glib::clone!(@weak self as widget => move |_, _, _| {
-                 widget.handle_selection_changed();
+        selection_model.connect_selected_item_notify(
+            glib::clone!(@weak self as widget => move |_| {
+                widget.handle_selection_changed();
+                widget.notify_selected_word();
             }),
         );
     }
@@ -318,11 +298,6 @@ impl Sidebar {
 
     // LIST OPERATIONS
 
-    /// Gets current selected word.
-    pub fn selected_word(&self) -> Option<WordObject> {
-        self.selection_model()?.selected_item().and_downcast()
-    }
-
     /// Adds a new word to the model.
     pub fn add_word(&self) {
         let imp = self.imp();
@@ -335,6 +310,7 @@ impl Sidebar {
         }) {
             // Exits search mode first.
             imp.search_bar.set_search_mode(false);
+            imp.edit_word_button.set_active(false);
 
             log::debug!("Added word of id {}", id);
             let word_object = WordObject::query_project(self.project_model(), id);
@@ -345,7 +321,6 @@ impl Sidebar {
 
             self.select_word_by_id(id);
 
-            imp.edit_word_button.set_active(false);
             self.emit_by_name::<()>("word-activated", &[]);
         }
 
@@ -372,8 +347,6 @@ impl Sidebar {
 
             list_model.remove_by_id(&id);
 
-            self.handle_selection_changed();
-
             self.switch_stack_page();
         }
     }
@@ -384,38 +357,31 @@ impl Sidebar {
             .selection_model()
             .expect("Selection model is not initialized.");
 
-        if let Some(position) = selection_model
+        let result = if let Some(position) = selection_model
             .iter::<glib::Object>()
             .position(|w| w.unwrap().downcast_ref::<WordObject>().unwrap().id() == id)
         {
-            let result = selection_model.select_item(position as u32, true);
-            if result && selection_model.n_items() == 1 {
-                self.handle_selection_changed();
-            }
+            self.select_word_by_index(position as u32)
+        } else {
+            self.select_word_by_index(0)
+        };
 
-            self.imp()
-                .list_view
-                .activate_action(
-                    "list.scroll-to-item",
-                    Some(&glib::Variant::from(position as u32)),
-                )
-                .unwrap_or_default();
+        result
+    }
 
-            return result;
-        }
+    pub fn select_word_by_index(&self, index: u32) -> bool {
+        let selection_model = self
+            .selection_model()
+            .expect("Selection model is not initialized.");
 
-        if id == Uuid::default() {
-            selection_model.select_item(0, true);
+        let result = selection_model.select_item(index, true);
 
-            self.imp()
-                .list_view
-                .activate_action("list.scroll-to-item", Some(&glib::Variant::from(0_u32)))
-                .unwrap_or_default();
+        self.imp()
+            .list_view
+            .activate_action("list.scroll-to-item", Some(&glib::Variant::from(index)))
+            .unwrap_or_default();
 
-            return true;
-        }
-
-        false
+        result
     }
 
     /// Callback to `selection-changed` signal.
@@ -424,9 +390,10 @@ impl Sidebar {
             self.notify_changes_to_model(word);
         }
 
-        self.imp().old_selected_word.replace(self.selected_word());
+        let new_word = self.selected_word();
+        self.imp().old_selected_word.replace(new_word);
 
-        self.emit_by_name::<()>("word-selected", &[])
+        self.emit_by_name::<()>("word-selected", &[]);
     }
 
     /// Callback to 'activate' signal.
@@ -536,10 +503,8 @@ impl Sidebar {
         let stack = imp.stack.get();
 
         if self.list_model().map(|wl| wl.n_items()).unwrap_or_default() > 0 {
-            // stack.set_visible_child(&*imp.main_page);
             stack.set_visible_child_name("list");
         } else {
-            // stack.set_visible_child(&*imp.list_empty_page);
             stack.set_visible_child_name("empty")
         }
     }
@@ -551,13 +516,25 @@ impl ui::View for Sidebar {
 
         // reload list
         if let Some(list_model) = self.list_model() {
+            let id = self
+                .imp()
+                .old_selected_word
+                .borrow()
+                .as_ref()
+                .map(|w| w.id());
+            log::debug!("old selected word: {:?}", id);
+
             if let Some(project) = self.project_model().project().as_ref() {
                 list_model.sync_with_store(project.language().dictionary().words(), |i, _| {
                     WordObject::query_project(self.project_model(), i)
                 })
             }
 
-            self.select_word_by_id(self.imp().selected_id.get());
+            if let Some(id) = id {
+                self.select_word_by_id(id);
+            } else {
+                self.select_word_by_index(0);
+            }
         }
 
         self.imp().edit_word_button.set_active(false);
@@ -568,10 +545,6 @@ impl ui::View for Sidebar {
 
     fn unload_state(&self) {
         log::debug!("Unloading view state.");
-
-        if let Some(word) = self.selected_word() {
-            self.imp().selected_id.set(word.id());
-        }
 
         self.imp().edit_word_button.set_active(false);
     }

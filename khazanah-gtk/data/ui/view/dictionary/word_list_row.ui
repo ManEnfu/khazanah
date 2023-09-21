@@ -22,17 +22,30 @@
                 <property name="spacing">6</property>
                 <child>
                   <object class="GtkLabel" id="word_label">
-                    <!-- <property name="halign">start</property> -->
+                    <binding name="label">
+                      <closure type="gchararray" function="display_romanization">
+                        <lookup name="romanization">
+                          <lookup name="word">KhzDictionaryViewWordListRow</lookup>
+                        </lookup>
+                      </closure>
+                    </binding>
                     <property name="ellipsize">end</property>
                   </object>
                 </child>
 
                 <child>
                   <object class="GtkLabel" id="pronunciation_label">
+                    <binding name="label">
+                      <closure type="gchararray" function="display_pronunciation">
+                        <lookup name="pronunciation">
+                          <lookup name="word">KhzDictionaryViewWordListRow</lookup>
+                        </lookup>
+                      </closure>
+                    </binding>
+                    <property name="ellipsize">end</property>
                     <style>
                       <class name="dim-label"/>
                     </style>
-                    <property name="ellipsize">end</property>
                   </object>
                 </child>
               </object>
@@ -50,6 +63,11 @@
                 </child>
                 <child>
                   <object class="GtkLabel" id="pos_label">
+                    <binding name="label">
+                      <lookup name="part-of-speech-label">
+                        <lookup name="word">KhzDictionaryViewWordListRow</lookup>
+                      </lookup>
+                    </binding>
                     <style>
                       <class name="caption"/>
                       <class name="dim-label"/>
@@ -58,6 +76,11 @@
                 </child>
                 <child>
                   <object class="GtkLabel" id="translation_label">
+                    <binding name="label">
+                      <lookup name="translation">
+                        <lookup name="word">KhzDictionaryViewWordListRow</lookup>
+                      </lookup>
+                    </binding>
                     <property name="ellipsize">end</property>
                     <style>
                       <class name="dim-label"/>

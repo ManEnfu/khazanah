@@ -9,7 +9,7 @@ use crate::models::PhonemeObject;
 
 #[doc(hidden)]
 mod imp {
-    use std::cell::{Cell, RefCell};
+    use std::cell::RefCell;
 
     use super::*;
 
@@ -23,7 +23,7 @@ mod imp {
         pub symbol_label: TemplateChild<gtk::Label>,
 
         #[property(get, set)]
-        pub reveal_action_buttons: Cell<bool>,
+        pub phoneme: RefCell<Option<PhonemeObject>>,
 
         pub bindings: RefCell<Vec<glib::Binding>>,
     }
@@ -64,7 +64,6 @@ mod imp {
 }
 
 glib::wrapper! {
-    /// Row widget for `ListView`.
     pub struct ListRow(ObjectSubclass<imp::ListRow>)
         @extends gtk::Widget, adw::Bin,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
@@ -75,33 +74,6 @@ impl ListRow {
     /// Creates a new list row.
     pub fn new() -> Self {
         glib::Object::builder().build()
-    }
-
-    /// Binds widget to a object.
-    pub fn bind(&self, phoneme_object: &PhonemeObject) {
-        let mut bindings = self.imp().bindings.borrow_mut();
-        let imp = self.imp();
-
-        bindings.push(
-            phoneme_object
-                .bind_property("name", &*imp.name_label, "label")
-                .sync_create()
-                .build(),
-        );
-
-        bindings.push(
-            phoneme_object
-                .bind_property("base-symbol", &*imp.symbol_label, "label")
-                .sync_create()
-                .build(),
-        );
-    }
-
-    /// Unbinds widget.
-    pub fn unbind(&self) {
-        for binding in self.imp().bindings.borrow_mut().drain(..) {
-            binding.unbind();
-        }
     }
 }
 

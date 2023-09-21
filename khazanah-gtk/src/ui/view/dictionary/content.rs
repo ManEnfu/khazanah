@@ -35,11 +35,31 @@ mod imp {
 
         #[property(get, set)]
         pub project_model: RefCell<models::ProjectModel>,
+        #[property(get, set = Self::set_word, nullable)]
+        pub word: RefCell<Option<models::WordObject>>,
 
         #[property(get, set)]
         pub fields_sensitive: Cell<bool>,
 
         pub form_bindings: RefCell<Vec<glib::Binding>>,
+    }
+
+    impl Content {
+        fn set_word(&self, value: Option<models::WordObject>) {
+            log::debug!("set word: {:?}", value.as_ref().map(|w| w.id()));
+            let obj = self.obj();
+
+            obj.unbind();
+            if let Some(word) = &value {
+                obj.bind(word);
+                obj.set_fields_sensitive(true);
+            } else {
+                obj.clear_fields();
+                obj.set_fields_sensitive(false);
+            }
+
+            self.word.replace(value);
+        }
     }
 
     #[glib::object_subclass]
@@ -106,7 +126,7 @@ impl Content {
     }
 
     /// Binds a word to form.
-    pub fn bind(&self, word: &models::WordObject) {
+    fn bind(&self, word: &models::WordObject) {
         let imp = self.imp();
         let mut bindings = imp.form_bindings.borrow_mut();
 
@@ -154,7 +174,7 @@ impl Content {
     }
 
     /// Unbinds form.
-    pub fn unbind(&self) {
+    fn unbind(&self) {
         let mut bindings = self.imp().form_bindings.borrow_mut();
 
         for binding in bindings.drain(..) {
@@ -163,7 +183,7 @@ impl Content {
     }
 
     /// Clears form fields.
-    pub fn clear_fields(&self) {
+    fn clear_fields(&self) {
         let imp = self.imp();
         imp.romanization_entry.set_text("");
         imp.translation_entry.set_text("");
@@ -192,14 +212,9 @@ impl Content {
 impl ui::View for Content {
     fn load_state(&self) {
         log::debug!("Loading view state.");
-
-        self.unbind();
-        self.clear_fields();
     }
 
     fn unload_state(&self) {
         log::debug!("Unloading view state.");
-
-        self.unbind();
     }
 }
